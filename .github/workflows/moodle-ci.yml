@@ -1,0 +1,52 @@
+name: Moodle Plugin CI
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        moodle-branch: ['MOODLE_400_STABLE', 'MOODLE_401_STABLE', 'MOODLE_402_STABLE', 'MOODLE_403_STABLE', 'MOODLE_404_STABLE']
+        php: ['7.4', '8.0', '8.1', '8.2', '8.3']
+        database: ['mysqli', 'pgsql']
+        exclude:
+          # Moodle 4.0 doesn't support PHP 8.1+ fully
+          - moodle-branch: 'MOODLE_400_STABLE'
+            php: '8.1'
+          - moodle-branch: 'MOODLE_400_STABLE'
+            php: '8.2'
+          - moodle-branch: 'MOODLE_400_STABLE'
+            php: '8.3'
+          # Moodle 4.1+ dropped PHP 7.4
+          - moodle-branch: 'MOODLE_402_STABLE'
+            php: '7.4'
+          - moodle-branch: 'MOODLE_403_STABLE'
+            php: '7.4'
+          - moodle-branch: 'MOODLE_404_STABLE'
+            php: '7.4'
+            
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+        with:
+          path: plugin
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, pgsql, mysqli, gd, xmlrpc, soap, intl, zip
+
+      - name: Run Moodle Plugin CI
+        uses: moodlehq/moodle-plugin-ci@v3
+        with:
+          moodle-branch: ${{ matrix.moodle-branch }}
+          database-type: ${{ matrix.database }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

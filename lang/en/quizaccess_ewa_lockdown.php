@@ -1,0 +1,67 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Language strings for quizaccess_ewa_lockdown.
+ *
+ * @package   quizaccess_ewa_lockdown
+ * @copyright 2026 Mahmoud Salem <m.salem@ewa.bh>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
+
+// Plugin name.
+$string['pluginname'] = 'EWA Secure Browser access rule';
+
+// Settings form strings.
+$string['requireewalockdown'] = 'Require EWA Secure Browser';
+$string['requireewalockdown_help'] = 'When enabled, students must use the EWA Secure Browser Android app to start this quiz. Access from regular browsers will be blocked. A QR code will be displayed for students to scan with the app.';
+$string['tokenexpiry'] = 'Session token expiry (seconds)';
+$string['tokenexpiry_help'] = 'How long a session token remains valid after the student scans the QR code. Default is 1800 seconds (30 minutes). Must be greater than or equal to the quiz time limit.';
+$string['exitpassword'] = 'Emergency exit password';
+$string['exitpassword_help'] = 'A password that supervisors can enter in the EWA Secure Browser app to release the device from kiosk mode in case of emergency. Leave blank to disable emergency exit.';
+
+// Preflight / access denied strings.
+$string['accessdenied'] = 'Access Denied';
+$string['mustuseewaapp'] = 'This quiz requires the EWA Secure Browser app on Android. You cannot open it from a regular browser.';
+$string['scanqrtostart'] = 'Scan the QR code below with the EWA Secure Browser app to start the quiz:';
+$string['qrcode_alttext'] = 'QR code to launch this quiz in EWA Secure Browser';
+$string['downloadapp'] = 'Don\'t have the app yet? Download EWA Secure Browser from the Play Store.';
+$string['tokenerror'] = 'Your session token is invalid or has expired. Please re-scan the QR code with the EWA Secure Browser app.';
+$string['tokenexpired'] = 'Your secure session has expired. Please ask your supervisor to re-issue the QR code.';
+
+// Violation log strings.
+$string['violation_invalid_token'] = 'Invalid security token';
+$string['violation_wrong_browser'] = 'Attempt from non-EWA browser';
+$string['violation_focus_lost'] = 'App lost focus during exam';
+$string['violation_expired_token'] = 'Expired security token';
+
+// Privacy.
+$string['privacy:metadata:quizaccess_ewa_sessions'] = 'Stores secure exam session tokens issued to students.';
+$string['privacy:metadata:quizaccess_ewa_sessions:userid'] = 'The user this session was issued for.';
+$string['privacy:metadata:quizaccess_ewa_sessions:quizid'] = 'The quiz this session is for.';
+$string['privacy:metadata:quizaccess_ewa_sessions:token'] = 'The HMAC security token (hashed).';
+$string['privacy:metadata:quizaccess_ewa_sessions:deviceid'] = 'A fingerprint of the Android device used.';
+$string['privacy:metadata:quizaccess_ewa_sessions:timecreated'] = 'When the session was created.';
+$string['privacy:metadata:quizaccess_ewa_sessions:timeexpires'] = 'When the session token expires.';
+$string['privacy:metadata:quizaccess_ewa_violations'] = 'Logs security violations detected during secure exams.';
+$string['privacy:metadata:quizaccess_ewa_violations:userid'] = 'The user associated with the violation.';
+$string['privacy:metadata:quizaccess_ewa_violations:quizid'] = 'The quiz during which the violation was detected.';
+$string['privacy:metadata:quizaccess_ewa_violations:violationtype'] = 'The type of violation recorded.';
+$string['privacy:metadata:quizaccess_ewa_violations:deviceid'] = 'The device fingerprint at time of violation.';
+$string['privacy:metadata:quizaccess_ewa_violations:details'] = 'Additional context about the violation.';
+$string['privacy:metadata:quizaccess_ewa_violations:timecreated'] = 'When the violation occurred.';
