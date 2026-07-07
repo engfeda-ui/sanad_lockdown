@@ -44,7 +44,7 @@ jobs:
           extensions: mbstring, pgsql, mysqli, gd, xmlrpc, soap, intl, zip
 
       - name: Run Moodle Plugin CI
-        uses: moodlehq/moodle-plugin-ci@v3
+        uses: moodlehq/moodle-plugin-ci@v4
         with:
           moodle-branch: ${{ matrix.moodle-branch }}
           database-type: ${{ matrix.database }}
