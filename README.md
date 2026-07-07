@@ -28,7 +28,7 @@ The solution consists of two integrated components:
 *   **Secure Custom Keyboard (IME):** Implements a dedicated keyboard layout. Autocomplete, spelling suggestions, and clipboard copy/paste are completely disabled.
 *   **Immersive Full-Screen Mode:** Hides navigation bars and system status bars permanently. The student cannot swipe out of the exam.
 *   **Anti-Tampering Protections:** Performs runtime checks for device root status, emulator execution, and APK signature validation.
-*   **Annual License Activation:** Secure offline-capable challenge-response activation (AES-128) protecting your intellectual property.
+*   **Annual License Activation:** Secure offline challenge-response cryptographic signing (RSA-1024) protecting your intellectual property.
 *   **Autoping (Heartbeat):** Constantly pings Moodle every 30 seconds to refresh the session token. If the app is closed or network fails, the session immediately expires on the server.
 
 ---
@@ -66,28 +66,28 @@ The solution consists of two integrated components:
 
 ---
 
-## 🔑 Challenge-Response Licensing & Activation
-To activate the tablet and run the **EWA Kiosk** browser:
-1. Open the app on the tablet. The screen will display a **16-character Hardware ID** (e.g., `EWA1-98F2-A5C3-D8E4`).
-2. Open the local utility file `ewa_license_generator.html` on your PC.
-3. Input the Hardware ID, select or specify a **custom subscription duration (days)**, and click **Generate Activation Key**.
-4. Enter the generated activation key in the tablet to permanently unlock the exam scanner interface for the chosen duration.
+## 🔑 Challenge-Response RSA Licensing & Activation
+To prevent unauthorized installations and enforce annual subscription plans, EWA Kiosk uses a hardware-locked asymmetric cryptography licensing protocol:
+1. Upon first boot, the tablet displays a **16-character Hardware ID** (e.g., `EWA1-98F2-A5C3-D8E4`).
+2. Provide the Hardware ID to the developer/license issuer.
+3. The license issuer opens their secure offline tool `ewa_license_generator.html`, inputs the Hardware ID, specifies the **custom subscription duration (days)**, and clicks **Generate Activation Key**. This signs the payload using a secure **RSA Private Key**.
+4. Enter the generated activation key (`YYYYMMDD:RSA_SIGNATURE`) into the tablet. The app verifies the signature using an embedded **RSA Public Key** to permanently unlock the exam scanner interface for the chosen duration.
 
 ---
 
 ## 📋 Changelog
 
 ### v1.2.0 — 2026-07-07
-*   **New:** Integrated **Challenge-Response** Hardware Activation licensing (annual subscription).
+*   **New:** Integrated **RSA-1024 Asymmetric Digital Signature** Hardware Activation licensing (annual subscription).
 *   **New:** Implemented **Immersive Full-Screen Mode** (hiding status and navigation bars) in `MainActivity.kt`.
 *   **New:** Added **Root Detection and Signature Verification** to block modified APK execution.
-*   **New:** Created offline license generator tool `ewa_license_generator.html` supporting custom days.
+*   **New:** Created secure offline RSA license generator tool for the developer supporting custom days.
 *   **Fix:** Cleared Moodle CodeSniffer standard warnings and PSR12 class brace whitespace errors across all files.
 
 ### v1.0.0 — 2026-06-25
 *   Initial stable release.
 *   Secure Token manager and Device ID binding logic.
-*   Heartbeat ping session extensions.
+*   Heartbeat log integrations.
 *   Device Admin policies and basic kiosk controller class.
 
 ---
