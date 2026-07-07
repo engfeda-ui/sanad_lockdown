@@ -28,7 +28,6 @@ namespace quizaccess_ewa_lockdown;
  * Records security violations detected during secure exams.
  */
 class violation_logger {
-
     /** @var string Attempt from non-EWA browser */
     const TYPE_WRONG_BROWSER   = 'wrong_browser';
 

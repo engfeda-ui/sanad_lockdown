@@ -32,7 +32,6 @@ namespace quizaccess_ewa_lockdown;
  * Builds QR codes for the EWA Secure Browser launch URL.
  */
 class qr_generator {
-
     /**
      * Return an HTML <img> tag containing the QR code for the given URL.
      *
