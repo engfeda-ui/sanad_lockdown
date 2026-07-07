@@ -116,7 +116,7 @@ class token_manager {
     }
 
     /**
-     * Validate a specific token string against the database.
+     * Validate a specific token string against the database and bind/verify the device ID.
      *
      * @param int    $quizid Expected quiz ID.
      * @param int    $userid Expected user ID.
@@ -143,6 +143,25 @@ class token_manager {
         if (time() > $record->timeexpires) {
             // Token has expired — clean up.
             $DB->delete_records('quizaccess_ewa_sessions', ['id' => $record->id]);
+            return false;
+        }
+
+        // Get the device ID from the request headers.
+        $requestdeviceid = $_SERVER[self::HEADER_DEVICE] ?? '';
+
+        // If the session record has no device ID bound yet, bind the current request device ID.
+        if (empty($record->deviceid) && !empty($requestdeviceid)) {
+            $record->deviceid = $requestdeviceid;
+            $DB->update_record('quizaccess_ewa_sessions', $record);
+        } else if (!empty($record->deviceid) && !empty($requestdeviceid) && $record->deviceid !== $requestdeviceid) {
+            // If the device ID in request does not match the bound device ID, log violation and deny.
+            violation_logger::log(
+                $quizid,
+                $userid,
+                violation_logger::TYPE_DEVICE_MISMATCH,
+                $requestdeviceid,
+                ['bound_device' => $record->deviceid]
+            );
             return false;
         }
 
