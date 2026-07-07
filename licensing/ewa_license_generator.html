@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مولد تراخيص EWA Secure Browser | لوحة التحكم الخاصة بك</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
+        
+        :root {
+            --primary: #0A2540;
+            --accent: #00A896;
+            --bg: #F4F7F9;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --text: #334D6E;
+            --white: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary) 0%, #103F68 100%);
+            color: var(--white);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 580px;
+            background: var(--card-bg);
+            color: var(--text);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 13.5px;
+            color: #6C7A89;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            height: 52px;
+            padding: 12px 16px;
+            border: 2px solid #E2E8F0;
+            border-radius: 10px;
+            font-size: 15px;
+            color: var(--primary);
+            outline: none;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 168, 150, 0.15);
+        }
+
+        .btn-generate {
+            width: 100%;
+            height: 54px;
+            background: var(--accent);
+            color: var(--white);
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 168, 150, 0.3);
+        }
+
+        .btn-generate:hover {
+            background: #008F80;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0, 168, 150, 0.4);
+        }
+
+        .btn-generate:active {
+            transform: translateY(0);
+        }
+
+        .result-container {
+            margin-top: 30px;
+            padding: 24px;
+            background: #EDF2F7;
+            border-radius: 12px;
+            border: 1px dashed var(--accent);
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .result-box {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--accent);
+            background: var(--white);
+            padding: 14px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #CBD5E0;
+            word-break: break-all;
+            user-select: all;
+            margin-bottom: 12px;
+        }
+
+        .btn-copy {
+            width: 100%;
+            height: 40px;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .btn-copy:hover {
+            background: #143555;
+        }
+
+        .footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 11px;
+            color: #A0AEC0;
+        }
+    </style>
+    <!-- تضمين CryptoJS لتشفير الـ AES محلياً بأمان كامل -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🔑 نظام تراخيص EWA Secure Browser</h1>
+        <p>قم بتوليد كود التفعيل السنوي لتفعيل أجهزة تابلت الأكاديمية</p>
+    </div>
+
+    <!-- كود تعريف جهاز التابلت -->
+    <div class="form-group">
+        <label for="hardwareId">كود تعريف الجهاز (Hardware ID):</label>
+        <input type="text" id="hardwareId" placeholder="مثال: EWA1-98F2-A5C3-D8E4" required>
+    </div>
+
+    <!-- مدة الترخيص -->
+    <div class="form-group">
+        <label for="duration">مدة الترخيص:</label>
+        <select id="duration">
+            <option value="365">سنة واحدة (365 يوم) - ترخيص قياسي</option>
+            <option value="180">6 أشهر (180 يوم)</option>
+            <option value="30">شهر واحد (30 يوم) - تجريبي</option>
+            <option value="custom">مدة مخصصة (أيام)...</option>
+        </select>
+    </div>
+
+    <!-- حقل إدخال الأيام المخصصة -->
+    <div class="form-group" id="customDaysGroup" style="display: none;">
+        <label for="customDays">عدد الأيام المخصص:</label>
+        <input type="number" id="customDays" placeholder="أدخل عدد الأيام، مثال: 500" min="1">
+    </div>
+
+    <!-- زر التوليد -->
+    <button class="btn-generate" onclick="generateActivationKey()">توليد كود التفعيل</button>
+
+    <!-- صندوق النتيجة بعد التوليد -->
+    <div class="result-container" id="resultContainer">
+        <div class="result-title">كود التفعيل النهائي (انسخ والصقه في التابلت):</div>
+        <div class="result-box" id="activationKeyBox"></div>
+        <button class="btn-copy" onclick="copyToClipboard()">نسخ الكود</button>
+    </div>
+
+    <div class="footer">
+        جميع الحقوق محفوظة © 2026. نظام التراخيص مشفر بـ AES-128.
+    </div>
+</div>
+
+<script>
+    // AES key parts - matching exactly the ones in Android (LicenseManager.kt)
+    const keyPart1 = CryptoJS.enc.Hex.parse("4557415f53656375"); // "EWA_Secu"
+    const keyPart2 = CryptoJS.enc.Hex.parse("72655f4b65795f39"); // "re_Key_9"
+    
+    // Concatenate the two key parts to form the full key
+    const mergedKey = CryptoJS.lib.WordArray.create();
+    mergedKey.concat(keyPart1);
+    mergedKey.concat(keyPart2);
+
+    function generateActivationKey() {
+        const hardwareIdInput = document.getElementById("hardwareId").value.trim();
+        if (!hardwareIdInput) {
+            alert("يرجى إدخال كود تعريف الجهاز أولاً!");
+            return;
+        }
+
+        // Clean Hardware ID (Remove dashes and spaces)
+        const cleanHardwareId = hardwareIdInput.replace(/[- ]/g, "").toUpperCase();
+        if (cleanHardwareId.length !== 16) {
+            alert("كود تعريف الجهاز غير صالح. يجب أن يحتوي على 16 حرفاً/رقماً!");
+            return;
+        }
+
+        // Calculate Expiry Date based on chosen duration
+        let durationDays;
+        const durationSelect = document.getElementById("duration").value;
+        if (durationSelect === "custom") {
+            durationDays = parseInt(document.getElementById("customDays").value);
+            if (isNaN(durationDays) || durationDays <= 0) {
+                alert("يرجى إدخال عدد أيام مخصص صالح!");
+                return;
+            }
+        } else {
+            durationDays = parseInt(durationSelect);
+        }
+
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + durationDays);
+
+        // Format Date: YYYYMMDD
+        const year = expiryDate.getFullYear();
+        const month = String(expiryDate.getMonth() + 1).padStart(2, '0');
+        const day = String(expiryDate.getDate()).padStart(2, '0');
+        const expiryString = `${year}${month}${day}`;
+
+        // Create Payload: "HARDWAREID:YYYYMMDD"
+        const payload = `${cleanHardwareId}:${expiryString}`;
+
+        try {
+            // Encrypt using AES/ECB/PKCS5Padding
+            const encrypted = CryptoJS.AES.encrypt(payload, mergedKey, {
+                mode: CryptoJS.mode.ECB,
+                padding: CryptoJS.pad.Pkcs7
+            });
+
+            // Convert to Base64 and format to chunked key for readability: XXXX-XXXX-XXXX-XXXX
+            let base64Code = encrypted.toString();
+            
+            document.getElementById("activationKeyBox").innerText = base64Code;
+            document.getElementById("resultContainer").style.display = "block";
+        } catch (e) {
+            alert("حدث خطأ أثناء تشفير كود الترخيص!");
+            console.error(e);
+        }
+    }
+
+    function copyToClipboard() {
+        const keyText = document.getElementById("activationKeyBox").innerText;
+        navigator.clipboard.writeText(keyText).then(() => {
+            alert("تم نسخ كود التفعيل إلى الحافظة!");
+        }).catch(err => {
+            console.error("Failed to copy key: ", err);
+        });
+    }
+    // Show/Hide custom days input field
+    document.getElementById("duration").addEventListener("change", function() {
+        const customDaysGroup = document.getElementById("customDaysGroup");
+        if (this.value === "custom") {
+            customDaysGroup.style.display = "block";
+            document.getElementById("customDays").focus();
+        } else {
+            customDaysGroup.style.display = "none";
+        }
+    });
+</script>
+
+</body>
+</html>
