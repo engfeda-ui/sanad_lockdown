@@ -1,138 +1,128 @@
-# 🛡️ EWA Secure Exam System (ewa_lockdown)
+# 🛡️ Moodle Quiz Access Rule: EWA Kiosk Lockdown (`quizaccess_ewa_lockdown`)
 
-[English](#english) | [العربية](#العربية)
+[![Moodle Compatibility](https://img.shields.io/badge/Moodle-4.5%20to%205.0%2B-orange.svg?style=flat-square)](https://moodle.org)
+[![PHP Version](https://img.shields.io/badge/PHP-8.1%20%7C%208.2%20%7C%208.3-blue.svg?style=flat-square)](https://php.net)
+[![Database](https://img.shields.io/badge/Database-PostgreSQL%20%7C%20MySQL%20%7C%20MariaDB-purple.svg?style=flat-square)](https://docs.moodle.org)
+[![Android Version](https://img.shields.io/badge/Android-8.0%20to%2014%2B-green.svg?style=flat-square)](https://developer.android.com)
+[![License](https://img.shields.io/badge/License-Proprietary-red.svg?style=flat-square)](#license)
 
----
+A professional, enterprise-grade assessment lockdown solution designed specifically for the **Energy & Water Academy (EWA)**. The system guarantees absolute exam integrity by forcing students to solve Moodle quizzes exclusively through the secured **EWA Kiosk** Android tablet application.
 
-# English
-
-## Overview
-**EWA Secure Exam System** is a high-security, enterprise-grade assessment lockdown solution designed specifically for the **Energy & Water Academy (EWA)**. The system prevents academic dishonesty during Moodle quizzes by strictly restricting student access to a dedicated, hardware-locked Android secure browser application.
-
-The system consists of two primary components:
-1. **Moodle Access Rule Plugin (`mod_quiz_accessrule_ewa_lockdown`):** Restricts quiz access to requests containing valid, cryptographically signed EWA session tokens and binds the exam session to a specific device.
-2. **EWA Secure Browser (Android App):** An Android application running in **Device Owner Mode** (Kiosk Mode) that blocks access to navigation bar, system notifications, screenshots, screen recording, and unauthorized apps.
-
----
-
-## 🚀 Key Features
-
-*   **🔒 Device Owner Kiosk Lock:** Completely locks down the Android tablet using Android Enterprise Device Owner policies (pinning the screen and disabling system UI).
-*   **🔌 Cryptographic Session Binding:** Binds the student's Moodle attempt to a specific hardware ID, blocking token sharing across multiple devices.
-*   **⌨️ Secure Custom Keyboard (IME):** Implements a dedicated keyboard layout with disabled clipboard copy/paste, translation overlays, and autocomplete features.
-*   **🔄 Automatic Autoping (Heartbeat):** Android app pings Moodle every 30 seconds to refresh the session token; if the app is closed or network fails, the session immediately expires.
-*   **⚠️ Real-Time Focus & Overlay Tracking:** Automatically detects when the app loses focus or an overlay window tries to launch, instantly logging security violations to Moodle database.
-*   **🔑 Supervisor Bypass & Verification:** Allows supervisors to exit kiosk mode using a secure, quiz-specific exit password configured in Moodle settings.
-*   **💳 Annual Subscription Hardware Licensing:** Restricts app usage to a predefined number of tablet devices using a Challenge-Response RSA licensing system.
+The solution consists of two integrated components:
+1. **Moodle Access Rule Plugin (`ewa_lockdown`):** Installs on your Moodle server to restrict quiz access, sign session tokens, and log focus violations.
+2. **EWA Kiosk (Android App):** Installs on target tablets to lock down the device into an absolute kiosk mode during the exam.
 
 ---
 
-## 🛠️ Requirements
-*   **Moodle Version:** 4.5.0 and above.
-*   **PHP Version:** 8.1 / 8.2 / 8.3.
-*   **Android OS:** Android 8.0 (Oreo) and above on tablets.
+## ✨ Features
+
+### 🔌 Moodle Access Rule Features
+*   **Granular Kiosk Enforcement:** Enable lockdown on a per-quiz basis with a simple checkbox in quiz settings.
+*   **Hardware-Locked Session Binding:** Binds the student's attempt to a unique device fingerprint (`Device ID`) on the first heartbeat. Any token sharing or access from multiple tablets triggers an immediate security violation.
+*   **Real-Time Violation Logger:** Stores and tracks exam infractions (such as app focus loss, overlay detection, or device mismatch) in Moodle's database with timestamps.
+*   **Supervisor Bypass Code:** Configure an exam-specific exit password in the quiz settings. This allows on-site supervisors to unlock the tablet and close the kiosk session.
+*   **Enterprise Integration:** Fully compatible with Moodle's Privacy Subsystem (GDPR compliance) and Backup & Restore APIs.
+
+### 📱 EWA Kiosk (Android App) Features
+*   **Absolute Device Owner Lock:** Locks the tablet using Android Enterprise `Device Owner` policies. Disables hardware buttons, gestures, recent apps, and the notification drawer.
+*   **Secure Custom Keyboard (IME):** Implements a dedicated keyboard layout. Autocomplete, spelling suggestions, and clipboard copy/paste are completely disabled.
+*   **Immersive Full-Screen Mode:** Hides navigation bars and system status bars permanently. The student cannot swipe out of the exam.
+*   **Anti-Tampering Protections:** Performs runtime checks for device root status, emulator execution, and APK signature validation.
+*   **Annual License Activation:** Secure offline-capable challenge-response activation (AES-128) protecting your intellectual property.
+*   **Autoping (Heartbeat):** Constantly pings Moodle every 30 seconds to refresh the session token. If the app is closed or network fails, the session immediately expires on the server.
 
 ---
 
-## 📦 Installation & Setup
+## 📋 Requirements
 
-### 1. Install Moodle Access Rule Plugin
-1. Clone this repository into your Moodle installation folder:
+| Dependency | Required Version / Compatibility |
+| :--- | :--- |
+| **Moodle Framework** | Moodle 4.5.0 to 5.0+ (Tested against Moodle 4.5 stable) |
+| **PHP Runtime** | PHP 8.1, PHP 8.2, PHP 8.3 |
+| **Database System** | PostgreSQL 13+, MySQL 8.0+, or MariaDB 10.5+ |
+| **Android Tablet OS** | Android 8.0 (Oreo) up to Android 14+ |
+
+---
+
+## 🚀 Installation
+
+### 1. Moodle Plugin Installation (ZIP Upload)
+1. Zip the `ewa_lockdown` folder.
+2. Log in to your Moodle site as Administrator.
+3. Go to **Site administration > Plugins > Install plugins**.
+4. Drag and drop the `ewa_lockdown.zip` file into the file uploader.
+5. Click **Install plugin from the ZIP file** and follow the database upgrade wizard.
+
+### 2. EWA Kiosk Android App Installation
+1. Obtain the compiled `EWA_Kiosk.apk` file.
+2. Install the app on the tablet via ADB:
    ```bash
-   git clone https://github.com/engfeda-ui/ewa_lockdown.git mod/quiz/accessrule/ewa_lockdown
+   adb install EWA_Kiosk.apk
    ```
-2. Navigate to your Moodle administration page or run the CLI upgrade script:
-   ```bash
-   php admin/cli/upgrade.php
-   ```
-3. Enable the **EWA Secure Browser Lockdown** rule inside the specific quiz settings.
-
-### 2. Install and Provision Android App
-1. Compile the APK in Android Studio (`app-debug.apk`).
-2. Install the app on target tablets using ADB:
-   ```bash
-   adb install app-debug.apk
-   ```
-3. Set the app as the **Device Owner** (Kiosk Controller) using this shell command:
-   ```bash
-   adb shell dpm set-device-owner com.ewa.securebrowser/.DeviceAdminReceiver
-   ```
-
----
-
-## 🔑 Challenge-Response Licensing System
-To prevent unauthorized installations and enforce annual subscription plans, EWA Secure Browser uses a hardware-locked licensing protocol:
-1. Upon first boot, the tablet displays a **16-digit Hardware ID** (e.g., `EWA1-98F2-A5C3-D8E4`).
-2. Open the local license dashboard `ewa_license_generator.html` on your PC.
-3. Paste the Hardware ID, select subscription duration (e.g., 365 days), and click **Generate Activation Key**.
-4. Type the generated activation key into the tablet. The app decrypts it using an internal **AES-128 key** to unlock the quiz scanner interface.
-
----
-
-# العربية
-
-## نظرة عامة
-**نظام اختبارات EWA الآمن (EWA Secure Exam System)** هو نظام حماية واختبارات متكامل مصمم خصيصاً لـ **أكاديمية الطاقة والمياه (EWA)**. يمنع النظام الغش والتلاعب الأكاديمي أثناء اختبارات مودل عن طريق تقييد الوصول للاختبار وحصره فقط على متصفح مخصص وآمن على أجهزة التابلت مقفل بالكامل.
-
-يتكون النظام من جزأين رئيسيين:
-1. **إضافة قواعد الوصول لمودل (`ewa_lockdown`):** تمنع الطلاب من فتح الاختبار إلا عبر إرسال توكن أمان مشفر وموقع رقمياً، وربط الاختبار بجهاز تابلت فيزيائي محدد.
-2. **تطبيق متصفح EWA الآمن (تطبيق أندرويد):** تطبيق يعمل بصلاحيات **مسؤول الجهاز المطلق (Device Owner)** لقفل شاشة التابلت بالكامل ومنع الخروج أو تصفح أي تطبيقات أخرى.
-
----
-
-## 🚀 الميزات الرئيسية
-
-*   **🔒 وضع الكشك المطلق (Device Owner Mode):** يقفل التابلت بالكامل ويمنع فتح شريط الإشعارات، أو أزرار النظام، أو إيماءات التنقل.
-*   **🔌 ربط الجلسة بـ Hardware ID:** يربط محاولة اختبار الطالب بجهازه لمنع مشاركة الروابط والتوكنات على أجهزة أخرى.
-*   **⌨️ لوحة مفاتيح آمنة مخصصة (IME):** لوحة مفاتيح مدمجة مغلقة وخالية من الحافظة (Clipboard) لمنع النسخ واللصق أو الترجمة الفورية والبحث.
-*   **🔄 نبضات القلب التلقائية (Heartbeat):** يتصل التطبيق بمودل كل 30 ثانية لتمديد صلاحية التوكن؛ وإذا تم إغلاق التطبيق أو تعطل الاتصال، تنتهي الجلسة فوراً.
-*   **⚠️ رصد ومراقبة النوافذ العائمة:** يسجل التطبيق مخالفة أمنية في خادم المودل فوراً إذا فقد التطبيق التركيز أو حاولت شاشة أخرى الظهور فوق المتصفح.
-*   **🔑 خروج اضطراري للمشرفين:** يتيح للمراقب إلغاء وضع الكشك للتابلت محلياً بإدخال كلمة مرور الخروج المحددة في إعدادات الاختبار بمودل.
-*   **💳 ترخيص اشتراك سنوي مغلق على الأجهزة:** نظام تراخيص سنوي ذكي (Challenge-Response) يمنع الأكاديمية من تشغيل التطبيق على أجهزة إضافية غير المتفق عليها.
-
----
-
-## 🛠️ متطلبات التشغيل
-*   **إصدار مودل:** 4.5.0 فما فوق.
-*   **إصدار PHP:** 8.1 / 8.2 / 8.3.
-*   **نظام أندرويد للتابلت:** إصدار Android 8.0 فما فوق.
-
----
-
-## 📦 التثبيت والإعداد
-
-### 1. تثبيت إضافة مودل
-1. قم ببرمجة أو نسخ الإضافة داخل مجلد المودل لديك:
-   ```bash
-   git clone https://github.com/engfeda-ui/ewa_lockdown.git mod/quiz/accessrule/ewa_lockdown
-   ```
-2. توجه لصفحة الإدارة في المودل أو قم بتشغيل الترقية من سطر الأوامر:
-   ```bash
-   php admin/cli/upgrade.php
-   ```
-3. قم بتفعيل الخيار **EWA Secure Browser Lockdown** في إعدادات الاختبار المطلوب حمايته.
-
-### 2. تثبيت وإعداد تطبيق الأندرويد
-1. قم ببناء ملف الـ APK في Android Studio (`app-debug.apk`).
-2. قم بتثبيت التطبيق على التابلت عبر الـ ADB:
-   ```bash
-   adb install app-debug.apk
-   ```
-3. قم بتعيين التطبيق كـ **Device Owner** (المالك المطلق للجهاز) عبر الأمر:
+3. Set the app as the **Device Owner** (Kiosk Controller) using the following ADB command:
    ```bash
    adb shell dpm set-device-owner com.ewa.securebrowser/.DeviceAdminReceiver
    ```
 
 ---
 
-## 🔑 نظام التراخيص السنوي (Challenge-Response)
-لمنع استخدام التطبيق على أجهزة أكثر من المتفق عليها، يتم تطبيق آلية الترخيص السنوية كالتالي:
-1. عند تشغيل التطبيق لأول مرة على التابلت، يظهر **كود تعريف فريد للجهاز مكون من 16 رقماً** (مثل: `EWA1-98F2-A5C3-D8E4`).
-2. افتح صفحة التفعيل `ewa_license_generator.html` على كمبيوترك الشخصي.
-3. اكتب كود الجهاز، وحدد مدة الاشتراك (مثلاً 365 يوم)، واضغط **توليد كود التفعيل**.
-4. اكتب كود التفعيل الناتج في التابلت، وسيقوم التطبيق بفك تشفيره بـ **AES-128** وتنشيط نفسه فوراً.
+## 🔑 Challenge-Response Licensing & Activation
+To activate the tablet and run the **EWA Kiosk** browser:
+1. Open the app on the tablet. The screen will display a **16-character Hardware ID** (e.g., `EWA1-98F2-A5C3-D8E4`).
+2. Open the local utility file `ewa_license_generator.html` on your PC.
+3. Input the Hardware ID, select or specify a **custom subscription duration (days)**, and click **Generate Activation Key**.
+4. Enter the generated activation key in the tablet to permanently unlock the exam scanner interface for the chosen duration.
 
 ---
 
-## 📄 License & Rights
-All software, code assets, and design concepts are proprietary and confidential. Developed specifically for **Energy & Water Academy (EWA)** under commercial licensing agreements. Unauthorized redistribution, copying, or reverse engineering is strictly prohibited.
+## 📋 Changelog
+
+### v1.2.0 — 2026-07-07
+*   **New:** Integrated **Challenge-Response** Hardware Activation licensing (annual subscription).
+*   **New:** Implemented **Immersive Full-Screen Mode** (hiding status and navigation bars) in `MainActivity.kt`.
+*   **New:** Added **Root Detection and Signature Verification** to block modified APK execution.
+*   **New:** Created offline license generator tool `ewa_license_generator.html` supporting custom days.
+*   **Fix:** Cleared Moodle CodeSniffer standard warnings and PSR12 class brace whitespace errors across all files.
+
+### v1.0.0 — 2026-06-25
+*   Initial stable release.
+*   Secure Token manager and Device ID binding logic.
+*   Heartbeat ping session extensions.
+*   Device Admin policies and basic kiosk controller class.
+
+---
+
+## 💻 Directory Structure
+
+```
+ewa_lockdown/
+├── classes/
+│   ├── privacy/            # GDPR Privacy provider
+│   ├── qr_generator.php    # QR Code builder
+│   ├── token_manager.php   # Session JWT manager
+│   └── violation_logger.php# Violation database logs
+├── db/
+│   ├── install.xml         # Schema tables
+│   └── upgrade.php         # Version migration handler
+├── lang/
+│   └── en/                 # Language packs
+├── tests/                  # PHPUnit test cases
+├── api.php                 # App heartbeat REST API endpoint
+├── rule.php                # Access rule class
+├── version.php             # Plugin version and metadata
+└── README.md
+```
+
+---
+
+## 🔒 Security & Code Compliance
+*   **SQL Injection Prevention:** Utilizes Moodle's `$DB` API with named parameter bindings exclusively.
+*   **Cryptographic Signature:** JWT Session tokens signed with HMAC-SHA256 based on site keys.
+*   **Anti-Tampering:** APK files protected with custom R8/ProGuard obfuscation rules preventing decompilation.
+*   **GDPR Compliance:** Implements all core privacy interfaces exporting and deleting session metadata logs.
+
+---
+
+## 📄 License & Credits
+*   **Copyright:** © 2026 Mahmoud Salem
+*   **License:** Proprietary. Confidential and proprietary software. Unauthorized copying, distribution, or reverse engineering is strictly prohibited.
