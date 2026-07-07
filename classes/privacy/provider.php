@@ -30,8 +30,6 @@ use core_privacy\local\request\contextlist;
 use core_privacy\local\request\userlist;
 use core_privacy\local\request\approved_userlist;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Privacy Subsystem for quizaccess_ewa_lockdown implementing necessary interfaces.
  */
@@ -39,7 +37,6 @@ class provider implements
     \core_privacy\local\metadata\provider,
     \core_privacy\local\request\core_userlist_provider,
     \core_privacy\local\request\plugin\provider {
-
     /**
      * Returns metadata about this plugin.
      *
@@ -152,7 +149,7 @@ class provider implements
 
         $userid = $contextlist->get_user()->id;
 
-        list($contextsql, $contextparams) = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
+        [$contextsql, $contextparams] = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
 
         $sql = "SELECT c.id AS contextid, ses.*
                   FROM {context} c
@@ -233,7 +230,7 @@ class provider implements
 
         $userid = $contextlist->get_user()->id;
 
-        list($contextsql, $contextparams) = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
+        [$contextsql, $contextparams] = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
 
         $sql = "SELECT cm.instance
                   FROM {context} c
@@ -248,7 +245,7 @@ class provider implements
             return;
         }
 
-        list($quizsql, $quizparams) = $DB->get_in_or_equal($quizids, SQL_PARAMS_NAMED);
+        [$quizsql, $quizparams] = $DB->get_in_or_equal($quizids, SQL_PARAMS_NAMED);
         $delparams = ['userid' => $userid] + $quizparams;
 
         $DB->delete_records_select('quizaccess_ewa_sessions', "userid = :userid AND quizid {$quizsql}", $delparams);
@@ -279,7 +276,7 @@ class provider implements
             return;
         }
 
-        list($insql, $inparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+        [$insql, $inparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
         $params = ['quizid' => $cm->instance] + $inparams;
 
         $DB->delete_records_select('quizaccess_ewa_sessions', "quizid = :quizid AND userid {$insql}", $params);

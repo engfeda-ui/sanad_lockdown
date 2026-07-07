@@ -29,13 +29,10 @@
 
 namespace quizaccess_ewa_lockdown;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Manages the creation and validation of secure session tokens.
  */
 class token_manager {
-
     /** @var string HTTP header name sent by the EWA Secure Browser app. */
     const HEADER_TOKEN = 'HTTP_X_EWA_SECURE_TOKEN';
 

@@ -1,4 +1,19 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * API endpoint for EWA Secure Browser integration.
  * Handles heartbeats, remote violation logging, and supervisor exit verification.
@@ -9,7 +24,7 @@
  */
 
 define('NO_OUTPUT_BUFFERING', true);
-require_once(__DIR__ . '/../../../../config.php');
+require_once(__DIR__ . '/../../../../config.php'); // phpcs:ignore moodle.Files.RequireLogin.Missing
 require_once($CFG->dirroot . '/mod/quiz/locallib.php');
 
 use quizaccess_ewa_lockdown\token_manager;
@@ -112,14 +127,14 @@ switch ($action) {
         // Extend token expiry by 2 minutes on every successful heartbeat.
         $session->timeexpires = time() + 120;
         $DB->update_record('quizaccess_ewa_sessions', $session);
-        
+
         echo json_encode(['status' => 'acknowledged', 'expires' => $session->timeexpires]);
         break;
 
     case 'log_violation':
         $violationtype = $data['type'] ?? 'unknown_violation';
         $details = $data['details'] ?? '';
-        
+
         violation_logger::log(
             $quizid,
             $session->userid,
@@ -127,16 +142,16 @@ switch ($action) {
             $deviceid,
             ['api_log' => true, 'raw_details' => $details]
         );
-        
+
         echo json_encode(['status' => 'logged']);
         break;
 
     case 'verify_exit':
         $password = $data['password'] ?? '';
-        
+
         // Fetch quiz lockdown settings.
         $settings = $DB->get_record('quizaccess_ewa_lockdown', ['quizid' => $quizid]);
-        
+
         if (!$settings || empty($settings->exitpassword)) {
             // No exit password configured, allow exit by default.
             echo json_encode(['status' => 'verified', 'info' => 'No exit password set']);

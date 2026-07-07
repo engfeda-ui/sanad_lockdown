@@ -53,7 +53,6 @@ use quizaccess_ewa_lockdown\violation_logger;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class quizaccess_ewa_lockdown extends quiz_access_rule_base {
-
     /**
      * Return an instance of this rule if the quiz has it enabled.
      *
@@ -155,7 +154,7 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
     public static function delete_settings($quiz) {
         global $DB;
         $DB->delete_records('quizaccess_ewa_lockdown', ['quizid' => $quiz->id]);
-        $DB->delete_records('quizaccess_ewa_sessions',  ['quizid' => $quiz->id]);
+        $DB->delete_records('quizaccess_ewa_sessions', ['quizid' => $quiz->id]);
         $DB->delete_records('quizaccess_ewa_violations', ['quizid' => $quiz->id]);
     }
 

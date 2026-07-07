@@ -28,8 +28,6 @@
 
 namespace quizaccess_ewa_lockdown;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Builds QR codes for the EWA Secure Browser launch URL.
  */

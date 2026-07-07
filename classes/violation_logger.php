@@ -24,18 +24,24 @@
 
 namespace quizaccess_ewa_lockdown;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Records security violations detected during secure exams.
  */
 class violation_logger {
 
-    // Violation type constants.
+    /** @var string Attempt from non-EWA browser */
     const TYPE_WRONG_BROWSER   = 'wrong_browser';
+
+    /** @var string Session token is invalid */
     const TYPE_INVALID_TOKEN   = 'invalid_token';
+
+    /** @var string Session token has expired */
     const TYPE_EXPIRED_TOKEN   = 'expired_token';
+
+    /** @var string Application lost focus (overlay or home button) */
     const TYPE_FOCUS_LOST      = 'focus_lost';
+
+    /** @var string Request device ID mismatch with the session */
     const TYPE_DEVICE_MISMATCH = 'device_mismatch';
 
     /**
@@ -98,9 +104,6 @@ class violation_logger {
      */
     public static function get_all(int $quizid, int $userid): array {
         global $DB;
-        return $DB->get_records('quizaccess_ewa_violations',
-            ['quizid' => $quizid, 'userid' => $userid],
-            'timecreated ASC'
-        );
+        return $DB->get_records('quizaccess_ewa_violations', ['quizid' => $quizid, 'userid' => $userid], 'timecreated ASC');
     }
 }

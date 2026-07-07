@@ -33,14 +33,12 @@ require_once($CFG->dirroot . '/mod/quiz/locallib.php');
  * Unit tests for the quizaccess_ewa_lockdown class and token_manager.
  */
 class rule_test extends \advanced_testcase {
-
     public function test_token_issue_and_validate() {
         $this->resetAfterTest();
 
         $quizid = 100;
         $userid = 200;
         $deviceid = 'test-device-123';
-        
         // 1. Issue a token.
         $token = token_manager::issue($quizid, $userid, $deviceid, 1800);
         $this->assertNotEmpty($token);
@@ -64,10 +62,10 @@ class rule_test extends \advanced_testcase {
 
         $quizid = 101;
         $userid = 201;
-        
+
         // Issue token that expires immediately (-1 second).
         $token = token_manager::issue($quizid, $userid, '', -1);
-        
+
         // Validation should fail and delete the token.
         $this->assertFalse(token_manager::validate($quizid, $userid, $token));
     }
