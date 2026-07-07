@@ -32,10 +32,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 if (class_exists('\mod_quiz\local\access_rule_base')) {
-    if (!class_exists('quiz_access_rule_base')) {
+    if (!class_exists('quiz_access_rule_base', false)) {
         class_alias('\mod_quiz\local\access_rule_base', 'quiz_access_rule_base');
     }
-    if (!class_exists('quiz')) {
+    if (!class_exists('quiz', false)) {
         class_alias('\mod_quiz\quiz_settings', 'quiz');
     }
 } else {
