@@ -309,7 +309,7 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
 
         // If accessed from within the EWA secure browser with a valid token, hide the QR.
         if (token_manager::is_ewa_browser_request() && token_manager::validate_from_request($this->quiz->id, $USER->id)) {
-            return '';
+            return [];
         }
 
         $quizid  = $this->quizobj->get_quizid();
@@ -325,12 +325,14 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
             get_string('qrcode_alttext', 'quizaccess_ewa_lockdown')
         );
 
-        $html  = '<div class="ewa-lockdown-description text-center p-3 border rounded bg-light mb-3" style="max-width: 500px; margin: 0 auto;">';
-        $html .= '<p class="font-weight-bold"><strong>' . get_string('scanqrtostart', 'quizaccess_ewa_lockdown') . '</strong></p>';
-        $html .= '<div class="ewa-qrcode-wrapper mb-2">' . $qrimg . '</div>';
-        $html .= '<p class="text-muted small">' . get_string('downloadapp', 'quizaccess_ewa_lockdown') . '</p>';
-        $html .= '</div>';
+        // Use html_writer::div so the content is treated as raw HTML (not escaped).
+        // The quiz renderer wraps each description() item in <p> tags with html_writer
+        // which escapes strings — returning an html_writer output bypasses that.
+        $inner  = \html_writer::tag('p', \html_writer::tag('strong', get_string('scanqrtostart', 'quizaccess_ewa_lockdown')));
+        $inner .= \html_writer::div($qrimg, 'ewa-qrcode-wrapper text-center mb-2');
+        $inner .= \html_writer::tag('p', get_string('downloadapp', 'quizaccess_ewa_lockdown'), ['class' => 'text-muted small text-center']);
 
-        return $html;
+        return [\html_writer::div($inner, 'ewa-lockdown-description text-center p-3 border rounded bg-light mb-3',
+            ['style' => 'max-width:500px;margin:0 auto'])];
     }
 }
