@@ -298,4 +298,39 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
     public function notify_preflight_check_passed($attemptid) {
         // No action needed.
     }
+
+    /**
+     * Return a description of the rule, including the QR code for scanning.
+     *
+     * @return string Description HTML.
+     */
+    public function description() {
+        global $USER;
+
+        // If accessed from within the EWA secure browser with a valid token, hide the QR.
+        if (token_manager::is_ewa_browser_request() && token_manager::validate_from_request($this->quiz->id, $USER->id)) {
+            return '';
+        }
+
+        $quizid  = $this->quizobj->get_quizid();
+        $cmid    = $this->quizobj->get_cmid();
+        $expiry  = (int)($this->quiz->ewa_lockdown_tokenexpiry ?? 1800);
+
+        // Issue a token (replaces any previous one for this user+quiz).
+        $token   = token_manager::issue($quizid, $USER->id, '', $expiry);
+        $url     = token_manager::build_launch_url($quizid, $cmid, $token);
+        $qrimg   = qr_generator::get_img_tag(
+            $url,
+            250,
+            get_string('qrcode_alttext', 'quizaccess_ewa_lockdown')
+        );
+
+        $html  = '<div class="ewa-lockdown-description text-center p-3 border rounded bg-light mb-3" style="max-width: 500px; margin: 0 auto;">';
+        $html .= '<p class="font-weight-bold"><strong>' . get_string('scanqrtostart', 'quizaccess_ewa_lockdown') . '</strong></p>';
+        $html .= '<div class="ewa-qrcode-wrapper mb-2">' . $qrimg . '</div>';
+        $html .= '<p class="text-muted small">' . get_string('downloadapp', 'quizaccess_ewa_lockdown') . '</p>';
+        $html .= '</div>';
+
+        return $html;
+    }
 }
