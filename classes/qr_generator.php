@@ -89,7 +89,11 @@ class qr_generator {
         }
 
         // Try Moodle's built-in core_qrcode if available (Moodle 4.x wrapper around TCPDF).
-        if (class_exists('\\core_qrcode')) {
+        $coreqrfile = $CFG->dirroot . '/lib/classes/qrcode.php';
+        if (file_exists($coreqrfile)) {
+            require_once($coreqrfile);
+        }
+        if (class_exists('core_qrcode')) {
             $qrcode = new \core_qrcode($url);
             // Calculate scale based on requested size. Default size is 300, scale 3 works well.
             $scale = max(2, (int)($size / 75));
