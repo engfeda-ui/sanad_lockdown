@@ -88,6 +88,14 @@ class qr_generator {
             return ob_get_clean();
         }
 
+        // Try Moodle's built-in core_qrcode if available (Moodle 4.x wrapper around TCPDF).
+        if (class_exists('\\core_qrcode')) {
+            $qrcode = new \core_qrcode($url);
+            // Calculate scale based on requested size. Default size is 300, scale 3 works well.
+            $scale = max(2, (int)($size / 75));
+            return $qrcode->getBarcodePngData($scale, $scale);
+        }
+
         // Fallback: return a tiny 1×1 transparent PNG so the img tag stays valid.
         return base64_decode(
             'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/w8AAwAB/epTWHoAAAAASUVORK5CYII='
