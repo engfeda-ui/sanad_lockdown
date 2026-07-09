@@ -243,33 +243,97 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
 
     // ── Violations Modal ──────────────────────────────────────────────────────
     function openViolationsModal(name, violations) {
-        document.getElementById('ewa-violations-modal-title').textContent =
-            'Violations — ' + name + ' (' + violations.length + ')';
+        var isArabic = $('html').attr('lang') === 'ar';
+        
+        var modalTitle = isArabic 
+            ? 'المخالفات المرصودة — ' + name + ' (' + violations.length + ')'
+            : 'Violations — ' + name + ' (' + violations.length + ')';
+            
+        document.getElementById('ewa-violations-modal-title').textContent = modalTitle;
+
+        var headers = {
+            num: '#',
+            type: isArabic ? 'النوع' : 'Type',
+            time: isArabic ? 'الوقت' : 'Time',
+            device: isArabic ? 'الجهاز' : 'Device',
+            details: isArabic ? 'التفاصيل' : 'Details'
+        };
 
         var html = '<table class="ewa-viol-table"><thead><tr>'
-            + '<th>#</th><th>Type</th><th>Time</th><th>Device</th><th>Details</th>'
+            + '<th>' + headers.num + '</th>'
+            + '<th>' + headers.type + '</th>'
+            + '<th>' + headers.time + '</th>'
+            + '<th>' + headers.device + '</th>'
+            + '<th>' + headers.details + '</th>'
             + '</tr></thead><tbody>';
 
         if (!violations || violations.length === 0) {
-            html += '<tr><td colspan="5" class="text-center text-muted py-3">No violations recorded.</td></tr>';
+            var noViolMsg = isArabic ? 'لم يتم رصد أي مخالفات.' : 'No violations recorded.';
+            html += '<tr><td colspan="5" class="text-center text-muted py-3">' + noViolMsg + '</td></tr>';
         } else {
             violations.forEach(function(v, idx) {
-                var label   = VIOLATION_LABELS[v.type] || v.type;
-                var details = '';
+                // Determine localized violation type label
+                var label = v.type;
+                if (isArabic) {
+                    var arLabels = {
+                        'wrong_browser':                 'متصفح غير مصرح به',
+                        'invalid_token':                 'رمز أمان غير صالح',
+                        'expired_token':                 'رمز أمني منتهي',
+                        'focus_lost':                    'الخروج من التطبيق',
+                        'device_mismatch':               'تغيير الجهاز المستخدم',
+                        'invalid_exit_password_attempt': 'كلمة مرور خروج خاطئة'
+                    };
+                    label = arLabels[v.type] || v.type;
+                } else {
+                    label = VIOLATION_LABELS[v.type] || v.type;
+                }
+
+                // Format technical JSON details to human-readable message
+                var detailsHtml = '';
                 if (v.details) {
                     try {
-                        var parsed = JSON.parse(v.details);
-                        details = JSON.stringify(parsed, null, 1);
+                        var data = JSON.parse(v.details);
+                        if (data.page) {
+                            if (data.page === 'prevent_new_attempt') {
+                                detailsHtml = isArabic 
+                                    ? 'حاول فتح صفحة بدء الاختبار من متصفح عادي وتم حظره.'
+                                    : 'Attempted to open the quiz entry page from a regular browser.';
+                            } else if (data.page === 'description') {
+                                detailsHtml = isArabic 
+                                    ? 'حاول فتح صفحة معلومات الاختبار من متصفح عادي.'
+                                    : 'Opened the quiz information page from a regular browser.';
+                            } else {
+                                detailsHtml = escHtml(data.page);
+                            }
+                        } else if (data.bound_device) {
+                            var boundShort = escHtml(data.bound_device.substring(0, 12)) + '...';
+                            if (isArabic) {
+                                detailsHtml = 'الجهاز غير متطابق. الجلسة مرتبطة بجهاز آخر: <code>' + boundShort + '</code>';
+                            } else {
+                                detailsHtml = 'Device mismatch. Session is locked to device: <code>' + boundShort + '</code>';
+                            }
+                        } else if (data.remaining_attempts !== undefined) {
+                            detailsHtml = isArabic
+                                ? 'أدخل كلمة مرور خروج خاطئة. المحاولات المتبقية: ' + data.remaining_attempts
+                                : 'Incorrect exit password entered. Remaining attempts: ' + data.remaining_attempts;
+                        } else if (data.api_log && data.raw_details) {
+                            detailsHtml = escHtml(data.raw_details);
+                        } else {
+                            detailsHtml = '<pre class="mb-0" style="font-size:.72rem;white-space:pre-wrap">' + escHtml(JSON.stringify(data, null, 1)) + '</pre>';
+                        }
                     } catch (e) {
-                        details = v.details;
+                        detailsHtml = escHtml(v.details);
                     }
                 }
+
+                var devId = v.deviceid ? escHtml(v.deviceid.substring(0, 12)) : '—';
+
                 html += '<tr>'
                     + '<td>' + (idx + 1) + '</td>'
                     + '<td><strong>' + escHtml(label) + '</strong></td>'
                     + '<td>' + escHtml(v.time_human || '') + '</td>'
-                    + '<td><code>' + escHtml((v.deviceid || '').substring(0, 12)) + '</code></td>'
-                    + '<td><pre class="mb-0" style="font-size:.72rem;white-space:pre-wrap">' + escHtml(details) + '</pre></td>'
+                    + '<td><code>' + devId + '</code></td>'
+                    + '<td>' + detailsHtml + '</td>'
                     + '</tr>';
             });
         }
