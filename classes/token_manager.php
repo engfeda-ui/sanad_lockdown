@@ -91,20 +91,39 @@ class token_manager {
     }
 
     /**
-     * Validate an incoming token from the EWA Secure Browser HTTP headers.
+     * Validate an incoming token from the EWA Secure Browser HTTP headers or Session query.
      *
      * @param int $quizid Expected quiz ID.
      * @param int $userid Expected user ID.
      * @return bool True if the token is valid and not expired.
      */
     public static function validate_from_request(int $quizid, int $userid): bool {
-        // Check that the request comes from the EWA app.
-        $appid = $_SERVER[self::HEADER_APP_ID] ?? '';
-        if ($appid !== self::EXPECTED_APP_ID) {
+        // 1. First verify if it's the EWA app (via header OR user-agent fallback)
+        if (!self::is_ewa_browser_request()) {
             return false;
         }
 
+        // 2. Extract token from header or fallback to query parameter or active DB session
         $token = $_SERVER[self::HEADER_TOKEN] ?? '';
+        if (empty($token)) {
+            // Fallback for page loads/POSTs where custom headers are lost: read from URL query parameters
+            $token = optional_param('ewatoken', '', PARAM_RAW);
+        }
+
+        if (empty($token)) {
+            global $DB;
+            // Last fallback: check if we already have an active, unexpired session for this student in DB
+            $session = $DB->get_record_select('quizaccess_ewa_sessions', 
+                'quizid = :quizid AND userid = :userid AND timeexpires > :now',
+                ['quizid' => $quizid, 'userid' => $userid, 'now' => time()],
+                'token',
+                IGNORE_MULTIPLE
+            );
+            if ($session) {
+                $token = $session->token;
+            }
+        }
+
         if (empty($token)) {
             return false;
         }
@@ -182,15 +201,24 @@ class token_manager {
     /**
      * Check whether the current HTTP request originates from the EWA Secure Browser.
      *
-     * This only checks the presence and value of the app identifier header —
-     * it does NOT validate the session token. Use validate_from_request() for full
-     * security checks.
+     * Supports both custom App ID headers and the User-Agent fallback.
      *
      * @return bool True if the request has the EWA app identifier.
      */
     public static function is_ewa_browser_request(): bool {
+        // Check header first
         $appid = $_SERVER[self::HEADER_APP_ID] ?? '';
-        return $appid === self::EXPECTED_APP_ID;
+        if ($appid === self::EXPECTED_APP_ID) {
+            return true;
+        }
+
+        // Fallback: check User-Agent string (reliable across all GET/POST requests inside the WebView)
+        $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        if (strpos($ua, 'EwaSecureBrowser') !== false) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
