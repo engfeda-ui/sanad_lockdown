@@ -149,6 +149,20 @@ switch ($action) {
     case 'verify_exit':
         $password = $data['password'] ?? '';
 
+        // --- Rate Limiting: max 5 failed attempts per quiz+device within 5 minutes ---
+        $ratelimit_window = time() - 300; // 5 minutes ago
+        $failed_attempts = $DB->count_records_select(
+            'quizaccess_ewa_violations',
+            "quizid = :quizid AND deviceid = :deviceid AND violationtype = 'invalid_exit_password_attempt' AND timecreated > :window",
+            ['quizid' => $quizid, 'deviceid' => $deviceid, 'window' => $ratelimit_window]
+        );
+        if ($failed_attempts >= 5) {
+            http_response_code(429);
+            echo json_encode(['error' => 'Too many attempts. Try again later.']);
+            break;
+        }
+        // -------------------------------------------------------------------------
+
         // Fetch quiz lockdown settings.
         $settings = $DB->get_record('quizaccess_ewa_lockdown', ['quizid' => $quizid]);
 
@@ -164,15 +178,16 @@ switch ($action) {
             token_manager::revoke($quizid, $session->userid);
             echo json_encode(['status' => 'verified']);
         } else {
-            // Wrong password.
+            // Wrong password — log violation (also counted by rate limiter above).
             violation_logger::log(
                 $quizid,
                 $session->userid,
                 'invalid_exit_password_attempt',
-                $deviceid
+                $deviceid,
+                ['remaining_attempts' => max(0, 4 - $failed_attempts)]
             );
             http_response_code(401);
-            echo json_encode(['error' => 'Incorrect exit password']);
+            echo json_encode(['error' => 'Incorrect exit password', 'remaining_attempts' => max(0, 4 - $failed_attempts)]);
         }
         break;
 

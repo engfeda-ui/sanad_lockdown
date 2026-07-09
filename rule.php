@@ -368,12 +368,25 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
             get_string('qrcode_alttext', 'quizaccess_ewa_lockdown')
         );
 
+        // Monitor dashboard button for teachers.
+        $monitorurl = new \moodle_url('/mod/quiz/accessrule/ewa_lockdown/monitor.php', ['cmid' => $cmid]);
+        $monitorbtn = \html_writer::link(
+            $monitorurl,
+            '<i class="fa fa-desktop mr-1"></i>' . get_string('monitor_link', 'quizaccess_ewa_lockdown'),
+            [
+                'class'  => 'btn btn-primary btn-sm mb-3',
+                'target' => '_blank',
+                'style'  => 'display:inline-flex;align-items:center;gap:6px;',
+            ]
+        );
+
         // Use html_writer::div so the content is treated as raw HTML (not escaped).
         // The quiz renderer wraps each description() item in <p> tags with html_writer
         // which escapes strings — returning an html_writer output bypasses that.
         $inner  = \html_writer::tag('p', \html_writer::tag('strong', get_string('scanqrtostart', 'quizaccess_ewa_lockdown')));
         $inner .= \html_writer::div($qrimg, 'ewa-qrcode-wrapper text-center mb-2');
         $inner .= \html_writer::tag('p', get_string('downloadapp', 'quizaccess_ewa_lockdown'), ['class' => 'text-muted small text-center']);
+        $inner .= \html_writer::div($monitorbtn, 'text-center mt-3');
 
         return [\html_writer::div($inner, 'ewa-lockdown-description text-center p-3 border rounded bg-light mb-3',
             ['style' => 'max-width:500px;margin:0 auto'])];

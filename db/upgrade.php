@@ -37,5 +37,17 @@ function xmldb_quizaccess_ewa_lockdown_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026070700, 'quizaccess', 'ewa_lockdown');
     }
 
+    // 2026070901: Widen exitpassword column to 255 chars to safely store bcrypt/argon2 hashes.
+    if ($oldversion < 2026070901) {
+        $table = new \xmldb_table('quizaccess_ewa_lockdown');
+        $field = new \xmldb_field('exitpassword', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'tokenexpiry');
+
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->change_field_precision($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2026070901, 'quizaccess', 'ewa_lockdown');
+    }
+
     return true;
 }

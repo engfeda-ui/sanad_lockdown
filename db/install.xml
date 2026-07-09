@@ -11,7 +11,7 @@
         <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key to quiz.id."/>
         <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 = EWA Secure Browser required."/>
         <FIELD NAME="tokenexpiry" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1800" SEQUENCE="false" COMMENT="Token expiry in seconds. Default 30 minutes."/>
-        <FIELD NAME="exitpassword" TYPE="char" LENGTH="64" NOTNULL="false" SEQUENCE="false" COMMENT="Emergency exit password (hashed)."/>
+        <FIELD NAME="exitpassword" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Emergency exit password (bcrypt/argon2 hash, max 255 chars)."/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>

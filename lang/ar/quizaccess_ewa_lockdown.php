@@ -51,6 +51,59 @@ $string['violation_wrong_browser'] = 'محاولة دخول من متصفح غي
 $string['violation_focus_lost'] = 'فقدان التركيز والتنقل خارج التطبيق أثناء الاختبار';
 $string['violation_expired_token'] = 'رمز أمان منتهي الصلاحية';
 
+// ── لوحة تحكم المراقبة المباشرة ──────────────────────────────────────────────
+$string['plugindisabled']       = 'ميزة EWA Lockdown غير مفعّلة لهذا الاختبار.';
+$string['monitor_title']        = 'متصفح EWA الآمن — المراقبة المباشرة';
+$string['monitor_link']         = 'المراقبة المباشرة EWA';
+
+// إحصائيات.
+$string['total_students']       = 'إجمالي الطلاب';
+$string['stat_active']          = 'جلسات نشطة';
+$string['stat_waiting']         = 'في الانتظار';
+$string['stat_expired']         = 'جلسات منتهية';
+$string['stat_violations']      = 'إجمالي المخالفات';
+
+// حالات الجلسة.
+$string['status_active']        = 'نشطة';
+$string['status_waiting']       = 'انتظار';
+$string['status_expired']       = 'منتهية';
+
+// رؤوس الأعمدة.
+$string['student']              = 'الطالب';
+$string['col_status']           = 'حالة الجلسة';
+$string['col_device']           = 'معرّف الجهاز';
+$string['col_heartbeat']        = 'آخر نبضة';
+$string['col_expires']          = 'تنتهي في';
+$string['col_violations']       = 'المخالفات';
+$string['col_actions']          = 'الإجراءات';
+
+// أزرار الإجراءات.
+$string['action_revoke']        = 'إلغاء الجلسة';
+$string['action_reissue']       = 'إصدار QR';
+$string['action_showqr']        = 'عرض QR';
+$string['show_violations']      = 'عرض سجل المخالفات';
+
+// تأكيدات.
+$string['confirm_revoke']       = 'هل أنت متأكد من إلغاء جلسة هذا الطالب؟ سيحتاج إلى رمز QR جديد للمتابعة.';
+
+// تغذية راجعة للإجراءات.
+$string['session_revoked']      = 'تم إلغاء الجلسة بنجاح.';
+$string['session_reissued']     = 'تم إصدار رمز جلسة جديد. أظهر رمز QR للطالب.';
+
+// نافذة QR.
+$string['qrmodal_title']        = 'امسح للبدء في الاختبار';
+$string['qrmodal_hint']         = 'اطلب من الطالب مسح رمز QR هذا باستخدام تطبيق متصفح EWA الآمن.';
+$string['qrmodal_fullscreen']   = 'ملء الشاشة';
+
+// التحديث التلقائي.
+$string['next_refresh']         = 'التحديث التلقائي خلال {$a} ثانية';
+
+// الوقت المنقضي.
+$string['ago_seconds']          = 'منذ {$a} ثانية';
+$string['ago_minutes']          = 'منذ {$a} دقيقة';
+$string['ago_hours']            = 'منذ {$a} ساعة';
+
+
 // Privacy.
 $string['privacy:metadata:quizaccess_ewa_sessions'] = 'تخزين رموز جلسات الاختبار الآمنة المصدرة للطلاب.';
 $string['privacy:metadata:quizaccess_ewa_sessions:userid'] = 'المستخدم المصدر له الرمز.';

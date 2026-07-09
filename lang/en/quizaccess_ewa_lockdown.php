@@ -51,6 +51,58 @@ $string['violation_wrong_browser'] = 'Attempt from non-EWA browser';
 $string['violation_focus_lost'] = 'App lost focus during exam';
 $string['violation_expired_token'] = 'Expired security token';
 
+// ── Monitoring Dashboard ──────────────────────────────────────────────────────
+$string['plugindisabled']       = 'EWA Lockdown is not enabled for this quiz.';
+$string['monitor_title']        = 'EWA Secure Browser — Live Monitor';
+$string['monitor_link']         = 'EWA Live Monitor';
+
+// Stats bar.
+$string['total_students']       = 'Total Students';
+$string['stat_active']          = 'Active Sessions';
+$string['stat_waiting']         = 'Waiting / No Session';
+$string['stat_expired']         = 'Expired Sessions';
+$string['stat_violations']      = 'Total Violations';
+
+// Status badges.
+$string['status_active']        = 'Active';
+$string['status_waiting']       = 'Waiting';
+$string['status_expired']       = 'Expired';
+
+// Table column headers.
+$string['student']              = 'Student';
+$string['col_status']           = 'Session Status';
+$string['col_device']           = 'Device ID';
+$string['col_heartbeat']        = 'Last Heartbeat';
+$string['col_expires']          = 'Expires At';
+$string['col_violations']       = 'Violations';
+$string['col_actions']          = 'Actions';
+
+// Action buttons.
+$string['action_revoke']        = 'Revoke';
+$string['action_reissue']       = 'Issue QR';
+$string['action_showqr']        = 'Show QR';
+$string['show_violations']      = 'Show violation log';
+
+// Confirmation dialogs.
+$string['confirm_revoke']       = 'Are you sure you want to revoke this student\'s session? They will need a new QR code to continue.';
+
+// Session actions feedback.
+$string['session_revoked']      = 'Session revoked successfully.';
+$string['session_reissued']     = 'New session token issued. Show the QR code to the student.';
+
+// QR modal.
+$string['qrmodal_title']        = 'Scan to Start Exam';
+$string['qrmodal_hint']         = 'Ask the student to scan this QR code with the EWA Secure Browser app.';
+$string['qrmodal_fullscreen']   = 'Full Screen';
+
+// Auto-refresh.
+$string['next_refresh']         = 'Auto-refresh in {$a}s';
+
+// Time-ago strings.
+$string['ago_seconds']          = '{$a}s ago';
+$string['ago_minutes']          = '{$a}m ago';
+$string['ago_hours']            = '{$a}h ago';
+
 // Privacy.
 $string['privacy:metadata:quizaccess_ewa_sessions'] = 'Stores secure exam session tokens issued to students.';
 $string['privacy:metadata:quizaccess_ewa_sessions:userid'] = 'The user this session was issued for.';
@@ -66,3 +118,5 @@ $string['privacy:metadata:quizaccess_ewa_violations:violationtype'] = 'The type 
 $string['privacy:metadata:quizaccess_ewa_violations:deviceid'] = 'The device fingerprint at time of violation.';
 $string['privacy:metadata:quizaccess_ewa_violations:details'] = 'Additional context about the violation.';
 $string['privacy:metadata:quizaccess_ewa_violations:timecreated'] = 'When the violation occurred.';
+
+
