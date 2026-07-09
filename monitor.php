@@ -149,6 +149,17 @@ function ewa_build_student_row(object $user, int $quizid, object $settings): arr
     );
     $violationcount = count($violations);
 
+    $mapped_violations = [];
+    foreach ($violations as $v) {
+        $mapped_violations[] = [
+            'type'        => $v->violationtype,
+            'time'        => $v->timecreated,
+            'time_human'  => userdate($v->timecreated, get_string('strftimedatetimeshort', 'langconfig')),
+            'deviceid'    => $v->deviceid ?? '',
+            'details'     => $v->details ?? '',
+        ];
+    }
+
     // QR url for this student (only if active session exists and not expired).
     $qrurl = '';
     if ($status === 'active' && $session) {
@@ -170,7 +181,7 @@ function ewa_build_student_row(object $user, int $quizid, object $settings): arr
         'deviceid'       => $deviceid,
         'lastheartbeat'  => $lastheartbeat,
         'violationcount' => $violationcount,
-        'violations'     => array_values($violations),
+        'violations'     => $mapped_violations,
         'qrurl'          => $qrurl,
         'reissuedurl'    => $reissuedurl,
     ];
@@ -191,15 +202,7 @@ if ($ajax) {
             'lastheartbeat'  => $row['lastheartbeat'],
             'deviceid'       => $row['deviceid'] ? substr($row['deviceid'], 0, 12) . '...' : '',
             'violationcount' => $row['violationcount'],
-            'violations'     => array_map(function($v) {
-                return [
-                    'type'        => $v->violationtype,
-                    'time'        => $v->timecreated,
-                    'time_human'  => userdate($v->timecreated, get_string('strftimedatetimeshort', 'langconfig')),
-                    'deviceid'    => $v->deviceid ?? '',
-                    'details'     => $v->details ?? '',
-                ];
-            }, $row['violations']),
+            'violations'     => $row['violations'],
         ];
     }
     echo json_encode(['students' => $rows, 'servertime' => time()]);
