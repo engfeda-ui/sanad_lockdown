@@ -55,10 +55,10 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
     function bindStaticEvents() {
         // QR show buttons (delegated — rows may be re-rendered).
         $(document).on('click', '.ewa-show-qr', function() {
-            var b64  = $(this).data('qrb64');
-            var name = $(this).data('name');
-            var url  = $(this).data('qrurl');
-            openQrModal(name, 'data:image/png;base64,' + atob(b64), url);
+            var qrdata = $(this).data('qrb64');
+            var name   = $(this).data('name');
+            var url    = $(this).data('qrurl');
+            openQrModal(name, qrdata, url);
         });
 
         // Violation buttons (delegated).

@@ -430,7 +430,7 @@ function ewa_render_student_row(array $row, int $cmid, int $quizid, string $sess
     $showqrbtn = '';
     if ($qrurl || $reissued) {
         $targeturl = $reissued ?: $qrurl;
-        $qrdata = base64_encode(qr_generator::get_data_uri($targeturl, 320));
+        $qrdata = qr_generator::get_data_uri($targeturl, 320);
         $showqrbtn = '<button type="button" class="ewa-action-btn ewa-btn-info btn btn-sm ewa-show-qr ml-1"'
             . ' data-qrb64="' . htmlspecialchars($qrdata) . '"'
             . ' data-name="' . s(fullname($user)) . '"'
