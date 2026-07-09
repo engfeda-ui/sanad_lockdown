@@ -94,6 +94,7 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
         $mform->setType('ewa_lockdown_tokenexpiry', PARAM_INT);
         $mform->setDefault('ewa_lockdown_tokenexpiry', 1800);
         $mform->addHelpButton('ewa_lockdown_tokenexpiry', 'tokenexpiry', 'quizaccess_ewa_lockdown');
+        $mform->addRule('ewa_lockdown_tokenexpiry', null, 'numeric', null, 'client');
         $mform->hideIf('ewa_lockdown_tokenexpiry', 'ewa_lockdown_enabled', 'eq', 0);
 
         // Emergency exit password.
@@ -127,7 +128,8 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
         global $DB;
 
         $enabled        = !empty($quiz->ewa_lockdown_enabled) ? 1 : 0;
-        $expiry         = isset($quiz->ewa_lockdown_tokenexpiry) ? (int)$quiz->ewa_lockdown_tokenexpiry : 1800;
+        // FIX: Enforce minimum expiry of 300 seconds to prevent instantly-expiring tokens.
+        $expiry         = max(300, isset($quiz->ewa_lockdown_tokenexpiry) ? (int)$quiz->ewa_lockdown_tokenexpiry : 1800);
         $exitpass       = isset($quiz->ewa_lockdown_exitpassword) ? trim($quiz->ewa_lockdown_exitpassword) : '';
         $alloweddomains = isset($quiz->ewa_lockdown_alloweddomains) ? trim($quiz->ewa_lockdown_alloweddomains) : '';
 
@@ -136,26 +138,28 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
             return;
         }
 
-        // Hash the exit password if provided.
-        $hashed = $exitpass !== '' ? password_hash($exitpass, PASSWORD_BCRYPT) : null;
-
         $record = $DB->get_record('quizaccess_ewa_lockdown', ['quizid' => $quiz->id]);
         if ($record) {
             $record->enabled        = $enabled;
             $record->tokenexpiry    = $expiry;
-            $record->exitpassword   = $hashed;
             $record->alloweddomains = $alloweddomains;
             $record->timemodified   = time();
+            // FIX: Only update the exit password hash when the teacher actually enters a new one.
+            // Previously, leaving the field blank would erase the existing password (set it to null).
+            if ($exitpass !== '') {
+                $record->exitpassword = password_hash($exitpass, PASSWORD_BCRYPT);
+            }
             $DB->update_record('quizaccess_ewa_lockdown', $record);
         } else {
             $record = new stdClass();
             $record->quizid         = $quiz->id;
             $record->enabled        = $enabled;
             $record->tokenexpiry    = $expiry;
-            $record->exitpassword   = $hashed;
             $record->alloweddomains = $alloweddomains;
             $record->timecreated    = time();
             $record->timemodified   = time();
+            // Only set password if one was provided during initial creation.
+            $record->exitpassword   = $exitpass !== '' ? password_hash($exitpass, PASSWORD_BCRYPT) : null;
             $DB->insert_record('quizaccess_ewa_lockdown', $record);
         }
     }

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -52,7 +52,9 @@ if ($appid !== token_manager::EXPECTED_APP_ID) {
 $inputraw = file_get_contents('php://input');
 $data = json_decode($inputraw, true);
 
-if (!$data) {
+// FIX: Use strict null check — json_decode returns null on error, not false.
+// Previously `if (!$data)` would reject valid JSON values like `0` or `false`.
+if ($data === null) {
     http_response_code(400);
     echo json_encode(['error' => 'Bad Request: Invalid JSON']);
     exit;
@@ -68,7 +70,7 @@ if (empty($action) || empty($quizid)) {
 }
 
 // 2. Extract Token and Device ID from HTTP Headers.
-$token = $_SERVER['HTTP_X_EWA_SECURE_TOKEN'] ?? '';
+$token    = $_SERVER['HTTP_X_EWA_SECURE_TOKEN'] ?? '';
 $deviceid = $_SERVER['HTTP_X_EWA_DEVICE_ID'] ?? '';
 
 if (empty($token) || empty($deviceid)) {
@@ -77,14 +79,19 @@ if (empty($token) || empty($deviceid)) {
     exit;
 }
 
-// Check session token validity.
 global $DB, $USER;
 
-// Fetch session record from database.
-$session = $DB->get_record('quizaccess_ewa_sessions', [
-    'token' => $token,
-    'quizid' => $quizid,
-]);
+// FIX (optimization): Fetch session + lockdown settings in one JOIN query to avoid
+// a second round-trip to the database for every heartbeat and verify_exit action.
+$session = $DB->get_record_sql(
+    'SELECT s.*, l.tokenexpiry AS quiz_tokenexpiry,
+            l.exitpassword AS quiz_exitpassword,
+            l.alloweddomains AS quiz_alloweddomains
+       FROM {quizaccess_ewa_sessions} s
+       LEFT JOIN {quizaccess_ewa_lockdown} l ON l.quizid = s.quizid
+      WHERE s.token = :token AND s.quizid = :quizid',
+    ['token' => $token, 'quizid' => $quizid]
+);
 
 if (!$session) {
     http_response_code(401);
@@ -104,7 +111,7 @@ if (time() > $session->timeexpires) {
 if (empty($session->deviceid)) {
     // Bind device ID on first API request.
     $session->deviceid = $deviceid;
-    $DB->update_record('quizaccess_ewa_sessions', $session);
+    $DB->set_field('quizaccess_ewa_sessions', 'deviceid', $deviceid, ['id' => $session->id]);
 } else if ($session->deviceid !== $deviceid) {
     violation_logger::log(
         $quizid,
@@ -118,40 +125,50 @@ if (empty($session->deviceid)) {
     exit;
 }
 
+// FIX: Validate that the session user actually exists and is not deleted.
+// Previously the code blindly set $USER without checking if the record was found.
+$sessionuser = $DB->get_record('user', ['id' => $session->userid, 'deleted' => 0]);
+if (!$sessionuser) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Unauthorized: Session user not found']);
+    exit;
+}
+
 // Set global USER to the session owner so Moodle logging works correctly.
-$USER = $DB->get_record('user', ['id' => $session->userid]);
+$USER = $sessionuser;
 
 // 3. Process Actions.
 switch ($action) {
     case 'heartbeat':
-        // Extend token expiry by 2 minutes on every successful heartbeat.
-        $session->timeexpires = time() + 120;
-        $DB->update_record('quizaccess_ewa_sessions', $session);
+        // FIX: Extend token expiry using the quiz-configured tokenexpiry value (from JOIN),
+        // not a hardcoded 120s. This prevents premature expiry on slow networks.
+        // Minimum floor of 300 seconds for safety.
+        $extend_by        = max(300, (int)($session->quiz_tokenexpiry ?? 300));
+        $session->timeexpires = time() + $extend_by;
+        $DB->set_field('quizaccess_ewa_sessions', 'timeexpires', $session->timeexpires, ['id' => $session->id]);
 
-        // Fetch allowed domains from settings
-        $settings = $DB->get_record('quizaccess_ewa_lockdown', ['quizid' => $quizid]);
+        // Parse allowed domains — already fetched via JOIN, no extra query needed.
         $allowed_domains = [];
-        if ($settings && !empty($settings->alloweddomains)) {
-            // Split by newline and clean values
-            $lines = explode("\n", str_replace("\r", "", $settings->alloweddomains));
+        if (!empty($session->quiz_alloweddomains)) {
+            $lines = explode("\n", str_replace("\r", "", $session->quiz_alloweddomains));
             foreach ($lines as $line) {
                 $cleaned = trim($line);
-                if (!empty($cleaned)) {
+                if ($cleaned !== '') {
                     $allowed_domains[] = $cleaned;
                 }
             }
         }
 
         echo json_encode([
-            'status' => 'acknowledged', 
-            'expires' => $session->timeexpires,
-            'allowed_domains' => $allowed_domains
+            'status'          => 'acknowledged',
+            'expires'         => $session->timeexpires,
+            'allowed_domains' => $allowed_domains,
         ]);
         break;
 
     case 'log_violation':
         $violationtype = $data['type'] ?? 'unknown_violation';
-        $details = $data['details'] ?? '';
+        $details       = $data['details'] ?? '';
 
         violation_logger::log(
             $quizid,
@@ -168,8 +185,8 @@ switch ($action) {
         $password = $data['password'] ?? '';
 
         // --- Rate Limiting: max 5 failed attempts per quiz+device within 5 minutes ---
-        $ratelimit_window = time() - 300; // 5 minutes ago
-        $failed_attempts = $DB->count_records_select(
+        $ratelimit_window = time() - 300;
+        $failed_attempts  = $DB->count_records_select(
             'quizaccess_ewa_violations',
             "quizid = :quizid AND deviceid = :deviceid AND violationtype = 'invalid_exit_password_attempt' AND timecreated > :window",
             ['quizid' => $quizid, 'deviceid' => $deviceid, 'window' => $ratelimit_window]
@@ -181,18 +198,18 @@ switch ($action) {
         }
         // -------------------------------------------------------------------------
 
-        // Fetch quiz lockdown settings.
-        $settings = $DB->get_record('quizaccess_ewa_lockdown', ['quizid' => $quizid]);
+        // Use settings already fetched by the JOIN — no second DB query needed.
+        $exitpasswordhash = $session->quiz_exitpassword ?? null;
 
-        if (!$settings || empty($settings->exitpassword)) {
-            // No exit password configured, allow exit by default.
-            echo json_encode(['status' => 'verified', 'info' => 'No exit password set']);
+        if (empty($exitpasswordhash)) {
+            // No exit password configured — allow exit by default.
             token_manager::revoke($quizid, $session->userid);
+            echo json_encode(['status' => 'verified', 'info' => 'No exit password set']);
             break;
         }
 
-        if (password_verify($password, $settings->exitpassword)) {
-            // Correct password - Revoke session and allow exit.
+        if (password_verify($password, $exitpasswordhash)) {
+            // Correct password — revoke session and allow exit.
             token_manager::revoke($quizid, $session->userid);
             echo json_encode(['status' => 'verified']);
         } else {
@@ -205,7 +222,10 @@ switch ($action) {
                 ['remaining_attempts' => max(0, 4 - $failed_attempts)]
             );
             http_response_code(401);
-            echo json_encode(['error' => 'Incorrect exit password', 'remaining_attempts' => max(0, 4 - $failed_attempts)]);
+            echo json_encode([
+                'error'              => 'Incorrect exit password',
+                'remaining_attempts' => max(0, 4 - $failed_attempts),
+            ]);
         }
         break;
 
