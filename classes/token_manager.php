@@ -127,14 +127,28 @@ class token_manager {
             return false;
         }
 
+        // Find the session record by token and quizid.
         $record = $DB->get_record('quizaccess_ewa_sessions', [
             'token'  => $token,
             'quizid' => $quizid,
-            'userid' => $userid,
         ]);
 
         if (!$record) {
             return false;
+        }
+
+        // If the token was not issued for this student, check if it was issued for a teacher/admin.
+        if ($record->userid !== $userid) {
+            $cm = get_coursemodule_from_instance('quiz', $quizid);
+            if (!$cm) {
+                return false;
+            }
+            $context = \context_module::instance($cm->id);
+            // Check if the token creator has teacher capabilities (mod/quiz:preview or mod/quiz:viewreports)
+            if (!has_capability('mod/quiz:preview', $context, $record->userid) &&
+                !has_capability('mod/quiz:viewreports', $context, $record->userid)) {
+                return false;
+            }
         }
 
         if (time() > $record->timeexpires) {

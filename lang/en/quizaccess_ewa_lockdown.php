@@ -43,6 +43,7 @@ $string['qrcode_alttext'] = 'QR code to launch this quiz in EWA Secure Browser';
 $string['downloadapp'] = 'Don\'t have the app yet? Download EWA Secure Browser from the Play Store.';
 $string['tokenerror'] = 'Your session token is invalid or has expired. Please re-scan the QR code with the EWA Secure Browser app.';
 $string['tokenexpired'] = 'Your secure session has expired. Please ask your supervisor to re-issue the QR code.';
+$string['requestfromteacher'] = 'Please ask your exam supervisor or teacher for the QR code to start the exam.';
 
 // Violation log strings.
 $string['violation_invalid_token'] = 'Invalid security token';

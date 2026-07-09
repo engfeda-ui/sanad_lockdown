@@ -185,6 +185,11 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
     public function prevent_new_attempt($numprevattempts, $lastattempt) {
         global $USER;
 
+        $context = $this->quizobj->get_context();
+        if (has_capability('mod/quiz:preview', $context)) {
+            return false; // Let teachers review/preview without constraints.
+        }
+
         if (!token_manager::is_ewa_browser_request()) {
             violation_logger::log(
                 $this->quiz->id,
@@ -222,6 +227,11 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
     public function is_preflight_check_required($attemptid) {
         global $USER;
 
+        $context = $this->quizobj->get_context();
+        if (has_capability('mod/quiz:preview', $context)) {
+            return false; // Teachers do not need preflight check.
+        }
+
         if (!token_manager::is_ewa_browser_request()) {
             return true;
         }
@@ -243,6 +253,24 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
     public function add_preflight_check_form_fields($quizform, \MoodleQuickForm $mform, $attemptid) {
         global $USER;
 
+        $context = $this->quizobj->get_context();
+        $isteacher = has_capability('mod/quiz:preview', $context) || has_capability('mod/quiz:viewreports', $context);
+
+        if (!$isteacher) {
+            // Students see a text instruction indicating they need the QR from the teacher
+            $html  = '<div class="ewa-lockdown-preflight">';
+            $html .= '<div class="alert alert-danger" role="alert">';
+            $html .= '<strong>' . get_string('accessdenied', 'quizaccess_ewa_lockdown') . '</strong> ';
+            $html .= get_string('mustuseewaapp', 'quizaccess_ewa_lockdown');
+            $html .= '</div>';
+            $html .= '<p class="font-weight-bold text-center text-primary" style="font-size:1.1em; margin: 15px 0;"><strong>' 
+                . get_string('requestfromteacher', 'quizaccess_ewa_lockdown') . '</strong></p>';
+            $html .= '</div>';
+
+            $mform->addElement('html', $html);
+            return;
+        }
+
         $quizid  = $this->quizobj->get_quizid();
         $cmid    = $this->quizobj->get_cmid();
         $expiry  = (int)($this->quiz->ewa_lockdown_tokenexpiry ?? 1800);
@@ -256,7 +284,7 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
             get_string('qrcode_alttext', 'quizaccess_ewa_lockdown')
         );
 
-        // Build the HTML to show in the preflight form.
+        // Build the HTML to show in the preflight form (visible for teachers).
         $html  = '<div class="ewa-lockdown-preflight">';
         $html .= '<div class="alert alert-warning" role="alert">';
         $html .= '<strong>' . get_string('accessdenied', 'quizaccess_ewa_lockdown') . '</strong> ';
@@ -314,6 +342,21 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
 
         $quizid  = $this->quizobj->get_quizid();
         $cmid    = $this->quizobj->get_cmid();
+        $context = $this->quizobj->get_context();
+
+        // Check if current user is a teacher/admin
+        $isteacher = has_capability('mod/quiz:preview', $context) || has_capability('mod/quiz:viewreports', $context);
+
+        if (!$isteacher) {
+            // Students see a text instruction indicating they need the QR from the teacher
+            $inner  = \html_writer::tag('p', \html_writer::tag('strong', get_string('accessdenied', 'quizaccess_ewa_lockdown')), ['class' => 'text-danger text-center']);
+            $inner .= \html_writer::tag('p', get_string('mustuseewaapp', 'quizaccess_ewa_lockdown'), ['class' => 'text-center']);
+            $inner .= \html_writer::tag('p', get_string('requestfromteacher', 'quizaccess_ewa_lockdown'), ['class' => 'font-weight-bold text-center text-primary', 'style' => 'font-size: 1.1em;']);
+            
+            return [\html_writer::div($inner, 'ewa-lockdown-description p-3 border rounded bg-light mb-3',
+                ['style' => 'max-width:500px;margin:0 auto'])];
+        }
+
         $expiry  = (int)($this->quiz->ewa_lockdown_tokenexpiry ?? 1800);
 
         // Issue a token (replaces any previous one for this user+quiz).
