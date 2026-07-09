@@ -97,6 +97,7 @@ $string['qrmodal_fullscreen']   = 'ملء الشاشة';
 
 // التحديث التلقائي.
 $string['next_refresh']         = 'التحديث التلقائي خلال {$a} ثانية';
+$string['close']                = 'إغلاق';
 
 // الوقت المنقضي.
 $string['ago_seconds']          = 'منذ {$a} ثانية';

@@ -97,6 +97,7 @@ $string['qrmodal_fullscreen']   = 'Full Screen';
 
 // Auto-refresh.
 $string['next_refresh']         = 'Auto-refresh in {$a}s';
+$string['close']                = 'Close';
 
 // Time-ago strings.
 $string['ago_seconds']          = '{$a}s ago';
