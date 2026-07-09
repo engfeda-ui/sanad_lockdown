@@ -163,7 +163,9 @@ function ewa_build_student_row(object $user, int $quizid, object $settings): arr
     // QR url for this student (only if active session exists and not expired).
     $qrurl = '';
     if ($status === 'active' && $session) {
-        $qrurl = token_manager::build_launch_url($quizid, 0, $session->token);
+        $cm = get_coursemodule_from_instance('quiz', $quizid);
+        $cmid_val = $cm ? (int)$cm->id : 0;
+        $qrurl = token_manager::build_launch_url($quizid, $cmid_val, $session->token);
     }
 
     // Check re-issued QR in session.
