@@ -128,7 +128,25 @@ switch ($action) {
         $session->timeexpires = time() + 120;
         $DB->update_record('quizaccess_ewa_sessions', $session);
 
-        echo json_encode(['status' => 'acknowledged', 'expires' => $session->timeexpires]);
+        // Fetch allowed domains from settings
+        $settings = $DB->get_record('quizaccess_ewa_lockdown', ['quizid' => $quizid]);
+        $allowed_domains = [];
+        if ($settings && !empty($settings->alloweddomains)) {
+            // Split by newline and clean values
+            $lines = explode("\n", str_replace("\r", "", $settings->alloweddomains));
+            foreach ($lines as $line) {
+                $cleaned = trim($line);
+                if (!empty($cleaned)) {
+                    $allowed_domains[] = $cleaned;
+                }
+            }
+        }
+
+        echo json_encode([
+            'status' => 'acknowledged', 
+            'expires' => $session->timeexpires,
+            'allowed_domains' => $allowed_domains
+        ]);
         break;
 
     case 'log_violation':

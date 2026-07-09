@@ -49,5 +49,17 @@ function xmldb_quizaccess_ewa_lockdown_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026070901, 'quizaccess', 'ewa_lockdown');
     }
 
+    // 2026070903: Add alloweddomains field to the quizaccess_ewa_lockdown table.
+    if ($oldversion < 2026070903) {
+        $table = new \xmldb_table('quizaccess_ewa_lockdown');
+        $field = new \xmldb_field('alloweddomains', XMLDB_TYPE_TEXT, null, null, null, null, null, 'exitpassword');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2026070903, 'quizaccess', 'ewa_lockdown');
+    }
+
     return true;
 }

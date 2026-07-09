@@ -105,6 +105,17 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
         $mform->setType('ewa_lockdown_exitpassword', PARAM_RAW);
         $mform->addHelpButton('ewa_lockdown_exitpassword', 'exitpassword', 'quizaccess_ewa_lockdown');
         $mform->hideIf('ewa_lockdown_exitpassword', 'ewa_lockdown_enabled', 'eq', 0);
+
+        // Allowed Whitelisted Domains / URLs.
+        $mform->addElement(
+            'textarea',
+            'ewa_lockdown_alloweddomains',
+            get_string('alloweddomains', 'quizaccess_ewa_lockdown'),
+            ['rows' => 4, 'cols' => 60, 'placeholder' => "backup-lms.ewa.edu.sa\ncdn.ewa.edu.sa"]
+        );
+        $mform->setType('ewa_lockdown_alloweddomains', PARAM_RAW);
+        $mform->addHelpButton('ewa_lockdown_alloweddomains', 'alloweddomains', 'quizaccess_ewa_lockdown');
+        $mform->hideIf('ewa_lockdown_alloweddomains', 'ewa_lockdown_enabled', 'eq', 0);
     }
 
     /**
@@ -115,9 +126,10 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
     public static function save_settings($quiz) {
         global $DB;
 
-        $enabled  = !empty($quiz->ewa_lockdown_enabled) ? 1 : 0;
-        $expiry   = isset($quiz->ewa_lockdown_tokenexpiry) ? (int)$quiz->ewa_lockdown_tokenexpiry : 1800;
-        $exitpass = isset($quiz->ewa_lockdown_exitpassword) ? trim($quiz->ewa_lockdown_exitpassword) : '';
+        $enabled        = !empty($quiz->ewa_lockdown_enabled) ? 1 : 0;
+        $expiry         = isset($quiz->ewa_lockdown_tokenexpiry) ? (int)$quiz->ewa_lockdown_tokenexpiry : 1800;
+        $exitpass       = isset($quiz->ewa_lockdown_exitpassword) ? trim($quiz->ewa_lockdown_exitpassword) : '';
+        $alloweddomains = isset($quiz->ewa_lockdown_alloweddomains) ? trim($quiz->ewa_lockdown_alloweddomains) : '';
 
         if (!$enabled) {
             $DB->delete_records('quizaccess_ewa_lockdown', ['quizid' => $quiz->id]);
@@ -129,19 +141,21 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
 
         $record = $DB->get_record('quizaccess_ewa_lockdown', ['quizid' => $quiz->id]);
         if ($record) {
-            $record->enabled      = $enabled;
-            $record->tokenexpiry  = $expiry;
-            $record->exitpassword = $hashed;
-            $record->timemodified = time();
+            $record->enabled        = $enabled;
+            $record->tokenexpiry    = $expiry;
+            $record->exitpassword   = $hashed;
+            $record->alloweddomains = $alloweddomains;
+            $record->timemodified   = time();
             $DB->update_record('quizaccess_ewa_lockdown', $record);
         } else {
             $record = new stdClass();
-            $record->quizid       = $quiz->id;
-            $record->enabled      = $enabled;
-            $record->tokenexpiry  = $expiry;
-            $record->exitpassword = $hashed;
-            $record->timecreated  = time();
-            $record->timemodified = time();
+            $record->quizid         = $quiz->id;
+            $record->enabled        = $enabled;
+            $record->tokenexpiry    = $expiry;
+            $record->exitpassword   = $hashed;
+            $record->alloweddomains = $alloweddomains;
+            $record->timecreated    = time();
+            $record->timemodified   = time();
             $DB->insert_record('quizaccess_ewa_lockdown', $record);
         }
     }
@@ -168,7 +182,8 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
         return [
             'ewald.enabled AS ewa_lockdown_enabled,'
             . ' ewald.tokenexpiry AS ewa_lockdown_tokenexpiry,'
-            . ' ewald.exitpassword AS ewa_lockdown_exitpassword',
+            . ' ewald.exitpassword AS ewa_lockdown_exitpassword,'
+            . ' ewald.alloweddomains AS ewa_lockdown_alloweddomains',
             'LEFT JOIN {quizaccess_ewa_lockdown} ewald ON ewald.quizid = quiz.id',
             [],
         ];

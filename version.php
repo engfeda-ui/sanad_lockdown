@@ -24,9 +24,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2026070902;
+$plugin->version   = 2026070903;
 $plugin->requires  = 2024100700; // Moodle 4.5 minimum.
 $plugin->supported = [405, 500]; // Moodle 4.5 – 5.0.
 $plugin->component = 'quizaccess_ewa_lockdown';
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = 'v1.1.0'; // Added: Teacher Live Monitor dashboard.
+$plugin->release   = 'v1.2.0'; // Added: Teacher monitoring + Whitelisted URLs.
