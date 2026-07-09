@@ -489,7 +489,7 @@ function ewa_qr_modal_html(): string {
         <i class="fa fa-expand mr-1"></i>' . get_string('qrmodal_fullscreen', 'quizaccess_ewa_lockdown') . '
       </button>
       <button type="button" id="ewa-qr-close-btn" class="btn btn-primary btn-sm">
-        ' . get_string('close', 'moodle') . '
+        ' . get_string('close', 'core') . '
       </button>
     </div>
   </div>
@@ -509,7 +509,7 @@ function ewa_violations_modal_html(): string {
       <div id="ewa-violations-content"></div>
     </div>
     <div class="ewa-modal-footer">
-      <button type="button" id="ewa-violations-close-btn" class="btn btn-secondary btn-sm">' . get_string('close', 'moodle') . '</button>
+      <button type="button" id="ewa-violations-close-btn" class="btn btn-secondary btn-sm">' . get_string('close', 'core') . '</button>
     </div>
   </div>
 </div>';
