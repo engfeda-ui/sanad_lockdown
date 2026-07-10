@@ -303,6 +303,8 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
             get_string('qrcode_alttext', 'quizaccess_ewa_lockdown')
         );
 
+        $shortcode = token_manager::get_short_code($token);
+
         // Build the HTML to show in the preflight form (visible for teachers).
         $html  = '<div class="ewa-lockdown-preflight">';
         $html .= '<div class="alert alert-warning" role="alert">';
@@ -311,6 +313,11 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
         $html .= '</div>';
         $html .= '<p>' . get_string('scanqrtostart', 'quizaccess_ewa_lockdown') . '</p>';
         $html .= '<div class="ewa-qrcode-wrapper text-center">' . $qrimg . '</div>';
+        if ($shortcode !== '') {
+            $html .= '<p class="text-center font-weight-bold my-3" style="font-size:1.15em;">';
+            $html .= get_string('shortcode', 'quizaccess_ewa_lockdown') . ': <span class="badge badge-secondary p-2">' . s($shortcode) . '</span>';
+            $html .= '</p>';
+        }
         $html .= '<p class="text-muted small">' . get_string('downloadapp', 'quizaccess_ewa_lockdown') . '</p>';
         $html .= '</div>';
 
@@ -399,11 +406,16 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
             ]
         );
 
+        $shortcode = token_manager::get_short_code($token);
+
         // Use html_writer::div so the content is treated as raw HTML (not escaped).
         // The quiz renderer wraps each description() item in <p> tags with html_writer
         // which escapes strings — returning an html_writer output bypasses that.
         $inner  = \html_writer::tag('p', \html_writer::tag('strong', get_string('scanqrtostart', 'quizaccess_ewa_lockdown')));
         $inner .= \html_writer::div($qrimg, 'ewa-qrcode-wrapper text-center mb-2');
+        if ($shortcode !== '') {
+            $inner .= \html_writer::tag('p', get_string('shortcode', 'quizaccess_ewa_lockdown') . ': ' . \html_writer::span(s($shortcode), 'badge badge-secondary p-2'), ['class' => 'text-center font-weight-bold my-2', 'style' => 'font-size:1.15em;']);
+        }
         $inner .= \html_writer::tag('p', get_string('downloadapp', 'quizaccess_ewa_lockdown'), ['class' => 'text-muted small text-center']);
         $inner .= \html_writer::div($monitorbtn, 'text-center mt-3');
 

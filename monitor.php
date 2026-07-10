@@ -436,9 +436,25 @@ function ewa_render_student_row(array $row, int $cmid, int $quizid, string $sess
     if ($qrurl || $reissued) {
         $targeturl = $reissued ?: $qrurl;
         $qrdata = qr_generator::get_data_uri($targeturl, 320);
+
+        // Get the short code for display.
+        $shortcode = '';
+        if ($session) {
+            $shortcode = token_manager::get_short_code($session->token);
+        } else if ($reissued) {
+            $urlparts = parse_url($reissued);
+            if (isset($urlparts['query'])) {
+                parse_str($urlparts['query'], $query);
+                if (isset($query['ewatoken'])) {
+                    $shortcode = token_manager::get_short_code($query['ewatoken']);
+                }
+            }
+        }
+
         $showqrbtn = '<button type="button" class="ewa-action-btn ewa-btn-info btn btn-sm ewa-show-qr ml-1"'
             . ' data-qrb64="' . htmlspecialchars($qrdata) . '"'
             . ' data-name="' . s(fullname($user)) . '"'
+            . ' data-shortcode="' . s($shortcode) . '"'
             . ' data-qrurl="' . s($targeturl) . '">'
             . '<i class="fa fa-eye"></i> ' . get_string('action_showqr', 'quizaccess_ewa_lockdown')
             . '</button>';
@@ -486,6 +502,7 @@ function ewa_qr_modal_html(): string {
         <img id="ewa-qr-img" src="" alt="QR Code" class="ewa-qr-img" />
         <div class="ewa-qr-scan-line"></div>
       </div>
+      <p id="ewa-qr-short-code" class="mt-2 text-center font-weight-bold" style="font-size: 1.25em;"></p>
       <p class="ewa-qr-hint mt-3">' . get_string('qrmodal_hint', 'quizaccess_ewa_lockdown') . '</p>
       <code id="ewa-qr-url-text" class="ewa-qr-url-text"></code>
     </div>

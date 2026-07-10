@@ -55,10 +55,11 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
     function bindStaticEvents() {
         // QR show buttons (delegated — rows may be re-rendered).
         $(document).on('click', '.ewa-show-qr', function() {
-            var qrdata = $(this).data('qrb64');
-            var name   = $(this).data('name');
-            var url    = $(this).data('qrurl');
-            openQrModal(name, qrdata, url);
+            var qrdata    = $(this).data('qrb64');
+            var name      = $(this).data('name');
+            var url       = $(this).data('qrurl');
+            var shortcode = $(this).data('shortcode');
+            openQrModal(name, qrdata, url, shortcode);
         });
 
         // Violation buttons (delegated).
@@ -225,11 +226,22 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
     }
 
     // ── QR Modal ──────────────────────────────────────────────────────────────
-    function openQrModal(name, imgSrc, url) {
+    function openQrModal(name, imgSrc, url, shortcode) {
         document.getElementById('ewa-qr-modal-title').textContent = 'QR Code — ' + name;
         document.getElementById('ewa-qr-student-name').textContent = name;
         document.getElementById('ewa-qr-img').src = imgSrc;
         document.getElementById('ewa-qr-url-text').textContent = url;
+        
+        var isArabic = $('html').attr('lang') === 'ar';
+        var shortCodeEl = document.getElementById('ewa-qr-short-code');
+        if (shortcode) {
+            shortCodeEl.innerHTML = (isArabic ? 'الكود المختصر: ' : 'Short Code: ')
+                + '<span class="badge badge-secondary p-2">' + escHtml(shortcode) + '</span>';
+            shortCodeEl.style.display = 'block';
+        } else {
+            shortCodeEl.style.display = 'none';
+        }
+
         var modal = document.getElementById('ewa-qr-modal');
         modal.removeAttribute('hidden');
         document.body.style.overflow = 'hidden';

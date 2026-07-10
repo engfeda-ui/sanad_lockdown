@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -61,28 +61,80 @@ if ($data === null) {
 }
 
 $action = $data['action'] ?? '';
-$quizid = isset($data['quizid']) ? (int)$data['quizid'] : 0;
 
-if (empty($action) || empty($quizid)) {
+if (empty($action)) {
     http_response_code(400);
-    echo json_encode(['error' => 'Bad Request: Missing parameters']);
+    echo json_encode(['error' => 'Bad Request: Missing action parameter']);
     exit;
 }
 
-// 2. Extract Token and Device ID from HTTP Headers.
-$token    = $_SERVER['HTTP_X_EWA_SECURE_TOKEN'] ?? '';
+// 2. Extract Device ID from HTTP Headers.
 $deviceid = $_SERVER['HTTP_X_EWA_DEVICE_ID'] ?? '';
-
-if (empty($token) || empty($deviceid)) {
+if (empty($deviceid)) {
     http_response_code(401);
-    echo json_encode(['error' => 'Unauthorized: Missing Security Headers']);
+    echo json_encode(['error' => 'Unauthorized: Missing Device ID Header']);
     exit;
 }
 
 global $DB, $USER;
 
-// FIX (optimization): Fetch session + lockdown settings in one JOIN query to avoid
-// a second round-trip to the database for every heartbeat and verify_exit action.
+// Fallback action resolve_code does not require quizid or secure token headers.
+if ($action === 'resolve_code') {
+    $code = trim($data['code'] ?? '');
+    if (empty($code)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Bad Request: Missing short code parameter']);
+        exit;
+    }
+
+    $session = token_manager::verify_short_code($code);
+    if (!$session) {
+        http_response_code(404);
+        echo json_encode(['error' => 'Invalid or expired access code']);
+        exit;
+    }
+
+    if (time() > $session->timeexpires) {
+        $DB->delete_records('quizaccess_ewa_sessions', ['id' => $session->id]);
+        http_response_code(410);
+        echo json_encode(['error' => 'Access code has expired']);
+        exit;
+    }
+
+    // Bind device ID on resolution.
+    if (empty($session->deviceid)) {
+        $session->deviceid = $deviceid;
+        $DB->set_field('quizaccess_ewa_sessions', 'deviceid', $deviceid, ['id' => $session->id]);
+    } else if ($session->deviceid !== $deviceid) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Forbidden: Device Mismatch']);
+        exit;
+    }
+
+    $cm = get_coursemodule_from_instance('quiz', $session->quizid);
+    $cmid = $cm ? (int)$cm->id : 0;
+    $launchurl = token_manager::build_launch_url($session->quizid, $cmid, $session->token);
+
+    echo json_encode([
+        'status'    => 'resolved',
+        'token'     => $session->token,
+        'quizid'    => (string)$session->quizid,
+        'start_url' => $launchurl
+    ]);
+    exit;
+}
+
+// For all other actions (heartbeat, log_violation, verify_exit):
+$quizid = isset($data['quizid']) ? (int)$data['quizid'] : 0;
+$token  = $_SERVER['HTTP_X_EWA_SECURE_TOKEN'] ?? '';
+
+if (empty($quizid) || empty($token)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Bad Request: Missing parameters or headers']);
+    exit;
+}
+
+// Fetch session + lockdown settings in one JOIN query
 $session = $DB->get_record_sql(
     'SELECT s.*, l.tokenexpiry AS quiz_tokenexpiry,
             l.exitpassword AS quiz_exitpassword,
@@ -125,8 +177,7 @@ if (empty($session->deviceid)) {
     exit;
 }
 
-// FIX: Validate that the session user actually exists and is not deleted.
-// Previously the code blindly set $USER without checking if the record was found.
+// Validate that the session user actually exists and is not deleted.
 $sessionuser = $DB->get_record('user', ['id' => $session->userid, 'deleted' => 0]);
 if (!$sessionuser) {
     http_response_code(401);

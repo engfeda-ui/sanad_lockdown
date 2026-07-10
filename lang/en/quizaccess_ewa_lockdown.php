@@ -46,6 +46,9 @@ $string['downloadapp'] = 'Don\'t have the app yet? Download EWA Secure Browser f
 $string['tokenerror'] = 'Your session token is invalid or has expired. Please re-scan the QR code with the EWA Secure Browser app.';
 $string['tokenexpired'] = 'Your secure session has expired. Please ask your supervisor to re-issue the QR code.';
 $string['requestfromteacher'] = 'Please ask your exam supervisor or teacher for the QR code to start the exam.';
+$string['shortcode'] = 'Short Code';
+$string['or_enter_shortcode'] = 'Or enter the short code if the camera fails';
+$string['serverurl'] = 'Moodle Server URL';
 
 // Violation log strings.
 $string['violation_invalid_token'] = 'Invalid security token';

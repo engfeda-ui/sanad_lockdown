@@ -255,6 +255,50 @@ class token_manager {
     }
 
     /**
+     * Get the short code for a given session token.
+     * Generates a secure, human-readable format like "ID-XXXX" (e.g. "125-A8C9").
+     *
+     * @param string $token The session token.
+     * @return string The short code, or empty string on failure.
+     */
+    public static function get_short_code(string $token): string {
+        global $DB;
+        $record = $DB->get_record('quizaccess_ewa_sessions', ['token' => $token], 'id');
+        if (!$record) {
+            return '';
+        }
+        $secret = self::get_site_secret();
+        $sig = substr(hash_hmac('sha256', $record->id, $secret), 0, 4);
+        return $record->id . '-' . strtoupper($sig);
+    }
+
+    /**
+     * Verify a short code and return the corresponding session record if valid.
+     *
+     * @param string $code The input short code (e.g. "125-A8C9" or "125a8c9").
+     * @return \stdClass|null The session record object, or null if invalid/expired.
+     */
+    public static function verify_short_code(string $code): ?\stdClass {
+        global $DB;
+        $parts = explode('-', $code);
+        if (count($parts) !== 2) {
+            return null;
+        }
+        $id = (int)$parts[0];
+        $sig = strtoupper(trim($parts[1]));
+
+        $secret = self::get_site_secret();
+        $expected_sig = strtoupper(substr(hash_hmac('sha256', $id, $secret), 0, 4));
+
+        if ($sig !== $expected_sig) {
+            return null;
+        }
+
+        $record = $DB->get_record('quizaccess_ewa_sessions', ['id' => $id]);
+        return $record ?: null;
+    }
+
+    /**
      * Return a site-specific HMAC secret derived from Moodle's password salt.
      *
      * @return string 32-byte secret.
