@@ -124,5 +124,3 @@ $string['privacy:metadata:quizaccess_ewa_violations:violationtype'] = 'The type 
 $string['privacy:metadata:quizaccess_ewa_violations:deviceid'] = 'The device fingerprint at time of violation.';
 $string['privacy:metadata:quizaccess_ewa_violations:details'] = 'Additional context about the violation.';
 $string['privacy:metadata:quizaccess_ewa_violations:timecreated'] = 'When the violation occurred.';
-
-
