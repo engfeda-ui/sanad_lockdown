@@ -87,8 +87,23 @@ if ($action === 'resolve_code') {
         exit;
     }
 
+    // --- Rate Limiting: max 5 failed attempts per device within 5 minutes ---
+    $ratelimit_window = time() - 300;
+    $failed_attempts  = $DB->count_records_select(
+        'quizaccess_ewa_violations',
+        "deviceid = :deviceid AND violationtype = 'failed_code_resolution' AND timecreated > :window",
+        ['deviceid' => $deviceid, 'window' => $ratelimit_window]
+    );
+    if ($failed_attempts >= 5) {
+        http_response_code(429);
+        echo json_encode(['error' => 'Too many failed code resolution attempts. Try again later.']);
+        exit;
+    }
+    // -------------------------------------------------------------------------
+
     $session = token_manager::verify_short_code($code);
     if (!$session) {
+        violation_logger::log(0, 0, 'failed_code_resolution', $deviceid, ['code' => $code]);
         http_response_code(404);
         echo json_encode(['error' => 'Invalid or expired access code']);
         exit;
