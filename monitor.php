@@ -149,9 +149,9 @@ function ewa_build_student_row(object $user, int $quizid, object $settings): arr
     );
     $violationcount = count($violations);
 
-    $mapped_violations = [];
+    $mappedviolations = [];
     foreach ($violations as $v) {
-        $mapped_violations[] = [
+        $mappedviolations[] = [
             'type'        => $v->violationtype,
             'time'        => $v->timecreated,
             'time_human'  => userdate($v->timecreated, get_string('strftimedatetimeshort', 'langconfig')),
@@ -164,8 +164,8 @@ function ewa_build_student_row(object $user, int $quizid, object $settings): arr
     $qrurl = '';
     if ($status === 'active' && $session) {
         $cm = get_coursemodule_from_instance('quiz', $quizid);
-        $cmid_val = $cm ? (int)$cm->id : 0;
-        $qrurl = token_manager::build_launch_url($quizid, $cmid_val, $session->token);
+        $cmidval = $cm ? (int)$cm->id : 0;
+        $qrurl = token_manager::build_launch_url($quizid, $cmidval, $session->token);
     }
 
     // Check re-issued QR in session.
@@ -183,7 +183,7 @@ function ewa_build_student_row(object $user, int $quizid, object $settings): arr
         'deviceid'       => $deviceid,
         'lastheartbeat'  => $lastheartbeat,
         'violationcount' => $violationcount,
-        'violations'     => $mapped_violations,
+        'violations'     => $mappedviolations,
         'qrurl'          => $qrurl,
         'reissuedurl'    => $reissuedurl,
     ];
@@ -294,7 +294,7 @@ echo html_writer::end_tag('thead');
 echo html_writer::start_tag('tbody', ['id' => 'ewa-student-rows']);
 
 foreach ($studentrows as $row) {
-    echo ewa_render_student_row($row, $cmid, $quiz->id, $sesskey);
+    echo ewa_render_student_row($row, $cmid, $sesskey);
 }
 
 echo html_writer::end_tag('tbody');
@@ -316,15 +316,30 @@ echo $OUTPUT->footer();
 // Helper render functions
 // ═══════════════════════════════════════════════════════════════════════════════
 
+/**
+ * Render a statistics card.
+ *
+ * @param int    $val   The statistics value.
+ * @param string $label The statistics label.
+ * @param string $cls   CSS class selector name.
+ * @param string $icon  FontAwesome icon class name.
+ * @return string HTML statistics card block.
+ */
 function ewa_stat_card(int $val, string $label, string $cls, string $icon): string {
     return html_writer::tag('div',
         html_writer::tag('div', '<i class="fa ' . $icon . '"></i>', ['class' => 'ewa-stat-icon'])
-        . html_writer::tag('div', $val,   ['class' => 'ewa-stat-number'])
+        . html_writer::tag('div', $val, ['class' => 'ewa-stat-number'])
         . html_writer::tag('div', $label, ['class' => 'ewa-stat-label']),
         ['class' => "ewa-stat-card $cls"]
     );
 }
 
+/**
+ * Render a status badge based on enrollment session status.
+ *
+ * @param string $status Current session status name.
+ * @return string HTML status badge element.
+ */
 function ewa_status_badge(string $status): string {
     $map = [
         'active'  => ['success', 'fa-check-circle',   get_string('status_active',  'quizaccess_ewa_lockdown')],
@@ -336,8 +351,16 @@ function ewa_status_badge(string $status): string {
          . '<i class="fa ' . $icon . ' mr-1"></i>' . $label . '</span>';
 }
 
-function ewa_render_student_row(array $row, int $cmid, int $quizid, string $sesskey): string {
-    global $OUTPUT;
+/**
+ * Render a student row.
+ *
+ * @param array  $row      Student row data.
+ * @param int    $cmid     Course module ID.
+ * @param string $sesskey  Session key.
+ * @return string HTML table row.
+ */
+function ewa_render_student_row(array $row, int $cmid, string $sesskey): string {
+    global $OUTPUT, $DB, $quiz;
     $user       = $row['user'];
     $status     = $row['status'];
     $expires    = $row['expires'];
@@ -346,30 +369,32 @@ function ewa_render_student_row(array $row, int $cmid, int $quizid, string $sess
     $violations = $row['violations'];
     $vcount     = $row['violationcount'];
     $qrurl      = $row['qrurl'];
+    $session    = $DB->get_record('quizaccess_ewa_sessions', ['quizid' => $quiz->id, 'userid' => $user->id]);
     $reissued   = $row['reissuedurl'];
 
     $now = time();
 
-    // ── Avatar + name ─────────────────────────────────────────────────────────
+    // Avatar + name.
     $userpic = $OUTPUT->user_picture($user, ['size' => 36, 'link' => false]);
     $namelink = html_writer::link(
         new moodle_url('/user/view.php', ['id' => $user->id]),
         fullname($user),
         ['class' => 'ewa-student-name', 'target' => '_blank']
     );
-    $td_student = html_writer::tag('td',
+    $tdstudent = html_writer::tag(
+        'td',
         html_writer::div($userpic . ' ' . $namelink, 'ewa-student-cell'),
         ['data-userid' => $user->id]
     );
 
-    // ── Status ───────────────────────────────────────────────────────────────
-    $td_status = html_writer::tag('td', ewa_status_badge($status), ['class' => 'ewa-td-status']);
+    // Status.
+    $tdstatus = html_writer::tag('td', ewa_status_badge($status), ['class' => 'ewa-td-status']);
 
-    // ── Device ID ────────────────────────────────────────────────────────────
+    // Device ID.
     $devshort = $deviceid ? '<code title="' . s($deviceid) . '">' . substr($deviceid, 0, 12) . '…</code>' : '<span class="text-muted">—</span>';
-    $td_device = html_writer::tag('td', $devshort);
+    $tddevice = html_writer::tag('td', $devshort);
 
-    // ── Last heartbeat ────────────────────────────────────────────────────────
+    // Last heartbeat.
     if ($hb) {
         $ago = $now - $hb;
         $hbcls = $ago > 120 ? 'text-danger' : 'text-success';
@@ -377,18 +402,18 @@ function ewa_render_student_row(array $row, int $cmid, int $quizid, string $sess
     } else {
         $hbtext = '<span class="text-muted">—</span>';
     }
-    $td_hb = html_writer::tag('td', $hbtext, ['class' => 'ewa-td-hb']);
+    $tdhb = html_writer::tag('td', $hbtext, ['class' => 'ewa-td-hb']);
 
-    // ── Expires ───────────────────────────────────────────────────────────────
+    // Expires.
     if ($expires) {
         $expcls = ($now > $expires) ? 'text-danger' : 'text-success';
         $exptxt = '<span class="' . $expcls . '">' . userdate($expires, '%H:%M:%S') . '</span>';
     } else {
         $exptxt = '<span class="text-muted">—</span>';
     }
-    $td_expires = html_writer::tag('td', $exptxt);
+    $tdexpires = html_writer::tag('td', $exptxt);
 
-    // ── Violations ───────────────────────────────────────────────────────────
+    // Violations.
     if ($vcount > 0) {
         $violdata = htmlspecialchars(json_encode($violations), ENT_QUOTES);
         $vcls = $vcount >= 3 ? 'ewa-badge ewa-badge-danger' : 'ewa-badge ewa-badge-warning';
@@ -402,21 +427,32 @@ function ewa_render_student_row(array $row, int $cmid, int $quizid, string $sess
     } else {
         $vbtn = '<span class="ewa-badge ewa-badge-success"><i class="fa fa-check mr-1"></i>0</span>';
     }
-    $td_violations = html_writer::tag('td', $vbtn, ['class' => 'ewa-td-violations']);
+    $tdviolations = html_writer::tag('td', $vbtn, ['class' => 'ewa-td-violations']);
 
-    // ── Actions ───────────────────────────────────────────────────────────────
+    // Actions.
     $monurl = new moodle_url('/mod/quiz/accessrule/ewa_lockdown/monitor.php', ['cmid' => $cmid]);
 
     // Revoke button (only if active).
     $revokebtm = '';
     if ($status === 'active') {
-        $revokeform = html_writer::start_tag('form', ['method' => 'post', 'action' => $monurl->out(false), 'class' => 'd-inline', 'onsubmit' => "return confirm('" . get_string('confirm_revoke', 'quizaccess_ewa_lockdown') . "')"])
+        $revokeform = html_writer::start_tag(
+            'form',
+            [
+                'method' => 'post',
+                'action' => $monurl->out(false),
+                'class' => 'd-inline',
+                'onsubmit' => "return confirm('" . get_string('confirm_revoke', 'quizaccess_ewa_lockdown') . "')",
+            ]
+        )
             . html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action',  'value' => 'revoke'])
             . html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'uid',     'value' => $user->id])
             . html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'cmid',    'value' => $cmid])
             . html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => $sesskey])
-            . html_writer::tag('button', '<i class="fa fa-ban"></i> ' . get_string('action_revoke', 'quizaccess_ewa_lockdown'),
-                ['type' => 'submit', 'class' => 'ewa-action-btn ewa-btn-danger btn btn-sm'])
+            . html_writer::tag(
+                'button',
+                '<i class="fa fa-ban"></i> ' . get_string('action_revoke', 'quizaccess_ewa_lockdown'),
+                ['type' => 'submit', 'class' => 'ewa-action-btn ewa-btn-danger btn btn-sm']
+            )
             . html_writer::end_tag('form');
         $revokebtm = $revokeform;
     }
@@ -465,18 +501,14 @@ function ewa_render_student_row(array $row, int $cmid, int $quizid, string $sess
         ['class' => 'ewa-td-actions']
     );
 
-    // ── Row class ─────────────────────────────────────────────────────────────
-    $rowcls = 'ewa-student-row ewa-row-' . $status;
-    if ($vcount >= 3) {
-        $rowcls .= ' ewa-row-alert';
-    }
 
-    return html_writer::tag('tr',
-        $td_student . $td_status . $td_device . $td_hb . $td_expires . $td_violations . $td_actions,
-        ['class' => $rowcls, 'data-userid' => $user->id]
-    );
-}
 
+/**
+ * Get human readable time ago string.
+ *
+ * @param int $seconds Time in seconds.
+ * @return string Time ago string.
+ */
 function ewa_human_time_ago(int $seconds): string {
     if ($seconds < 60) {
         return get_string('ago_seconds', 'quizaccess_ewa_lockdown', $seconds);
@@ -487,6 +519,11 @@ function ewa_human_time_ago(int $seconds): string {
     return get_string('ago_hours', 'quizaccess_ewa_lockdown', round($seconds / 3600, 1));
 }
 
+/**
+ * Return QR modal HTML template.
+ *
+ * @return string HTML contents.
+ */
 function ewa_qr_modal_html(): string {
     return '
 <div id="ewa-qr-modal" class="ewa-modal" role="dialog" aria-modal="true" aria-label="QR Code" hidden>
@@ -518,6 +555,11 @@ function ewa_qr_modal_html(): string {
 </div>';
 }
 
+/**
+ * Return violations modal HTML template.
+ *
+ * @return string HTML contents.
+ */
 function ewa_violations_modal_html(): string {
     return '
 <div id="ewa-violations-modal" class="ewa-modal" role="dialog" aria-modal="true" hidden>
@@ -537,6 +579,11 @@ function ewa_violations_modal_html(): string {
 </div>';
 }
 
+/**
+ * Return inline styles template.
+ *
+ * @return string CSS stylesheet tag.
+ */
 function ewa_inline_styles(): string {
     return <<<CSS
 <style>

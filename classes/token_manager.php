@@ -112,8 +112,8 @@ class token_manager {
 
         if (empty($token)) {
             global $DB;
-            // Last fallback: check if we already have an active, unexpired session for this student in DB
-            $session = $DB->get_record_select('quizaccess_ewa_sessions', 
+            $session = $DB->get_record_select(
+                'quizaccess_ewa_sessions',
                 'quizid = :quizid AND userid = :userid AND timeexpires > :now',
                 ['quizid' => $quizid, 'userid' => $userid, 'now' => time()],
                 'token',
@@ -163,9 +163,11 @@ class token_manager {
                 return false;
             }
             $context = \context_module::instance($cm->id);
-            // Check if the token creator has teacher capabilities (mod/quiz:preview or mod/quiz:viewreports)
-            if (!has_capability('mod/quiz:preview', $context, $record->userid) &&
-                !has_capability('mod/quiz:viewreports', $context, $record->userid)) {
+            // Check if the token creator has teacher capabilities (mod/quiz:preview or mod/quiz:viewreports).
+            if (
+                !has_capability('mod/quiz:preview', $context, $record->userid) &&
+                !has_capability('mod/quiz:viewreports', $context, $record->userid)
+            ) {
                 return false;
             }
         }
@@ -288,9 +290,9 @@ class token_manager {
         $sig = strtoupper(trim($parts[1]));
 
         $secret = self::get_site_secret();
-        $expected_sig = strtoupper(substr(hash_hmac('sha256', $id, $secret), 0, 4));
+        $expectedsig = strtoupper(substr(hash_hmac('sha256', $id, $secret), 0, 4));
 
-        if ($sig !== $expected_sig) {
+        if ($sig !== $expectedsig) {
             return null;
         }
 

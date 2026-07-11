@@ -1,4 +1,19 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * Admin Kiosk Control Panel and Device Manager.
  *
@@ -80,17 +95,17 @@ if (!empty($action) && confirm_sesskey()) {
     }
 }
 
-// 3. Retrieve Dashboard Stats & Lists
-$total_devices = $DB->count_records('quizaccess_ewa_devices');
-$active_devices = $DB->count_records_select('quizaccess_ewa_devices', 'status = 1 AND expirydate > :now', ['now' => time()]);
-$pending_devices = $DB->count_records('quizaccess_ewa_devices', ['status' => 0]);
-$active_exams = $DB->count_records_select('quizaccess_ewa_sessions', 'timeexpires > :now', ['now' => time()]);
+// 3. Retrieve Dashboard Stats & Lists.
+$totaldevices = $DB->count_records('quizaccess_ewa_devices');
+$activedevices = $DB->count_records_select('quizaccess_ewa_devices', 'status = 1 AND expirydate > :now', ['now' => time()]);
+$pendingdevices = $DB->count_records('quizaccess_ewa_devices', ['status' => 0]);
+$activeexams = $DB->count_records_select('quizaccess_ewa_sessions', 'timeexpires > :now', ['now' => time()]);
 
-// Get all devices
+// Get all devices.
 $devices = $DB->get_records('quizaccess_ewa_devices', null, 'timecreated DESC');
 
-// Get active exam sessions with details
-$sql_sessions = "
+// Get active exam sessions with details.
+$sqlsessions = "
     SELECT s.id, s.token, s.deviceid, s.timecreated, s.timeexpires,
            u.id AS userid, u.firstname, u.lastname, u.email,
            q.id AS quizid, q.name AS quizname
@@ -99,10 +114,10 @@ $sql_sessions = "
       JOIN {quiz} q ON q.id = s.quizid
      WHERE s.timeexpires > :now
   ORDER BY s.timecreated DESC";
-$active_sessions = $DB->get_records_sql($sql_sessions, ['now' => time()]);
+$activesessions = $DB->get_records_sql($sqlsessions, ['now' => time()]);
 
-// Get recent violations
-$sql_violations = "
+// Get recent violations.
+$sqlviolations = "
     SELECT v.id, v.violationtype, v.deviceid, v.timecreated, v.details,
            u.firstname, u.lastname, u.email,
            q.name AS quizname
@@ -111,7 +126,7 @@ $sql_violations = "
       JOIN {quiz} q ON q.id = v.quizid
   ORDER BY v.timecreated DESC
      LIMIT 10";
-$violations = $DB->get_records_sql($sql_violations);
+$violations = $DB->get_records_sql($sqlviolations);
 
 // Start rendering page.
 echo $OUTPUT->header();
@@ -425,19 +440,19 @@ echo $OUTPUT->header();
     <div class="ewa-metrics-grid">
         <div class="ewa-metric-card">
             <div class="ewa-metric-title">الأجهزة المسجلة</div>
-            <div class="ewa-metric-value"><?php echo $total_devices; ?></div>
+            <div class="ewa-metric-value"><?php echo $totaldevices; ?></div>
         </div>
         <div class="ewa-metric-card">
             <div class="ewa-metric-title">الرخص النشطة حالياً</div>
-            <div class="ewa-metric-value" style="color: #34d399;"><?php echo $active_devices; ?></div>
+            <div class="ewa-metric-value" style="color: #34d399;"><?php echo $activedevices; ?></div>
         </div>
         <div class="ewa-metric-card">
             <div class="ewa-metric-title">أجهزة بانتظار التفعيل</div>
-            <div class="ewa-metric-value" style="color: #fbbf24;"><?php echo $pending_devices; ?></div>
+            <div class="ewa-metric-value" style="color: #fbbf24;"><?php echo $pendingdevices; ?></div>
         </div>
         <div class="ewa-metric-card">
             <div class="ewa-metric-title">الطلاب في الامتحانات الآن</div>
-            <div class="ewa-metric-value" style="color: #22d3ee;"><?php echo $active_exams; ?></div>
+            <div class="ewa-metric-value" style="color: #22d3ee;"><?php echo $activeexams; ?></div>
         </div>
     </div>
 
@@ -473,28 +488,28 @@ echo $OUTPUT->header();
                             <?php else: ?>
                                 <?php foreach ($devices as $d): ?>
                                     <?php 
-                                        $formatted_id = implode('-', str_split($d->hardwareid, 4));
+                                        $formattedid = implode('-', str_split($d->hardwareid, 4));
                                         
-                                        // Expiration string
-                                        $expiry_str = 'غير محدد';
+                                        // Expiration string.
+                                        $expirystr = 'غير محدد';
                                         $expired = false;
                                         if ($d->expirydate > 0) {
-                                            $expiry_str = userdate($d->expirydate, '%d-%m-%Y');
+                                            $expirystr = userdate($d->expirydate, '%d-%m-%Y');
                                             if ($d->expirydate <= time()) {
                                                 $expired = true;
                                             }
                                         }
 
-                                        // Badge class
+                                        // Badge class.
                                         if ($d->status == 1) {
-                                            $badge_class = $expired ? 'suspended' : 'active';
-                                            $badge_label = $expired ? 'منتهية الصلاحية' : 'نشط';
+                                            $badgeclass = $expired ? 'suspended' : 'active';
+                                            $badgelabel = $expired ? 'منتهية الصلاحية' : 'نشط';
                                         } else if ($d->status == 2) {
-                                            $badge_class = 'suspended';
-                                            $badge_label = 'محظور';
+                                            $badgeclass = 'suspended';
+                                            $badgelabel = 'محظور';
                                         } else {
-                                            $badge_class = 'pending';
-                                            $badge_label = 'قيد الانتظار';
+                                            $badgeclass = 'pending';
+                                            $badgelabel = 'قيد الانتظار';
                                         }
                                     ?>
                                     <tr class="device-row">
@@ -502,13 +517,13 @@ echo $OUTPUT->header();
                                             <strong style="color: var(--dash-text);"><?php echo s($d->devicebrand); ?></strong><br>
                                             <span style="font-size: 12px; color: var(--dash-text-muted);"><?php echo s($d->devicemodel); ?></span>
                                         </td>
-                                        <td style="font-family: monospace; font-size: 15px; font-weight: 700; color: var(--dash-accent);"><?php echo $formatted_id; ?></td>
+                                        <td style="font-family: monospace; font-size: 15px; font-weight: 700; color: var(--dash-accent);"><?php echo $formattedid; ?></td>
                                         <td>
-                                            <span class="ewa-badge ewa-badge-<?php echo $badge_class; ?>"><?php echo $badge_label; ?></span>
+                                            <span class="ewa-badge ewa-badge-<?php echo $badgeclass; ?>"><?php echo $badgelabel; ?></span>
                                         </td>
                                         <td>
                                             <span style="<?php echo $expired ? 'color: var(--dash-danger); font-weight: 700;' : ''; ?>">
-                                                <?php echo $expiry_str; ?>
+                                                <?php echo $expirystr; ?>
                                             </span>
                                         </td>
                                         <td>
@@ -559,21 +574,21 @@ echo $OUTPUT->header();
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if (empty($active_sessions)): ?>
+                            <?php if (empty($activesessions)): ?>
                                 <tr>
                                     <td colspan="5" style="text-align: center; color: var(--dash-text-muted); padding: 20px;">لا يوجد أي طالب يؤدي امتحاناً في الوقت الحالي.</td>
                                 </tr>
                             <?php else: ?>
-                                <?php foreach ($active_sessions as $s): ?>
+                                <?php foreach ($activesessions as $s): ?>
                                     <?php 
-                                        $formatted_device = $s->deviceid ? implode('-', str_split($s->deviceid, 4)) : 'غير مسجل (قديم)';
+                                        $formatteddevice = $s->deviceid ? implode('-', str_split($s->deviceid, 4)) : 'غير مسجل (قديم)';
                                     ?>
                                     <tr>
                                         <td>
                                             <strong><?php echo s($s->firstname . ' ' . $s->lastname); ?></strong><br>
                                             <span style="font-size: 11px; color: var(--dash-text-muted);"><?php echo s($s->email); ?></span>
                                         </td>
-                                        <td style="font-family: monospace; font-size: 14px; font-weight: 700; color: var(--dash-accent);"><?php echo $formatted_device; ?></td>
+                                        <td style="font-family: monospace; font-size: 14px; font-weight: 700; color: var(--dash-accent);"><?php echo $formatteddevice; ?></td>
                                         <td><strong><?php echo s($s->quizname); ?></strong></td>
                                         <td><?php echo userdate($s->timecreated, '%H:%M:%S (%d-%m-%Y)'); ?></td>
                                         <td style="color: var(--dash-success); font-weight: 700;"><?php echo userdate($s->timeexpires, '%H:%M:%S'); ?></td>
@@ -603,9 +618,9 @@ echo $OUTPUT->header();
                         <select name="userid" required style="width: 100%;">
                             <option value="">-- اختر الطالب --</option>
                             <?php
-                                // Fetch all students (role student) or simply all active users (since they are only students on this site)
-                                $all_students = $DB->get_records_select('user', 'id > 2 AND suspended = 0 AND deleted = 0', [], 'firstname ASC', 'id,firstname,lastname,email');
-                                foreach ($all_students as $student) {
+                                // Fetch all students (role student) or simply all active users (since they are only students on this site).
+                                $allstudents = $DB->get_records_select('user', 'id > 2 AND suspended = 0 AND deleted = 0', [], 'firstname ASC', 'id,firstname,lastname,email');
+                                foreach ($allstudents as $student) {
                                     echo "<option value=\"{$student->id}\">{$student->firstname} {$student->lastname} ({$student->email})</option>";
                                 }
                             ?>
@@ -630,17 +645,21 @@ echo $OUTPUT->header();
                     <?php else: ?>
                         <?php foreach ($violations as $v): ?>
                             <?php 
-                                $violation_ar = 'محاولة خروج / فقدان تركيز';
-                                if ($v->violationtype === 'invalid_token') $violation_ar = 'توكن غير صالح';
-                                if ($v->violationtype === 'wrong_browser') $violation_ar = 'دخول بمتصفح غير آمن';
+                                $violationar = 'محاولة خروج / فقدان تركيز';
+                                if ($v->violationtype === 'invalid_token') {
+                                    $violationar = 'توكن غير صالح';
+                                }
+                                if ($v->violationtype === 'wrong_browser') {
+                                    $violationar = 'دخول بمتصفح غير آمن';
+                                }
                                 
-                                $formatted_time = userdate($v->timecreated, '%H:%M:%S (%d-%m-%Y)');
+                                $formattedtime = userdate($v->timecreated, '%H:%M:%S (%d-%m-%Y)');
                             ?>
                             <div style="border-right: 3px solid var(--dash-danger); padding-right: 10px; background-color: rgba(239, 68, 68, 0.05); padding: 8px; border-radius: 4px;">
-                                <strong style="color: var(--dash-danger); font-size: 13px;"><?php echo $violation_ar; ?></strong><br>
+                                <strong style="color: var(--dash-danger); font-size: 13px;"><?php echo $violationar; ?></strong><br>
                                 <span style="font-size: 12px; font-weight: 700;">البيانات: <?php echo s($v->firstname . ' ' . $v->lastname); ?></span><br>
                                 <span style="font-size: 11px; color: var(--dash-text-muted);">الاختبار: <?php echo s($v->quizname); ?></span><br>
-                                <span style="font-size: 11px; color: var(--dash-text-muted);">التوقيت: <?php echo $formatted_time; ?></span>
+                                <span style="font-size: 11px; color: var(--dash-text-muted);">التوقيت: <?php echo $formattedtime; ?></span>
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>

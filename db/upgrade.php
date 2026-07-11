@@ -76,10 +76,10 @@ function xmldb_quizaccess_ewa_lockdown_upgrade($oldversion) {
         $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
 
         // Adding keys to table quizaccess_ewa_devices.
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
 
         // Adding indexes to table quizaccess_ewa_devices.
-        $table->add_index('hardwareid_idx', XMLDB_INDEX_UNIQUE, array('hardwareid'));
+        $table->add_index('hardwareid_idx', XMLDB_INDEX_UNIQUE, ['hardwareid']);
 
         // Conditionally launch create table for quizaccess_ewa_devices.
         if (!$dbman->table_exists($table)) {

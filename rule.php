@@ -282,7 +282,7 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
             $html .= '<strong>' . get_string('accessdenied', 'quizaccess_ewa_lockdown') . '</strong> ';
             $html .= get_string('mustuseewaapp', 'quizaccess_ewa_lockdown');
             $html .= '</div>';
-            $html .= '<p class="font-weight-bold text-center text-primary" style="font-size:1.1em; margin: 15px 0;"><strong>' 
+            $html .= '<p class="font-weight-bold text-center text-primary" style="font-size:1.1em; margin: 15px 0;"><strong>'
                 . get_string('requestfromteacher', 'quizaccess_ewa_lockdown') . '</strong></p>';
             $html .= '</div>';
 
@@ -377,10 +377,19 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
             // Students see a text instruction indicating they need the QR from the teacher
             $inner  = \html_writer::tag('p', \html_writer::tag('strong', get_string('accessdenied', 'quizaccess_ewa_lockdown')), ['class' => 'text-danger text-center']);
             $inner .= \html_writer::tag('p', get_string('mustuseewaapp', 'quizaccess_ewa_lockdown'), ['class' => 'text-center']);
-            $inner .= \html_writer::tag('p', get_string('requestfromteacher', 'quizaccess_ewa_lockdown'), ['class' => 'font-weight-bold text-center text-primary', 'style' => 'font-size: 1.1em;']);
-            
-            return [\html_writer::div($inner, 'ewa-lockdown-description p-3 border rounded bg-light mb-3',
-                ['style' => 'max-width:500px;margin:0 auto'])];
+            $inner .= \html_writer::tag(
+                'p',
+                get_string('requestfromteacher', 'quizaccess_ewa_lockdown'),
+                ['class' => 'font-weight-bold text-center text-primary', 'style' => 'font-size: 1.1em;']
+            );
+
+            return [
+                \html_writer::div(
+                    $inner,
+                    'ewa-lockdown-description p-3 border rounded bg-light mb-3',
+                    ['style' => 'max-width:500px;margin:0 auto']
+                ),
+            ];
         }
 
         $expiry  = (int)($this->quiz->ewa_lockdown_tokenexpiry ?? 1800);
@@ -414,12 +423,26 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
         $inner  = \html_writer::tag('p', \html_writer::tag('strong', get_string('scanqrtostart', 'quizaccess_ewa_lockdown')));
         $inner .= \html_writer::div($qrimg, 'ewa-qrcode-wrapper text-center mb-2');
         if ($shortcode !== '') {
-            $inner .= \html_writer::tag('p', get_string('shortcode', 'quizaccess_ewa_lockdown') . ': ' . \html_writer::span(s($shortcode), 'badge badge-secondary p-2'), ['class' => 'text-center font-weight-bold my-2', 'style' => 'font-size:1.15em;']);
+            $inner .= \html_writer::tag(
+                'p',
+                get_string('shortcode', 'quizaccess_ewa_lockdown') . ': ' .
+                    \html_writer::span(s($shortcode), 'badge badge-secondary p-2'),
+                ['class' => 'text-center font-weight-bold my-2', 'style' => 'font-size:1.15em;']
+            );
         }
-        $inner .= \html_writer::tag('p', get_string('downloadapp', 'quizaccess_ewa_lockdown'), ['class' => 'text-muted small text-center']);
+        $inner .= \html_writer::tag(
+            'p',
+            get_string('downloadapp', 'quizaccess_ewa_lockdown'),
+            ['class' => 'text-muted small text-center']
+        );
         $inner .= \html_writer::div($monitorbtn, 'text-center mt-3');
 
-        return [\html_writer::div($inner, 'ewa-lockdown-description text-center p-3 border rounded bg-light mb-3',
-            ['style' => 'max-width:500px;margin:0 auto'])];
+        return [
+            \html_writer::div(
+                $inner,
+                'ewa-lockdown-description text-center p-3 border rounded bg-light mb-3',
+                ['style' => 'max-width:500px;margin:0 auto']
+            ),
+        ];
     }
 }

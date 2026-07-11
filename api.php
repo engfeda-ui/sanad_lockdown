@@ -87,19 +87,18 @@ if ($action === 'resolve_code') {
         exit;
     }
 
-    // --- Rate Limiting: max 5 failed attempts per device within 5 minutes ---
-    $ratelimit_window = time() - 300;
-    $failed_attempts  = $DB->count_records_select(
+    // Rate limiting: max 5 failed attempts per device within 5 minutes.
+    $ratelimitwindow = time() - 300;
+    $failedattempts  = $DB->count_records_select(
         'quizaccess_ewa_violations',
         "deviceid = :deviceid AND violationtype = 'failed_code_resolution' AND timecreated > :window",
-        ['deviceid' => $deviceid, 'window' => $ratelimit_window]
+        ['deviceid' => $deviceid, 'window' => $ratelimitwindow]
     );
-    if ($failed_attempts >= 5) {
+    if ($failedattempts >= 5) {
         http_response_code(429);
         echo json_encode(['error' => 'Too many failed code resolution attempts. Try again later.']);
         exit;
     }
-    // -------------------------------------------------------------------------
 
     $session = token_manager::verify_short_code($code);
     if (!$session) {
@@ -134,7 +133,7 @@ if ($action === 'resolve_code') {
         'status'    => 'resolved',
         'token'     => $session->token,
         'quizid'    => (string)$session->quizid,
-        'start_url' => $launchurl
+        'start_url' => $launchurl,
     ]);
     exit;
 }
@@ -183,7 +182,7 @@ if ($action === 'check_license') {
     echo json_encode([
         'status' => $statusstr,
         'hardware_id' => $hardwareid,
-        'expiry_date' => (int)$device->expirydate
+        'expiry_date' => (int)$device->expirydate,
     ]);
     exit;
 }
@@ -255,21 +254,20 @@ $USER = $sessionuser;
 // 3. Process Actions.
 switch ($action) {
     case 'heartbeat':
-        // FIX: Extend token expiry using the quiz-configured tokenexpiry value (from JOIN),
-        // not a hardcoded 120s. This prevents premature expiry on slow networks.
+        // Extend token expiry using the quiz-configured tokenexpiry value.
         // Minimum floor of 300 seconds for safety.
-        $extend_by        = max(300, (int)($session->quiz_tokenexpiry ?? 300));
-        $session->timeexpires = time() + $extend_by;
+        $extendby = max(300, (int)($session->quiz_tokenexpiry ?? 300));
+        $session->timeexpires = time() + $extendby;
         $DB->set_field('quizaccess_ewa_sessions', 'timeexpires', $session->timeexpires, ['id' => $session->id]);
 
         // Parse allowed domains — already fetched via JOIN, no extra query needed.
-        $allowed_domains = [];
+        $alloweddomains = [];
         if (!empty($session->quiz_alloweddomains)) {
             $lines = explode("\n", str_replace("\r", "", $session->quiz_alloweddomains));
             foreach ($lines as $line) {
                 $cleaned = trim($line);
                 if ($cleaned !== '') {
-                    $allowed_domains[] = $cleaned;
+                    $alloweddomains[] = $cleaned;
                 }
             }
         }
@@ -277,7 +275,7 @@ switch ($action) {
         echo json_encode([
             'status'          => 'acknowledged',
             'expires'         => $session->timeexpires,
-            'allowed_domains' => $allowed_domains,
+            'allowed_domains' => $alloweddomains,
         ]);
         break;
 
@@ -299,19 +297,18 @@ switch ($action) {
     case 'verify_exit':
         $password = $data['password'] ?? '';
 
-        // --- Rate Limiting: max 5 failed attempts per quiz+device within 5 minutes ---
-        $ratelimit_window = time() - 300;
-        $failed_attempts  = $DB->count_records_select(
+        // Rate limiting: max 5 failed attempts per quiz and device within 5 minutes.
+        $ratelimitwindow = time() - 300;
+        $failedattempts  = $DB->count_records_select(
             'quizaccess_ewa_violations',
             "quizid = :quizid AND deviceid = :deviceid AND violationtype = 'invalid_exit_password_attempt' AND timecreated > :window",
-            ['quizid' => $quizid, 'deviceid' => $deviceid, 'window' => $ratelimit_window]
+            ['quizid' => $quizid, 'deviceid' => $deviceid, 'window' => $ratelimitwindow]
         );
-        if ($failed_attempts >= 5) {
+        if ($failedattempts >= 5) {
             http_response_code(429);
             echo json_encode(['error' => 'Too many attempts. Try again later.']);
             break;
         }
-        // -------------------------------------------------------------------------
 
         // Use settings already fetched by the JOIN — no second DB query needed.
         $exitpasswordhash = $session->quiz_exitpassword ?? null;
@@ -334,12 +331,12 @@ switch ($action) {
                 $session->userid,
                 'invalid_exit_password_attempt',
                 $deviceid,
-                ['remaining_attempts' => max(0, 4 - $failed_attempts)]
+                ['remaining_attempts' => max(0, 4 - $failedattempts)]
             );
             http_response_code(401);
             echo json_encode([
                 'error'              => 'Incorrect exit password',
-                'remaining_attempts' => max(0, 4 - $failed_attempts),
+                'remaining_attempts' => max(0, 4 - $failedattempts),
             ]);
         }
         break;
