@@ -62,5 +62,24 @@
         <INDEX NAME="quiz_user_time_idx" UNIQUE="false" FIELDS="quizid, userid, timecreated"/>
       </INDEXES>
     </TABLE>
+
+    <TABLE NAME="quizaccess_ewa_devices" COMMENT="Stores EWA Kiosk registered devices and their license status">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="hardwareid" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="Unique hardware ID / fingerprint of the device."/>
+        <FIELD NAME="devicemodel" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Tablet device model name."/>
+        <FIELD NAME="devicebrand" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="Tablet device brand."/>
+        <FIELD NAME="status" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="0 = Pending, 1 = Active, 2 = Suspended."/>
+        <FIELD NAME="expirydate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Unix timestamp for license expiration."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="hardwareid_idx" UNIQUE="true" FIELDS="hardwareid"/>
+      </INDEXES>
+    </TABLE>
   </TABLES>
 </XMLDB>

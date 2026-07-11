@@ -124,6 +124,55 @@ if ($action === 'resolve_code') {
     exit;
 }
 
+if ($action === 'check_license') {
+    $hardwareid = trim($data['hardware_id'] ?? '');
+    $devicemodel = trim($data['device_model'] ?? '');
+    $devicebrand = trim($data['device_brand'] ?? '');
+
+    if (empty($hardwareid)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Bad Request: Missing hardware_id parameter']);
+        exit;
+    }
+
+    // Standardize hardware ID to uppercase and remove spaces/dashes
+    $hardwareid = strtoupper(str_replace([' ', '-'], '', $hardwareid));
+
+    // Try to find the device
+    $device = $DB->get_record('quizaccess_ewa_devices', ['hardwareid' => $hardwareid]);
+
+    if (!$device) {
+        // Register the device automatically in a pending state
+        $device = new stdClass();
+        $device->hardwareid = $hardwareid;
+        $device->devicemodel = $devicemodel;
+        $device->devicebrand = $devicebrand;
+        $device->status = 0; // 0 = Pending
+        $device->expirydate = 0;
+        $device->timecreated = time();
+        $device->timemodified = time();
+        $device->id = $DB->insert_record('quizaccess_ewa_devices', $device);
+    }
+
+    $statusstr = 'pending';
+    if ($device->status == 1) {
+        if ($device->expirydate > time()) {
+            $statusstr = 'active';
+        } else {
+            $statusstr = 'expired';
+        }
+    } else if ($device->status == 2) {
+        $statusstr = 'suspended';
+    }
+
+    echo json_encode([
+        'status' => $statusstr,
+        'hardware_id' => $hardwareid,
+        'expiry_date' => (int)$device->expirydate
+    ]);
+    exit;
+}
+
 // For all other actions (heartbeat, log_violation, verify_exit):
 $quizid = isset($data['quizid']) ? (int)$data['quizid'] : 0;
 $token  = $_SERVER['HTTP_X_EWA_SECURE_TOKEN'] ?? '';

@@ -61,5 +61,33 @@ function xmldb_quizaccess_ewa_lockdown_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026070903, 'quizaccess', 'ewa_lockdown');
     }
 
+    // 2026071100: Add quizaccess_ewa_devices table.
+    if ($oldversion < 2026071100) {
+        $table = new \xmldb_table('quizaccess_ewa_devices');
+
+        // Adding fields to table quizaccess_ewa_devices.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('hardwareid', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('devicemodel', XMLDB_TYPE_CHAR, '100', null, null, null, null);
+        $table->add_field('devicebrand', XMLDB_TYPE_CHAR, '100', null, null, null, null);
+        $table->add_field('status', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('expirydate', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+        $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
+
+        // Adding keys to table quizaccess_ewa_devices.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+
+        // Adding indexes to table quizaccess_ewa_devices.
+        $table->add_index('hardwareid_idx', XMLDB_INDEX_UNIQUE, array('hardwareid'));
+
+        // Conditionally launch create table for quizaccess_ewa_devices.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2026071100, 'quizaccess', 'ewa_lockdown');
+    }
+
     return true;
 }
