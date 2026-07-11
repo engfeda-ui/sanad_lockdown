@@ -496,10 +496,24 @@ function ewa_render_student_row(array $row, int $cmid, string $sesskey): string 
             . '</button>';
     }
 
-    $td_actions = html_writer::tag('td',
+    $tdactions = html_writer::tag(
+        'td',
         html_writer::div($reissueform . $revokebtm . $showqrbtn, 'ewa-actions-cell'),
         ['class' => 'ewa-td-actions']
     );
+
+    // Row class.
+    $rowcls = 'ewa-student-row ewa-row-' . $status;
+    if ($vcount >= 3) {
+        $rowcls .= ' ewa-row-alert';
+    }
+
+    return html_writer::tag(
+        'tr',
+        $tdstudent . $tdstatus . $tddevice . $tdhb . $tdexpires . $tdviolations . $tdactions,
+        ['class' => $rowcls, 'data-userid' => $user->id]
+    );
+}
 
 
 
