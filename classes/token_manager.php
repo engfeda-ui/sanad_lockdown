@@ -157,7 +157,7 @@ class token_manager {
         }
 
         // If the token was not issued for this student, check if it was issued for a teacher/admin.
-        if ($record->userid !== $userid) {
+        if ((int) $record->userid !== (int) $userid) {
             $cm = get_coursemodule_from_instance('quiz', $quizid);
             if (!$cm) {
                 return false;
