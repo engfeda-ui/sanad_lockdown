@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -79,8 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($action)) {
         token_manager::revoke($quiz->id, $uid);
         $notifymsg  = get_string('session_revoked', 'quizaccess_ewa_lockdown');
         $notifytype = \core\output\notification::NOTIFY_SUCCESS;
-
-    } else if ($action === 'reissue' && $uid > 0) {
+    } elseif ($action === 'reissue' && $uid > 0) {
         // Re-issue a QR token for this student.
         $expiry  = (int)$settings->tokenexpiry;
         $newtoken = token_manager::issue($quiz->id, $uid, '', $expiry);
@@ -96,8 +96,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($action)) {
     }
 
     if (!$ajax) {
-        redirect(new moodle_url('/mod/quiz/accessrule/ewa_lockdown/monitor.php', ['cmid' => $cmid]),
-            $notifymsg ?? '', null, $notifytype ?? \core\output\notification::NOTIFY_INFO);
+        redirect(
+            new moodle_url('/mod/quiz/accessrule/ewa_lockdown/monitor.php', ['cmid' => $cmid]),
+            $notifymsg ?? '',
+            null,
+            $notifytype ?? \core\output\notification::NOTIFY_INFO
+        );
     }
 }
 
@@ -106,7 +110,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($action)) {
 /**
  * Return all enrolled students in this quiz's course.
  */
-function ewa_get_enrolled_students(int $courseid, context_module $context): array {
+function ewa_get_enrolled_students(int $courseid, context_module $context): array
+{
     $users = get_enrolled_users($context, 'mod/quiz:attempt', 0, 'u.id, u.firstname, u.lastname, u.email, u.picture', 'u.lastname ASC');
     return $users ?: [];
 }
@@ -114,7 +119,8 @@ function ewa_get_enrolled_students(int $courseid, context_module $context): arra
 /**
  * Build the monitoring data row for a single student.
  */
-function ewa_build_student_row(object $user, int $quizid, object $settings): array {
+function ewa_build_student_row(object $user, int $quizid, object $settings): array
+{
     global $DB;
 
     $now     = time();
@@ -126,7 +132,7 @@ function ewa_build_student_row(object $user, int $quizid, object $settings): arr
         $expires   = null;
         $deviceid  = '';
         $lastheartbeat = null;
-    } else if ($now > $session->timeexpires) {
+    } elseif ($now > $session->timeexpires) {
         $status    = 'expired';
         $expires   = $session->timeexpires;
         $deviceid  = $session->deviceid ?? '';
@@ -170,8 +176,10 @@ function ewa_build_student_row(object $user, int $quizid, object $settings): arr
 
     // Check re-issued QR in session.
     $reissuedurl = '';
-    if (isset($_SESSION['ewa_reissue_uid']) && $_SESSION['ewa_reissue_uid'] == $user->id
-        && isset($_SESSION['ewa_reissue_quiz']) && $_SESSION['ewa_reissue_quiz'] == $quizid) {
+    if (
+        isset($_SESSION['ewa_reissue_uid']) && $_SESSION['ewa_reissue_uid'] == $user->id
+        && isset($_SESSION['ewa_reissue_quiz']) && $_SESSION['ewa_reissue_quiz'] == $quizid
+    ) {
         $reissuedurl = $_SESSION['ewa_reissue_url'] ?? '';
         unset($_SESSION['ewa_reissue_url'], $_SESSION['ewa_reissue_uid'], $_SESSION['ewa_reissue_quiz']);
     }
@@ -245,33 +253,40 @@ echo $OUTPUT->header();
 
 // ── Breadcrumb / Back link ────────────────────────────────────────────────────
 $quizviewurl = new moodle_url('/mod/quiz/view.php', ['id' => $cmid]);
-echo html_writer::tag('div',
-    html_writer::link($quizviewurl, '← ' . get_string('backto', 'moodle', format_string($quiz->name)),
-        ['class' => 'btn btn-sm btn-outline-secondary mb-3']),
+echo html_writer::tag(
+    'div',
+    html_writer::link(
+        $quizviewurl,
+        '← ' . get_string('backto', 'moodle', format_string($quiz->name)),
+        ['class' => 'btn btn-sm btn-outline-secondary mb-3']
+    ),
     ['class' => 'ewa-monitor-back']
 );
 
 // ── Page title ────────────────────────────────────────────────────────────────
-echo html_writer::tag('h2',
+echo html_writer::tag(
+    'h2',
     '<i class="fa fa-desktop mr-2"></i>' . get_string('monitor_title', 'quizaccess_ewa_lockdown'),
     ['class' => 'ewa-monitor-h2']
 );
-echo html_writer::tag('p',
+echo html_writer::tag(
+    'p',
     format_string($quiz->name),
     ['class' => 'text-muted mb-4']
 );
 
 // ── Stats bar ─────────────────────────────────────────────────────────────────
 echo html_writer::start_div('ewa-stats-bar mb-4');
-echo ewa_stat_card(count($students),   get_string('total_students',     'quizaccess_ewa_lockdown'), 'ewa-stat-total', 'fa-users');
-echo ewa_stat_card($activecnt,         get_string('stat_active',        'quizaccess_ewa_lockdown'), 'ewa-stat-active', 'fa-shield');
-echo ewa_stat_card($waitingcnt,        get_string('stat_waiting',       'quizaccess_ewa_lockdown'), 'ewa-stat-waiting', 'fa-clock-o');
-echo ewa_stat_card($expiredcnt,        get_string('stat_expired',       'quizaccess_ewa_lockdown'), 'ewa-stat-expired', 'fa-times-circle');
-echo ewa_stat_card($totalviolations,   get_string('stat_violations',    'quizaccess_ewa_lockdown'), 'ewa-stat-violations', 'fa-exclamation-triangle');
+echo ewa_stat_card(count($students), get_string('total_students', 'quizaccess_ewa_lockdown'), 'ewa-stat-total', 'fa-users');
+echo ewa_stat_card($activecnt, get_string('stat_active', 'quizaccess_ewa_lockdown'), 'ewa-stat-active', 'fa-shield');
+echo ewa_stat_card($waitingcnt, get_string('stat_waiting', 'quizaccess_ewa_lockdown'), 'ewa-stat-waiting', 'fa-clock-o');
+echo ewa_stat_card($expiredcnt, get_string('stat_expired', 'quizaccess_ewa_lockdown'), 'ewa-stat-expired', 'fa-times-circle');
+echo ewa_stat_card($totalviolations, get_string('stat_violations', 'quizaccess_ewa_lockdown'), 'ewa-stat-violations', 'fa-exclamation-triangle');
 echo html_writer::end_div();
 
 // ── Auto-refresh notice ───────────────────────────────────────────────────────
-echo html_writer::tag('div',
+echo html_writer::tag(
+    'div',
     '<i class="fa fa-refresh fa-spin mr-1" id="ewa-refresh-icon"></i>'
     . '<span id="ewa-refresh-countdown">' . get_string('next_refresh', 'quizaccess_ewa_lockdown', 30) . '</span>',
     ['class' => 'ewa-refresh-bar mb-3', 'id' => 'ewa-refresh-bar']
@@ -282,13 +297,13 @@ echo html_writer::start_div('ewa-monitor-table-wrap');
 echo html_writer::start_tag('table', ['class' => 'ewa-monitor-table table table-hover', 'id' => 'ewa-monitor-table']);
 echo html_writer::start_tag('thead');
 echo html_writer::start_tag('tr');
-echo html_writer::tag('th', get_string('student',      'quizaccess_ewa_lockdown'));
-echo html_writer::tag('th', get_string('col_status',   'quizaccess_ewa_lockdown'));
-echo html_writer::tag('th', get_string('col_device',   'quizaccess_ewa_lockdown'));
-echo html_writer::tag('th', get_string('col_heartbeat','quizaccess_ewa_lockdown'));
-echo html_writer::tag('th', get_string('col_expires',  'quizaccess_ewa_lockdown'));
-echo html_writer::tag('th', get_string('col_violations','quizaccess_ewa_lockdown'));
-echo html_writer::tag('th', get_string('col_actions',  'quizaccess_ewa_lockdown'));
+echo html_writer::tag('th', get_string('student', 'quizaccess_ewa_lockdown'));
+echo html_writer::tag('th', get_string('col_status', 'quizaccess_ewa_lockdown'));
+echo html_writer::tag('th', get_string('col_device', 'quizaccess_ewa_lockdown'));
+echo html_writer::tag('th', get_string('col_heartbeat', 'quizaccess_ewa_lockdown'));
+echo html_writer::tag('th', get_string('col_expires', 'quizaccess_ewa_lockdown'));
+echo html_writer::tag('th', get_string('col_violations', 'quizaccess_ewa_lockdown'));
+echo html_writer::tag('th', get_string('col_actions', 'quizaccess_ewa_lockdown'));
 echo html_writer::end_tag('tr');
 echo html_writer::end_tag('thead');
 echo html_writer::start_tag('tbody', ['id' => 'ewa-student-rows']);
@@ -325,8 +340,10 @@ echo $OUTPUT->footer();
  * @param string $icon  FontAwesome icon class name.
  * @return string HTML statistics card block.
  */
-function ewa_stat_card(int $val, string $label, string $cls, string $icon): string {
-    return html_writer::tag('div',
+function ewa_stat_card(int $val, string $label, string $cls, string $icon): string
+{
+    return html_writer::tag(
+        'div',
         html_writer::tag('div', '<i class="fa ' . $icon . '"></i>', ['class' => 'ewa-stat-icon'])
         . html_writer::tag('div', $val, ['class' => 'ewa-stat-number'])
         . html_writer::tag('div', $label, ['class' => 'ewa-stat-label']),
@@ -340,9 +357,10 @@ function ewa_stat_card(int $val, string $label, string $cls, string $icon): stri
  * @param string $status Current session status name.
  * @return string HTML status badge element.
  */
-function ewa_status_badge(string $status): string {
+function ewa_status_badge(string $status): string
+{
     $map = [
-        'active'  => ['success', 'fa-check-circle',   get_string('status_active',  'quizaccess_ewa_lockdown')],
+        'active'  => ['success', 'fa-check-circle',   get_string('status_active', 'quizaccess_ewa_lockdown')],
         'waiting' => ['warning', 'fa-hourglass-half', get_string('status_waiting', 'quizaccess_ewa_lockdown')],
         'expired' => ['danger',  'fa-times-circle',   get_string('status_expired', 'quizaccess_ewa_lockdown')],
     ];
@@ -359,7 +377,8 @@ function ewa_status_badge(string $status): string {
  * @param string $sesskey  Session key.
  * @return string HTML table row.
  */
-function ewa_render_student_row(array $row, int $cmid, string $sesskey): string {
+function ewa_render_student_row(array $row, int $cmid, string $sesskey): string
+{
     global $OUTPUT, $DB, $quiz;
     $user       = $row['user'];
     $status     = $row['status'];
@@ -463,8 +482,11 @@ function ewa_render_student_row(array $row, int $cmid, string $sesskey): string 
         . html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'uid',     'value' => $user->id])
         . html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'cmid',    'value' => $cmid])
         . html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => $sesskey])
-        . html_writer::tag('button', '<i class="fa fa-qrcode"></i> ' . get_string('action_reissue', 'quizaccess_ewa_lockdown'),
-            ['type' => 'submit', 'class' => 'ewa-action-btn ewa-btn-primary btn btn-sm'])
+        . html_writer::tag(
+            'button',
+            '<i class="fa fa-qrcode"></i> ' . get_string('action_reissue', 'quizaccess_ewa_lockdown'),
+            ['type' => 'submit', 'class' => 'ewa-action-btn ewa-btn-primary btn btn-sm']
+        )
         . html_writer::end_tag('form');
 
     // Show QR button (only if active session exists and QR url available).
@@ -477,7 +499,7 @@ function ewa_render_student_row(array $row, int $cmid, string $sesskey): string 
         $shortcode = '';
         if ($session) {
             $shortcode = token_manager::get_short_code($session->token);
-        } else if ($reissued) {
+        } elseif ($reissued) {
             $urlparts = parse_url($reissued);
             if (isset($urlparts['query'])) {
                 parse_str($urlparts['query'], $query);
@@ -523,7 +545,8 @@ function ewa_render_student_row(array $row, int $cmid, string $sesskey): string 
  * @param int $seconds Time in seconds.
  * @return string Time ago string.
  */
-function ewa_human_time_ago(int $seconds): string {
+function ewa_human_time_ago(int $seconds): string
+{
     if ($seconds < 60) {
         return get_string('ago_seconds', 'quizaccess_ewa_lockdown', $seconds);
     }
@@ -538,7 +561,8 @@ function ewa_human_time_ago(int $seconds): string {
  *
  * @return string HTML contents.
  */
-function ewa_qr_modal_html(): string {
+function ewa_qr_modal_html(): string
+{
     return '
 <div id="ewa-qr-modal" class="ewa-modal" role="dialog" aria-modal="true" aria-label="QR Code" hidden>
   <div class="ewa-modal-backdrop"></div>
@@ -574,7 +598,8 @@ function ewa_qr_modal_html(): string {
  *
  * @return string HTML contents.
  */
-function ewa_violations_modal_html(): string {
+function ewa_violations_modal_html(): string
+{
     return '
 <div id="ewa-violations-modal" class="ewa-modal" role="dialog" aria-modal="true" hidden>
   <div class="ewa-modal-backdrop"></div>
@@ -598,7 +623,8 @@ function ewa_violations_modal_html(): string {
  *
  * @return string CSS stylesheet tag.
  */
-function ewa_inline_styles(): string {
+function ewa_inline_styles(): string
+{
     return <<<CSS
 <style>
 /* ─── EWA Monitor Dashboard ─────────────────────────────────── */

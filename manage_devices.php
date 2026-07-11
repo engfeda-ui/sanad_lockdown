@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -54,17 +55,17 @@ if (!empty($action) && confirm_sesskey()) {
             $device->timemodified = time();
             $DB->update_record('quizaccess_ewa_devices', $device);
             $msg = "تم تفعيل الجهاز {$device->hardwareid} بنجاح لمدة عام!";
-        } else if ($action === 'block') {
+        } elseif ($action === 'block') {
             $device = $DB->get_record('quizaccess_ewa_devices', ['id' => $id], '*', MUST_EXIST);
             $device->status = 2; // Suspended
             $device->timemodified = time();
             $DB->update_record('quizaccess_ewa_devices', $device);
             $msg = "تم حظر وتجميد ترخيص الجهاز {$device->hardwareid} بنجاح.";
-        } else if ($action === 'delete') {
+        } elseif ($action === 'delete') {
             $device = $DB->get_record('quizaccess_ewa_devices', ['id' => $id], '*', MUST_EXIST);
             $DB->delete_records('quizaccess_ewa_devices', ['id' => $id]);
             $msg = "تم حذف الجهاز {$device->hardwareid} نهائياً من النظام.";
-        } else if ($action === 'extend') {
+        } elseif ($action === 'extend') {
             $days = required_param('days', PARAM_INT);
             $device = $DB->get_record('quizaccess_ewa_devices', ['id' => $id], '*', MUST_EXIST);
             $device->expirydate = time() + ($days * 86400);
@@ -72,19 +73,19 @@ if (!empty($action) && confirm_sesskey()) {
             $device->timemodified = time();
             $DB->update_record('quizaccess_ewa_devices', $device);
             $msg = "تم تمديد ترخيص الجهاز {$device->hardwareid} إلى {$days} يوماً.";
-        } else if ($action === 'resetpass') {
+        } elseif ($action === 'resetpass') {
             $userid = required_param('userid', PARAM_INT);
             $newpassword = required_param('newpassword', PARAM_RAW);
             if (strlen($newpassword) < 6) {
                 throw new moodle_exception('errorpasswordlength', 'quizaccess_ewa_lockdown', '', null, 'يجب ألا تقل كلمة المرور عن 6 خانات.');
             }
             $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
-            
+
             // Set password
             $user->password = password_hash($newpassword, PASSWORD_DEFAULT);
             $user->timemodified = time();
             $DB->update_record('user', $user);
-            
+
             // Clear cache and log user out of active web sessions to force re-auth
             \core_user::update_user($user);
             $msg = "تم بنجاح تغيير كلمة مرور الطالب ({$user->firstname} {$user->lastname}) إلى الكلمة الجديدة.";
@@ -429,7 +430,7 @@ echo $OUTPUT->header();
     <div class="ewa-title">🔑 لوحة تفعيل الأجهزة ومراقبة الاختبارات (Kiosk Admin)</div>
 
     <!-- Notifications Alert -->
-    <?php if (!empty($msg)): ?>
+    <?php if (!empty($msg)) : ?>
         <div class="ewa-alert ewa-alert-<?php echo $msgtype; ?>">
             <span><?php echo ($msgtype === 'success' ? '✅' : '❌'); ?></span>
             <span><?php echo s($msg); ?></span>
@@ -481,36 +482,36 @@ echo $OUTPUT->header();
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if (empty($devices)): ?>
+                            <?php if (empty($devices)) : ?>
                                 <tr>
                                     <td colspan="5" style="text-align: center; color: var(--dash-text-muted);">لا توجد أجهزة مسجلة في قاعدة البيانات بعد. قم بتشغيل التطبيق على التابلت ليتم تسجيله تلقائياً.</td>
                                 </tr>
-                            <?php else: ?>
-                                <?php foreach ($devices as $d): ?>
-                                    <?php 
+                            <?php else : ?>
+                                <?php foreach ($devices as $d) : ?>
+                                    <?php
                                         $formattedid = implode('-', str_split($d->hardwareid, 4));
-                                        
+
                                         // Expiration string.
                                         $expirystr = 'غير محدد';
                                         $expired = false;
-                                        if ($d->expirydate > 0) {
-                                            $expirystr = userdate($d->expirydate, '%d-%m-%Y');
-                                            if ($d->expirydate <= time()) {
-                                                $expired = true;
-                                            }
+                                    if ($d->expirydate > 0) {
+                                        $expirystr = userdate($d->expirydate, '%d-%m-%Y');
+                                        if ($d->expirydate <= time()) {
+                                            $expired = true;
                                         }
+                                    }
 
                                         // Badge class.
-                                        if ($d->status == 1) {
-                                            $badgeclass = $expired ? 'suspended' : 'active';
-                                            $badgelabel = $expired ? 'منتهية الصلاحية' : 'نشط';
-                                        } else if ($d->status == 2) {
-                                            $badgeclass = 'suspended';
-                                            $badgelabel = 'محظور';
-                                        } else {
-                                            $badgeclass = 'pending';
-                                            $badgelabel = 'قيد الانتظار';
-                                        }
+                                    if ($d->status == 1) {
+                                        $badgeclass = $expired ? 'suspended' : 'active';
+                                        $badgelabel = $expired ? 'منتهية الصلاحية' : 'نشط';
+                                    } elseif ($d->status == 2) {
+                                        $badgeclass = 'suspended';
+                                        $badgelabel = 'محظور';
+                                    } else {
+                                        $badgeclass = 'pending';
+                                        $badgelabel = 'قيد الانتظار';
+                                    }
                                     ?>
                                     <tr class="device-row">
                                         <td>
@@ -527,15 +528,15 @@ echo $OUTPUT->header();
                                             </span>
                                         </td>
                                         <td>
-                                            <?php if ($d->status == 0 || $expired): ?>
+                                            <?php if ($d->status == 0 || $expired) : ?>
                                                 <a href="?action=approve&id=<?php echo $d->id; ?>&sesskey=<?php echo sesskey(); ?>" class="ewa-btn ewa-btn-success">تفعيل الرخصه</a>
                                             <?php endif; ?>
 
-                                            <?php if ($d->status == 1 && !$expired): ?>
+                                            <?php if ($d->status == 1 && !$expired) : ?>
                                                 <a href="?action=block&id=<?php echo $d->id; ?>&sesskey=<?php echo sesskey(); ?>" class="ewa-btn ewa-btn-warning">تعطيل وحظر</a>
                                             <?php endif; ?>
 
-                                            <?php if ($d->status == 2): ?>
+                                            <?php if ($d->status == 2) : ?>
                                                 <a href="?action=approve&id=<?php echo $d->id; ?>&sesskey=<?php echo sesskey(); ?>" class="ewa-btn ewa-btn-success">إلغاء الحظر</a>
                                             <?php endif; ?>
 
@@ -574,13 +575,13 @@ echo $OUTPUT->header();
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if (empty($activesessions)): ?>
+                            <?php if (empty($activesessions)) : ?>
                                 <tr>
                                     <td colspan="5" style="text-align: center; color: var(--dash-text-muted); padding: 20px;">لا يوجد أي طالب يؤدي امتحاناً في الوقت الحالي.</td>
                                 </tr>
-                            <?php else: ?>
-                                <?php foreach ($activesessions as $s): ?>
-                                    <?php 
+                            <?php else : ?>
+                                <?php foreach ($activesessions as $s) : ?>
+                                    <?php
                                         $formatteddevice = $s->deviceid ? implode('-', str_split($s->deviceid, 4)) : 'غير مسجل (قديم)';
                                     ?>
                                     <tr>
@@ -620,9 +621,9 @@ echo $OUTPUT->header();
                             <?php
                                 // Fetch all students (role student) or simply all active users (since they are only students on this site).
                                 $allstudents = $DB->get_records_select('user', 'id > 2 AND suspended = 0 AND deleted = 0', [], 'firstname ASC', 'id,firstname,lastname,email');
-                                foreach ($allstudents as $student) {
-                                    echo "<option value=\"{$student->id}\">{$student->firstname} {$student->lastname} ({$student->email})</option>";
-                                }
+                            foreach ($allstudents as $student) {
+                                echo "<option value=\"{$student->id}\">{$student->firstname} {$student->lastname} ({$student->email})</option>";
+                            }
                             ?>
                         </select>
                     </div>
@@ -640,19 +641,19 @@ echo $OUTPUT->header();
             <div class="ewa-card">
                 <div class="ewa-card-title" style="color: var(--dash-danger);">🚨 سجل الخروقات والانتهاكات الأمنية الأخيرة</div>
                 <div style="display: flex; flex-direction: column; gap: 12px; max-height: 400px; overflow-y: auto;">
-                    <?php if (empty($violations)): ?>
+                    <?php if (empty($violations)) : ?>
                         <div style="text-align: center; color: var(--dash-text-muted); font-size: 13px;">لم يتم تسجيل أي خروقات أمنية مؤخراً. ممتاز!</div>
-                    <?php else: ?>
-                        <?php foreach ($violations as $v): ?>
-                            <?php 
+                    <?php else : ?>
+                        <?php foreach ($violations as $v) : ?>
+                            <?php
                                 $violationar = 'محاولة خروج / فقدان تركيز';
-                                if ($v->violationtype === 'invalid_token') {
-                                    $violationar = 'توكن غير صالح';
-                                }
-                                if ($v->violationtype === 'wrong_browser') {
-                                    $violationar = 'دخول بمتصفح غير آمن';
-                                }
-                                
+                            if ($v->violationtype === 'invalid_token') {
+                                $violationar = 'توكن غير صالح';
+                            }
+                            if ($v->violationtype === 'wrong_browser') {
+                                $violationar = 'دخول بمتصفح غير آمن';
+                            }
+
                                 $formattedtime = userdate($v->timecreated, '%H:%M:%S (%d-%m-%Y)');
                             ?>
                             <div style="border-right: 3px solid var(--dash-danger); padding-right: 10px; background-color: rgba(239, 68, 68, 0.05); padding: 8px; border-radius: 4px;">
