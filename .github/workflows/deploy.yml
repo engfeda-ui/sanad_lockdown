@@ -28,19 +28,4 @@ jobs:
         run: |
           rsync -avz --no-perms --no-owner --no-group --delete --exclude '.git*' ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/ubuntu/moodle-project/mod/quiz/accessrule/sanad_lockdown/
 
-      - name: Delete Old ewa_lockdown Folder from Server
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
-            # Path 1: local staging workspace
-            chmod -R u+w /home/ubuntu/moodle-project/mod/quiz/accessrule/ewa_lockdown 2>/dev/null || true
-            rm -rf /home/ubuntu/moodle-project/mod/quiz/accessrule/ewa_lockdown
-            
-            # Path 2: Apache web root directory (grant write permission first, then delete)
-            chmod -R u+w /var/www/html/mod/quiz/accessrule/ewa_lockdown 2>/dev/null || true
-            rm -rf /var/www/html/mod/quiz/accessrule/ewa_lockdown
-            
-            # Fallback with non-interactive sudo if needed
-            sudo -n rm -rf /var/www/html/mod/quiz/accessrule/ewa_lockdown || true
-            
-            echo 'Successfully cleared old folder.'
-          "
+
