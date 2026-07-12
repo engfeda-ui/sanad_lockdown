@@ -243,7 +243,7 @@ class token_manager {
 
         // Fallback: check User-Agent string (reliable across all GET/POST requests inside the WebView).
         $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
-        if (strpos($ua, 'EwaSecureBrowser') !== false) {
+        if (strpos($ua, 'SanadSecureBrowser') !== false) {
             return true;
         }
 

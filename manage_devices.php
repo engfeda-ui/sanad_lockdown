@@ -630,7 +630,7 @@ echo $OUTPUT->header();
 
                     <div style="display: flex; flex-direction: column; gap: 5px;">
                         <label style="font-size: 12px; font-weight: 700; color: var(--dash-text-muted);">2. اكتب كلمة المرور الجديدة:</label>
-                        <input type="text" name="newpassword" value="EwaStudent@2026" placeholder="اكتب كلمة السر هنا" required>
+                        <input type="text" name="newpassword" value="SanadStudent@2026" placeholder="اكتب كلمة السر هنا" required>
                     </div>
 
                     <button type="submit" class="sanad-btn sanad-btn-success" style="width: 100%; justify-content: center; height: 45px; font-size: 14px;">🔄 حفظ وتغيير كلمة المرور فوراً</button>
