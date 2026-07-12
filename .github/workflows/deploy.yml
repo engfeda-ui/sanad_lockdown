@@ -28,33 +28,12 @@ jobs:
         run: |
           rsync -avz --no-perms --no-owner --no-group --delete --exclude '.git*' ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/ubuntu/moodle-project/mod/quiz/accessrule/sanad_lockdown/
 
-      - name: Create Temporary Uninstall Placeholder for Old Plugin
+      - name: Delete Old ewa_lockdown Folder from Server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
             OLD_PATH='/home/ubuntu/moodle-project/mod/quiz/accessrule/ewa_lockdown'
-            NEW_PATH='/home/ubuntu/moodle-project/mod/quiz/accessrule/sanad_lockdown'
-            
-            # Clean and recreate old folder structure
-            rm -rf \$OLD_PATH
-            mkdir -p \$OLD_PATH/db
-            
-            # Copy version.php and replace 'sanad' with 'ewa'
-            if [ -f \$NEW_PATH/version.php ]; then
-              sed 's/sanad/ewa/g' \$NEW_PATH/version.php > \$OLD_PATH/version.php
+            if [ -d \$OLD_PATH ]; then
+              rm -rf \$OLD_PATH
+              echo 'Deleted old ewa_lockdown folder successfully'
             fi
-            
-            # Copy db/install.xml and replace 'sanad' with 'ewa'
-            if [ -f \$NEW_PATH/db/install.xml ]; then
-              sed 's/sanad/ewa/g' \$NEW_PATH/db/install.xml > \$OLD_PATH/db/install.xml
-            fi
-            
-            # Copy lang folder if exists to avoid missing string errors
-            if [ -d \$NEW_PATH/lang ]; then
-              mkdir -p \$OLD_PATH/lang/en
-              mkdir -p \$OLD_PATH/lang/ar
-              sed 's/sanad/ewa/g' \$NEW_PATH/lang/en/quizaccess_sanad_lockdown.php > \$OLD_PATH/lang/en/quizaccess_ewa_lockdown.php 2>/dev/null || true
-              sed 's/sanad/ewa/g' \$NEW_PATH/lang/ar/quizaccess_sanad_lockdown.php > \$OLD_PATH/lang/ar/quizaccess_ewa_lockdown.php 2>/dev/null || true
-            fi
-            
-            echo 'Created old plugin placeholder for clean uninstall'
           "
