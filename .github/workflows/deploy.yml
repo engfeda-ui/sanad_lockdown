@@ -30,7 +30,7 @@ jobs:
 
       - name: Delete Old ewa_lockdown Folder from Server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+          ssh -tt -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
             # Path 1: local staging workspace
             rm -rf /home/ubuntu/moodle-project/mod/quiz/accessrule/ewa_lockdown
             
