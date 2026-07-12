@@ -56,7 +56,7 @@ $string['violation_wrong_browser'] = 'Attempt from non-EWA browser';
 $string['violation_focus_lost'] = 'App lost focus during exam';
 $string['violation_expired_token'] = 'Expired security token';
 
-// ── Monitoring Dashboard ──────────────────────────────────────────────────────
+// Live monitor dashboard.
 $string['plugindisabled']       = 'EWA Lockdown is not enabled for this quiz.';
 $string['monitor_title']        = 'EWA Secure Browser — Live Monitor';
 $string['monitor_link']         = 'EWA Live Monitor';

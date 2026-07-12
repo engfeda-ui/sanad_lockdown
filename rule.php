@@ -276,7 +276,7 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
         $isteacher = has_capability('mod/quiz:preview', $context) || has_capability('mod/quiz:viewreports', $context);
 
         if (!$isteacher) {
-            // Students see a text instruction indicating they need the QR from the teacher
+            // Students see a text instruction indicating they need the QR from the teacher.
             $html  = '<div class="ewa-lockdown-preflight">';
             $html .= '<div class="alert alert-danger" role="alert">';
             $html .= '<strong>' . get_string('accessdenied', 'quizaccess_ewa_lockdown') . '</strong> ';
@@ -315,7 +315,8 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
         $html .= '<div class="ewa-qrcode-wrapper text-center">' . $qrimg . '</div>';
         if ($shortcode !== '') {
             $html .= '<p class="text-center font-weight-bold my-3" style="font-size:1.15em;">';
-            $html .= get_string('shortcode', 'quizaccess_ewa_lockdown') . ': <span class="badge badge-secondary p-2">' . s($shortcode) . '</span>';
+            $html .= get_string('shortcode', 'quizaccess_ewa_lockdown') . ': '
+                . '<span class="badge badge-secondary p-2">' . s($shortcode) . '</span>';
             $html .= '</p>';
         }
         $html .= '<p class="text-muted small">' . get_string('downloadapp', 'quizaccess_ewa_lockdown') . '</p>';
@@ -370,12 +371,16 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
         $cmid    = $this->quizobj->get_cmid();
         $context = $this->quizobj->get_context();
 
-        // Check if current user is a teacher/admin
+        // Check if current user is a teacher/admin.
         $isteacher = has_capability('mod/quiz:preview', $context) || has_capability('mod/quiz:viewreports', $context);
 
         if (!$isteacher) {
-            // Students see a text instruction indicating they need the QR from the teacher
-            $inner  = \html_writer::tag('p', \html_writer::tag('strong', get_string('accessdenied', 'quizaccess_ewa_lockdown')), ['class' => 'text-danger text-center']);
+            // Students see a text instruction indicating they need the QR from the teacher.
+            $inner  = \html_writer::tag(
+                'p',
+                \html_writer::tag('strong', get_string('accessdenied', 'quizaccess_ewa_lockdown')),
+                ['class' => 'text-danger text-center']
+            );
             $inner .= \html_writer::tag('p', get_string('mustuseewaapp', 'quizaccess_ewa_lockdown'), ['class' => 'text-center']);
             $inner .= \html_writer::tag(
                 'p',

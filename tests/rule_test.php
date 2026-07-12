@@ -97,7 +97,7 @@ class rule_test extends \advanced_testcase {
 
         $cm = get_coursemodule_from_instance('quiz', $quizid);
         $context = \context_module::instance($cm->id);
-        
+
         $roleid = $DB->get_field('role', 'id', ['shortname' => 'editingteacher']);
         $this->getDataGenerator()->enrol_user($teacher->id, $course->id, $roleid);
         assign_capability('mod/quiz:preview', CAP_ALLOW, $roleid, $context->id);
@@ -105,7 +105,7 @@ class rule_test extends \advanced_testcase {
         $teachertoken = token_manager::issue($quizid, $teacher->id, '', 1800);
 
         $_SERVER['HTTP_X_EWA_DEVICE_ID'] = 'student-device-999';
-        
+
         $this->assertTrue(token_manager::validate($quizid, $student->id, $teachertoken));
 
         $studentsession = $DB->get_record('quizaccess_ewa_sessions', [

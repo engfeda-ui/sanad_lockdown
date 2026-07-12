@@ -106,7 +106,7 @@ class token_manager {
         // 2. Extract token from header or fallback to query parameter or active DB session
         $token = $_SERVER[self::HEADER_TOKEN] ?? '';
         if (empty($token)) {
-            // Fallback for page loads/POSTs where custom headers are lost: read from URL query parameters
+            // Fallback for page loads/POSTs where custom headers are lost: read from URL query parameters.
             $token = optional_param('ewatoken', '', PARAM_RAW);
         }
 
@@ -235,13 +235,13 @@ class token_manager {
      * @return bool True if the request has the EWA app identifier.
      */
     public static function is_ewa_browser_request(): bool {
-        // Check header first
+        // Check header first.
         $appid = $_SERVER[self::HEADER_APP_ID] ?? '';
         if ($appid === self::EXPECTED_APP_ID) {
             return true;
         }
 
-        // Fallback: check User-Agent string (reliable across all GET/POST requests inside the WebView)
+        // Fallback: check User-Agent string (reliable across all GET/POST requests inside the WebView).
         $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
         if (strpos($ua, 'EwaSecureBrowser') !== false) {
             return true;

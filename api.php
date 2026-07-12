@@ -149,14 +149,14 @@ if ($action === 'check_license') {
         exit;
     }
 
-    // Standardize hardware ID to uppercase and remove spaces/dashes
+    // Standardize hardware ID to uppercase and remove spaces/dashes.
     $hardwareid = strtoupper(str_replace([' ', '-'], '', $hardwareid));
 
-    // Try to find the device
+    // Try to find the device.
     $device = $DB->get_record('quizaccess_ewa_devices', ['hardwareid' => $hardwareid]);
 
     if (!$device) {
-        // Register the device automatically in a pending state
+        // Register the device automatically in a pending state.
         $device = new stdClass();
         $device->hardwareid = $hardwareid;
         $device->devicemodel = $devicemodel;
@@ -187,7 +187,7 @@ if ($action === 'check_license') {
     exit;
 }
 
-// For all other actions (heartbeat, log_violation, verify_exit):
+// For all other actions (heartbeat, log_violation, verify_exit).
 $quizid = isset($data['quizid']) ? (int)$data['quizid'] : 0;
 $token  = $_SERVER['HTTP_X_EWA_SECURE_TOKEN'] ?? '';
 
@@ -197,7 +197,7 @@ if (empty($quizid) || empty($token)) {
     exit;
 }
 
-// Fetch session + lockdown settings in one JOIN query
+// Fetch session + lockdown settings in one JOIN query.
 $session = $DB->get_record_sql(
     'SELECT s.*, l.tokenexpiry AS quiz_tokenexpiry,
             l.exitpassword AS quiz_exitpassword,
@@ -325,7 +325,8 @@ switch ($action) {
         $ratelimitwindow = time() - 300;
         $failedattempts  = $DB->count_records_select(
             'quizaccess_ewa_violations',
-            "quizid = :quizid AND deviceid = :deviceid AND violationtype = 'invalid_exit_password_attempt' AND timecreated > :window",
+            "quizid = :quizid AND deviceid = :deviceid "
+            . "AND violationtype = 'invalid_exit_password_attempt' AND timecreated > :window",
             ['quizid' => $quizid, 'deviceid' => $deviceid, 'window' => $ratelimitwindow]
         );
         if ($failedattempts >= 5) {
