@@ -15,11 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * API endpoint for EWA Secure Browser integration.
+ * API endpoint for Sanad Secure Browser integration.
  * Handles heartbeats, remote violation logging, and supervisor exit verification.
  *
- * @package   quizaccess_ewa_lockdown
- * @copyright 2026 Mahmoud Salem <m.salem@ewa.bh>
+ * @package   quizaccess_sanad_lockdown
+ * @copyright 2026 Mahmoud Salem <m.salem@sanad.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -27,8 +27,8 @@ define('NO_OUTPUT_BUFFERING', true);
 require_once(__DIR__ . '/../../../../config.php'); // phpcs:ignore moodle.Files.RequireLogin.Missing
 require_once($CFG->dirroot . '/mod/quiz/locallib.php');
 
-use quizaccess_ewa_lockdown\token_manager;
-use quizaccess_ewa_lockdown\violation_logger;
+use quizaccess_sanad_lockdown\token_manager;
+use quizaccess_sanad_lockdown\violation_logger;
 
 // Set API response headers.
 header('Content-Type: application/json; charset=utf-8');
@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // 1. Verify App Identification.
-$appid = $_SERVER['HTTP_X_EWA_APP'] ?? '';
+$appid = $_SERVER['HTTP_X_Sanad_APP'] ?? '';
 if ($appid !== token_manager::EXPECTED_APP_ID) {
     http_response_code(403);
     echo json_encode(['error' => 'Forbidden: Invalid App Client']);
@@ -69,7 +69,7 @@ if (empty($action)) {
 }
 
 // 2. Extract Device ID from HTTP Headers.
-$deviceid = $_SERVER['HTTP_X_EWA_DEVICE_ID'] ?? '';
+$deviceid = $_SERVER['HTTP_X_Sanad_DEVICE_ID'] ?? '';
 if (empty($deviceid)) {
     http_response_code(401);
     echo json_encode(['error' => 'Unauthorized: Missing Device ID Header']);
@@ -90,7 +90,7 @@ if ($action === 'resolve_code') {
     // Rate limiting: max 5 failed attempts per device within 5 minutes.
     $ratelimitwindow = time() - 300;
     $failedattempts  = $DB->count_records_select(
-        'quizaccess_ewa_violations',
+        'quizaccess_sanad_violations',
         "deviceid = :deviceid AND violationtype = 'failed_code_resolution' AND timecreated > :window",
         ['deviceid' => $deviceid, 'window' => $ratelimitwindow]
     );
@@ -109,7 +109,7 @@ if ($action === 'resolve_code') {
     }
 
     if (time() > $session->timeexpires) {
-        $DB->delete_records('quizaccess_ewa_sessions', ['id' => $session->id]);
+        $DB->delete_records('quizaccess_sanad_sessions', ['id' => $session->id]);
         http_response_code(410);
         echo json_encode(['error' => 'Access code has expired']);
         exit;
@@ -118,7 +118,7 @@ if ($action === 'resolve_code') {
     // Bind device ID on resolution.
     if (empty($session->deviceid)) {
         $session->deviceid = $deviceid;
-        $DB->set_field('quizaccess_ewa_sessions', 'deviceid', $deviceid, ['id' => $session->id]);
+        $DB->set_field('quizaccess_sanad_sessions', 'deviceid', $deviceid, ['id' => $session->id]);
     } else if ($session->deviceid !== $deviceid) {
         http_response_code(403);
         echo json_encode(['error' => 'Forbidden: Device Mismatch']);
@@ -153,7 +153,7 @@ if ($action === 'check_license') {
     $hardwareid = strtoupper(str_replace([' ', '-'], '', $hardwareid));
 
     // Try to find the device.
-    $device = $DB->get_record('quizaccess_ewa_devices', ['hardwareid' => $hardwareid]);
+    $device = $DB->get_record('quizaccess_sanad_devices', ['hardwareid' => $hardwareid]);
 
     if (!$device) {
         // Register the device automatically in a pending state.
@@ -165,7 +165,7 @@ if ($action === 'check_license') {
         $device->expirydate = 0;
         $device->timecreated = time();
         $device->timemodified = time();
-        $device->id = $DB->insert_record('quizaccess_ewa_devices', $device);
+        $device->id = $DB->insert_record('quizaccess_sanad_devices', $device);
     }
 
     $statusstr = 'pending';
@@ -189,7 +189,7 @@ if ($action === 'check_license') {
 
 // For all other actions (heartbeat, log_violation, verify_exit).
 $quizid = isset($data['quizid']) ? (int)$data['quizid'] : 0;
-$token  = $_SERVER['HTTP_X_EWA_SECURE_TOKEN'] ?? '';
+$token  = $_SERVER['HTTP_X_Sanad_SECURE_TOKEN'] ?? '';
 
 if (empty($quizid) || empty($token)) {
     http_response_code(400);
@@ -202,8 +202,8 @@ $session = $DB->get_record_sql(
     'SELECT s.*, l.tokenexpiry AS quiz_tokenexpiry,
             l.exitpassword AS quiz_exitpassword,
             l.alloweddomains AS quiz_alloweddomains
-       FROM {quizaccess_ewa_sessions} s
-       LEFT JOIN {quizaccess_ewa_lockdown} l ON l.quizid = s.quizid
+       FROM {quizaccess_sanad_sessions} s
+       LEFT JOIN {quizaccess_sanad_lockdown} l ON l.quizid = s.quizid
       WHERE s.token = :token AND s.quizid = :quizid',
     ['token' => $token, 'quizid' => $quizid]
 );
@@ -227,8 +227,8 @@ if ($cm) {
             'SELECT s.*, l.tokenexpiry AS quiz_tokenexpiry,
                     l.exitpassword AS quiz_exitpassword,
                     l.alloweddomains AS quiz_alloweddomains
-               FROM {quizaccess_ewa_sessions} s
-               LEFT JOIN {quizaccess_ewa_lockdown} l ON l.quizid = s.quizid
+               FROM {quizaccess_sanad_sessions} s
+               LEFT JOIN {quizaccess_sanad_lockdown} l ON l.quizid = s.quizid
               WHERE s.deviceid = :deviceid AND s.quizid = :quizid',
             ['deviceid' => $deviceid, 'quizid' => $quizid]
         );
@@ -240,7 +240,7 @@ if ($cm) {
 
 // Check if token has expired.
 if (time() > $session->timeexpires) {
-    $DB->delete_records('quizaccess_ewa_sessions', ['id' => $session->id]);
+    $DB->delete_records('quizaccess_sanad_sessions', ['id' => $session->id]);
     http_response_code(401);
     echo json_encode(['error' => 'Unauthorized: Session has expired']);
     exit;
@@ -250,7 +250,7 @@ if (time() > $session->timeexpires) {
 if (empty($session->deviceid)) {
     // Bind device ID on first API request.
     $session->deviceid = $deviceid;
-    $DB->set_field('quizaccess_ewa_sessions', 'deviceid', $deviceid, ['id' => $session->id]);
+    $DB->set_field('quizaccess_sanad_sessions', 'deviceid', $deviceid, ['id' => $session->id]);
 } else if ($session->deviceid !== $deviceid) {
     violation_logger::log(
         $quizid,
@@ -282,7 +282,7 @@ switch ($action) {
         // Minimum floor of 300 seconds for safety.
         $extendby = max(300, (int)($session->quiz_tokenexpiry ?? 300));
         $session->timeexpires = time() + $extendby;
-        $DB->set_field('quizaccess_ewa_sessions', 'timeexpires', $session->timeexpires, ['id' => $session->id]);
+        $DB->set_field('quizaccess_sanad_sessions', 'timeexpires', $session->timeexpires, ['id' => $session->id]);
 
         // Parse allowed domains — already fetched via JOIN, no extra query needed.
         $alloweddomains = [];
@@ -324,7 +324,7 @@ switch ($action) {
         // Rate limiting: max 5 failed attempts per quiz and device within 5 minutes.
         $ratelimitwindow = time() - 300;
         $failedattempts  = $DB->count_records_select(
-            'quizaccess_ewa_violations',
+            'quizaccess_sanad_violations',
             "quizid = :quizid AND deviceid = :deviceid "
             . "AND violationtype = 'invalid_exit_password_attempt' AND timecreated > :window",
             ['quizid' => $quizid, 'deviceid' => $deviceid, 'window' => $ratelimitwindow]

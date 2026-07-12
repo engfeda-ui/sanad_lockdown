@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Upgrade steps for quizaccess_ewa_lockdown.
+ * Upgrade steps for quizaccess_sanad_lockdown.
  *
- * @package   quizaccess_ewa_lockdown
- * @copyright 2026 Mahmoud Salem <m.salem@ewa.bh>
+ * @package   quizaccess_sanad_lockdown
+ * @copyright 2026 Mahmoud Salem <m.salem@sanad.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -29,43 +29,43 @@
  * @param int $oldversion The old plugin version.
  * @return bool
  */
-function xmldb_quizaccess_ewa_lockdown_upgrade($oldversion) {
+function xmldb_quizaccess_sanad_lockdown_upgrade($oldversion) {
     global $DB;
     $dbman = $DB->get_manager();
 
     if ($oldversion < 2026070700) {
-        upgrade_plugin_savepoint(true, 2026070700, 'quizaccess', 'ewa_lockdown');
+        upgrade_plugin_savepoint(true, 2026070700, 'quizaccess', 'sanad_lockdown');
     }
 
     // 2026070901: Widen exitpassword column to 255 chars to safely store bcrypt/argon2 hashes.
     if ($oldversion < 2026070901) {
-        $table = new \xmldb_table('quizaccess_ewa_lockdown');
+        $table = new \xmldb_table('quizaccess_sanad_lockdown');
         $field = new \xmldb_field('exitpassword', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'tokenexpiry');
 
         if ($dbman->field_exists($table, $field)) {
             $dbman->change_field_precision($table, $field);
         }
 
-        upgrade_plugin_savepoint(true, 2026070901, 'quizaccess', 'ewa_lockdown');
+        upgrade_plugin_savepoint(true, 2026070901, 'quizaccess', 'sanad_lockdown');
     }
 
-    // 2026070903: Add alloweddomains field to the quizaccess_ewa_lockdown table.
+    // 2026070903: Add alloweddomains field to the quizaccess_sanad_lockdown table.
     if ($oldversion < 2026070903) {
-        $table = new \xmldb_table('quizaccess_ewa_lockdown');
+        $table = new \xmldb_table('quizaccess_sanad_lockdown');
         $field = new \xmldb_field('alloweddomains', XMLDB_TYPE_TEXT, null, null, null, null, null, 'exitpassword');
 
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
 
-        upgrade_plugin_savepoint(true, 2026070903, 'quizaccess', 'ewa_lockdown');
+        upgrade_plugin_savepoint(true, 2026070903, 'quizaccess', 'sanad_lockdown');
     }
 
-    // 2026071100: Add quizaccess_ewa_devices table.
+    // 2026071100: Add quizaccess_sanad_devices table.
     if ($oldversion < 2026071100) {
-        $table = new \xmldb_table('quizaccess_ewa_devices');
+        $table = new \xmldb_table('quizaccess_sanad_devices');
 
-        // Adding fields to table quizaccess_ewa_devices.
+        // Adding fields to table quizaccess_sanad_devices.
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('hardwareid', XMLDB_TYPE_CHAR, '64', null, XMLDB_NOTNULL, null, null);
         $table->add_field('devicemodel', XMLDB_TYPE_CHAR, '100', null, null, null, null);
@@ -75,18 +75,18 @@ function xmldb_quizaccess_ewa_lockdown_upgrade($oldversion) {
         $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
         $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, '0');
 
-        // Adding keys to table quizaccess_ewa_devices.
+        // Adding keys to table quizaccess_sanad_devices.
         $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
 
-        // Adding indexes to table quizaccess_ewa_devices.
+        // Adding indexes to table quizaccess_sanad_devices.
         $table->add_index('hardwareid_idx', XMLDB_INDEX_UNIQUE, ['hardwareid']);
 
-        // Conditionally launch create table for quizaccess_ewa_devices.
+        // Conditionally launch create table for quizaccess_sanad_devices.
         if (!$dbman->table_exists($table)) {
             $dbman->create_table($table);
         }
 
-        upgrade_plugin_savepoint(true, 2026071100, 'quizaccess', 'ewa_lockdown');
+        upgrade_plugin_savepoint(true, 2026071100, 'quizaccess', 'sanad_lockdown');
     }
 
     return true;

@@ -15,35 +15,35 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Arabic language strings for quizaccess_ewa_lockdown.
+ * Arabic language strings for quizaccess_sanad_lockdown.
  *
- * @package   quizaccess_ewa_lockdown
- * @copyright 2026 Mahmoud Salem <m.salem@ewa.bh>
+ * @package   quizaccess_sanad_lockdown
+ * @copyright 2026 Mahmoud Salem <m.salem@sanad.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 // Plugin name.
-$string['pluginname'] = 'قاعدة الوصول لمتصفح EWA الآمن';
+$string['pluginname'] = 'قاعدة الوصول لمتصفح Sanad الآمن';
 
 // Settings form strings.
-$string['requireewalockdown'] = 'طلب متصفح EWA الآمن';
-$string['requireewalockdown_help'] = 'عند التفعيل، يجب على الطلاب استخدام تطبيق متصفح EWA الآمن للأندرويد لبدء هذا الاختبار. سيتم حظر الدخول من المتصفحات العادية. سيظهر رمز الاستجابة السريعة (QR) ليقوم الطلاب بمسحه بالتطبيق.';
+$string['requiresanadlockdown'] = 'طلب متصفح Sanad الآمن';
+$string['requiresanadlockdown_help'] = 'عند التفعيل، يجب على الطلاب استخدام تطبيق متصفح Sanad الآمن للأندرويد لبدء هذا الاختبار. سيتم حظر الدخول من المتصفحات العادية. سيظهر رمز الاستجابة السريعة (QR) ليقوم الطلاب بمسحه بالتطبيق.';
 $string['tokenexpiry'] = 'صلاحية رمز الجلسة (بالثواني)';
 $string['tokenexpiry_help'] = 'المدة الزمنية التي يظل فيها رمز الجلسة صالحاً بعد مسح رمز الاستجابة السريعة. الافتراضي هو 1800 ثانية (30 دقيقة). يجب أن تكون أكبر من أو تساوي حد وقت الاختبار.';
 $string['exitpassword'] = 'كلمة مرور الخروج في حالات الطوارئ';
-$string['exitpassword_help'] = 'كلمة مرور يمكن للمراقبين إدخالها في تطبيق متصفح EWA الآمن لتحرير الجهاز من وضع كشك الامتحانات في حالات الطوارئ. اتركها فارغة لتعطيل الخروج الطارئ.';
+$string['exitpassword_help'] = 'كلمة مرور يمكن للمراقبين إدخالها في تطبيق متصفح Sanad الآمن لتحرير الجهاز من وضع كشك الامتحانات في حالات الطوارئ. اتركها فارغة لتعطيل الخروج الطارئ.';
 $string['alloweddomains'] = 'النطاقات والروابط المسموح بزيارتها (القائمة البيضاء)';
-$string['alloweddomains_help'] = 'أدخل أي نطاقات أو روابط خارجية إضافية يُسمح للطالب بالدخول إليها أثناء الامتحان (نطاق واحد في كل سطر، مثل: backup-lms.ewa.edu.sa أو cdn.ewa.edu.sa). سيقوم متصفح EWA الآمن بالسماح بالاتصال بهذه العناوين وحظر ما سواها.';
+$string['alloweddomains_help'] = 'أدخل أي نطاقات أو روابط خارجية إضافية يُسمح للطالب بالدخول إليها أثناء الامتحان (نطاق واحد في كل سطر، مثل: backup-lms.sanad.com أو cdn.sanad.com). سيقوم متصفح Sanad الآمن بالسماح بالاتصال بهذه العناوين وحظر ما سواها.';
 
 // Preflight / access denied strings.
 $string['accessdenied'] = 'تم رفض الوصول';
-$string['mustuseewaapp'] = 'هذا الاختبار يتطلب استخدام تطبيق متصفح EWA الآمن على الأندرويد. لا يمكنك فتحه من متصفح عادي.';
-$string['scanqrtostart'] = 'امسح رمز الاستجابة السريعة (QR) أدناه باستخدام تطبيق متصفح EWA الآمن لبدء الاختبار:';
-$string['qrcode_alttext'] = 'رمز الاستجابة السريعة لبدء هذا الاختبار في متصفح EWA الآمن';
-$string['downloadapp'] = 'ألا تملك التطبيق بعد؟ قم بتنزيل متصفح EWA الآمن من متجر Google Play.';
-$string['tokenerror'] = 'رمز الجلسة الخاص بك غير صالح أو انتهت صلاحيته. يرجى إعادة مسح رمز الاستجابة السريعة باستخدام تطبيق متصفح EWA الآمن.';
+$string['mustusesanadapp'] = 'هذا الاختبار يتطلب استخدام تطبيق متصفح Sanad الآمن على الأندرويد. لا يمكنك فتحه من متصفح عادي.';
+$string['scanqrtostart'] = 'امسح رمز الاستجابة السريعة (QR) أدناه باستخدام تطبيق متصفح Sanad الآمن لبدء الاختبار:';
+$string['qrcode_alttext'] = 'رمز الاستجابة السريعة لبدء هذا الاختبار في متصفح Sanad الآمن';
+$string['downloadapp'] = 'ألا تملك التطبيق بعد؟ قم بتنزيل متصفح Sanad الآمن من متجر Google Play.';
+$string['tokenerror'] = 'رمز الجلسة الخاص بك غير صالح أو انتهت صلاحيته. يرجى إعادة مسح رمز الاستجابة السريعة باستخدام تطبيق متصفح Sanad الآمن.';
 $string['tokenexpired'] = 'انتهت صلاحية جلستك الآمنة. يرجى مطالبة المراقب بإعادة إصدار رمز الاستجابة السريعة.';
 $string['requestfromteacher'] = 'يرجى طلب رمز الاستجابة السريعة (QR Code) من معلّم المادة أو مراقب القاعة لبدء الاختبار.';
 $string['shortcode'] = 'الكود المختصر';
@@ -57,9 +57,9 @@ $string['violation_focus_lost'] = 'فقدان التركيز والتنقل خا
 $string['violation_expired_token'] = 'رمز أمان منتهي الصلاحية';
 
 // Live monitor dashboard.
-$string['plugindisabled']       = 'ميزة EWA Lockdown غير مفعّلة لهذا الاختبار.';
-$string['monitor_title']        = 'متصفح EWA الآمن — المراقبة المباشرة';
-$string['monitor_link']         = 'المراقبة المباشرة EWA';
+$string['plugindisabled']       = 'ميزة Sanad Lockdown غير مفعّلة لهذا الاختبار.';
+$string['monitor_title']        = 'متصفح Sanad الآمن — المراقبة المباشرة';
+$string['monitor_link']         = 'المراقبة المباشرة Sanad';
 
 // Stats bar.
 $string['total_students']       = 'إجمالي الطلاب';
@@ -97,7 +97,7 @@ $string['session_reissued']     = 'تم إصدار رمز جلسة جديد. أ�
 
 // QR modal.
 $string['qrmodal_title']        = 'امسح للبدء في الاختبار';
-$string['qrmodal_hint']         = 'اطلب من الطالب مسح رمز QR هذا باستخدام تطبيق متصفح EWA الآمن.';
+$string['qrmodal_hint']         = 'اطلب من الطالب مسح رمز QR هذا باستخدام تطبيق متصفح Sanad الآمن.';
 $string['qrmodal_fullscreen']   = 'ملء الشاشة';
 
 // Auto-refresh.
@@ -111,17 +111,17 @@ $string['ago_hours']            = 'منذ {$a} ساعة';
 
 
 // Privacy.
-$string['privacy:metadata:quizaccess_ewa_sessions'] = 'تخزين رموز جلسات الاختبار الآمنة المصدرة للطلاب.';
-$string['privacy:metadata:quizaccess_ewa_sessions:userid'] = 'المستخدم المصدر له الرمز.';
-$string['privacy:metadata:quizaccess_ewa_sessions:quizid'] = 'الاختبار المرتبط بالرمز.';
-$string['privacy:metadata:quizaccess_ewa_sessions:token'] = 'رمز الجلسة الأمني المشفر.';
-$string['privacy:metadata:quizaccess_ewa_sessions:deviceid'] = 'بصمة جهاز الأندرويد المستخدم.';
-$string['privacy:metadata:quizaccess_ewa_sessions:timecreated'] = 'وقت إنشاء الجلسة.';
-$string['privacy:metadata:quizaccess_ewa_sessions:timeexpires'] = 'وقت انتهاء صلاحية الجلسة.';
-$string['privacy:metadata:quizaccess_ewa_violations'] = 'تسجيل المخالفات الأمنية المرصودة أثناء الاختبار الآمن.';
-$string['privacy:metadata:quizaccess_ewa_violations:userid'] = 'المستخدم المرتبط بالمخالفة.';
-$string['privacy:metadata:quizaccess_ewa_violations:quizid'] = 'الاختبار الذي تم رصد المخالفة به.';
-$string['privacy:metadata:quizaccess_ewa_violations:violationtype'] = 'نوع المخالفة الأمنية.';
-$string['privacy:metadata:quizaccess_ewa_violations:deviceid'] = 'بصمة الجهاز وقت حدوث المخالفة.';
-$string['privacy:metadata:quizaccess_ewa_violations:details'] = 'تفاصيل إضافية للمخالفة.';
-$string['privacy:metadata:quizaccess_ewa_violations:timecreated'] = 'وقت حدوث المخالفة.';
+$string['privacy:metadata:quizaccess_sanad_sessions'] = 'تخزين رموز جلسات الاختبار الآمنة المصدرة للطلاب.';
+$string['privacy:metadata:quizaccess_sanad_sessions:userid'] = 'المستخدم المصدر له الرمز.';
+$string['privacy:metadata:quizaccess_sanad_sessions:quizid'] = 'الاختبار المرتبط بالرمز.';
+$string['privacy:metadata:quizaccess_sanad_sessions:token'] = 'رمز الجلسة الأمني المشفر.';
+$string['privacy:metadata:quizaccess_sanad_sessions:deviceid'] = 'بصمة جهاز الأندرويد المستخدم.';
+$string['privacy:metadata:quizaccess_sanad_sessions:timecreated'] = 'وقت إنشاء الجلسة.';
+$string['privacy:metadata:quizaccess_sanad_sessions:timeexpires'] = 'وقت انتهاء صلاحية الجلسة.';
+$string['privacy:metadata:quizaccess_sanad_violations'] = 'تسجيل المخالفات الأمنية المرصودة أثناء الاختبار الآمن.';
+$string['privacy:metadata:quizaccess_sanad_violations:userid'] = 'المستخدم المرتبط بالمخالفة.';
+$string['privacy:metadata:quizaccess_sanad_violations:quizid'] = 'الاختبار الذي تم رصد المخالفة به.';
+$string['privacy:metadata:quizaccess_sanad_violations:violationtype'] = 'نوع المخالفة الأمنية.';
+$string['privacy:metadata:quizaccess_sanad_violations:deviceid'] = 'بصمة الجهاز وقت حدوث المخالفة.';
+$string['privacy:metadata:quizaccess_sanad_violations:details'] = 'تفاصيل إضافية للمخالفة.';
+$string['privacy:metadata:quizaccess_sanad_violations:timecreated'] = 'وقت حدوث المخالفة.';

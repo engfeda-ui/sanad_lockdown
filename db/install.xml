@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/quiz/accessrule/ewa_lockdown/db" VERSION="20260707"
-    COMMENT="XMLDB file for Moodle mod/quiz/accessrule/ewa_lockdown"
+<XMLDB PATH="mod/quiz/accessrule/sanad_lockdown/db" VERSION="20260707"
+    COMMENT="XMLDB file for Moodle mod/quiz/accessrule/sanad_lockdown"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="quizaccess_ewa_lockdown" COMMENT="Stores the EWA Lockdown settings for each quiz">
+    <TABLE NAME="quizaccess_sanad_lockdown" COMMENT="Stores the Sanad Lockdown settings for each quiz">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key to quiz.id."/>
-        <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 = EWA Secure Browser required."/>
+        <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 = Sanad Secure Browser required."/>
         <FIELD NAME="tokenexpiry" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1800" SEQUENCE="false" COMMENT="Token expiry in seconds. Default 30 minutes."/>
         <FIELD NAME="exitpassword" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Emergency exit password (bcrypt/argon2 hash, max 255 chars)."/>
         <FIELD NAME="alloweddomains" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Newline-separated list of whitelisted external domains/URLs."/>
@@ -22,7 +22,7 @@
       </KEYS>
     </TABLE>
 
-    <TABLE NAME="quizaccess_ewa_sessions" COMMENT="Stores active secure exam sessions per user per quiz">
+    <TABLE NAME="quizaccess_sanad_sessions" COMMENT="Stores active secure exam sessions per user per quiz">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key to quiz.id."/>
@@ -43,7 +43,7 @@
       </INDEXES>
     </TABLE>
 
-    <TABLE NAME="quizaccess_ewa_violations" COMMENT="Logs security violations detected during exams">
+    <TABLE NAME="quizaccess_sanad_violations" COMMENT="Logs security violations detected during exams">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -63,7 +63,7 @@
       </INDEXES>
     </TABLE>
 
-    <TABLE NAME="quizaccess_ewa_devices" COMMENT="Stores EWA Kiosk registered devices and their license status">
+    <TABLE NAME="quizaccess_sanad_devices" COMMENT="Stores Sanad Kiosk registered devices and their license status">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="hardwareid" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="Unique hardware ID / fingerprint of the device."/>

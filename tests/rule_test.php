@@ -15,14 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * PHPUnit tests for the quizaccess_ewa_lockdown plugin.
+ * PHPUnit tests for the quizaccess_sanad_lockdown plugin.
  *
- * @package   quizaccess_ewa_lockdown
- * @copyright 2026 Mahmoud Salem <m.salem@ewa.bh>
+ * @package   quizaccess_sanad_lockdown
+ * @copyright 2026 Mahmoud Salem <m.salem@sanad.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace quizaccess_ewa_lockdown;
+namespace quizaccess_sanad_lockdown;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -30,7 +30,7 @@ global $CFG;
 require_once($CFG->dirroot . '/mod/quiz/locallib.php');
 
 /**
- * Unit tests for the quizaccess_ewa_lockdown class and token_manager.
+ * Unit tests for the quizaccess_sanad_lockdown class and token_manager.
  */
 class rule_test extends \advanced_testcase {
     public function test_token_issue_and_validate() {
@@ -104,11 +104,11 @@ class rule_test extends \advanced_testcase {
 
         $teachertoken = token_manager::issue($quizid, $teacher->id, '', 1800);
 
-        $_SERVER['HTTP_X_EWA_DEVICE_ID'] = 'student-device-999';
+        $_SERVER['HTTP_X_Sanad_DEVICE_ID'] = 'student-device-999';
 
         $this->assertTrue(token_manager::validate($quizid, $student->id, $teachertoken));
 
-        $studentsession = $DB->get_record('quizaccess_ewa_sessions', [
+        $studentsession = $DB->get_record('quizaccess_sanad_sessions', [
             'quizid' => $quizid,
             'userid' => $student->id,
         ]);
@@ -116,6 +116,6 @@ class rule_test extends \advanced_testcase {
         $this->assertEquals('student-device-999', $studentsession->deviceid);
         $this->assertNotEquals($teachertoken, $studentsession->token);
 
-        unset($_SERVER['HTTP_X_EWA_DEVICE_ID']);
+        unset($_SERVER['HTTP_X_Sanad_DEVICE_ID']);
     }
 }

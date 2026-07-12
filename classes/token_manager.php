@@ -15,35 +15,35 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Token manager for quizaccess_ewa_lockdown.
+ * Token manager for quizaccess_sanad_lockdown.
  *
- * Issues and validates HMAC-SHA256 session tokens for the EWA Secure Browser.
+ * Issues and validates HMAC-SHA256 session tokens for the Sanad Secure Browser.
  * Each token encodes: userid, quizid, deviceid, and a creation timestamp,
  * then signs the payload with a per-site secret. Tokens are also stored in
  * the database so they can be invalidated server-side.
  *
- * @package   quizaccess_ewa_lockdown
- * @copyright 2026 Mahmoud Salem <m.salem@ewa.bh>
+ * @package   quizaccess_sanad_lockdown
+ * @copyright 2026 Mahmoud Salem <m.salem@sanad.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace quizaccess_ewa_lockdown;
+namespace quizaccess_sanad_lockdown;
 
 /**
  * Manages the creation and validation of secure session tokens.
  */
 class token_manager {
-    /** @var string HTTP header name sent by the EWA Secure Browser app. */
-    const HEADER_TOKEN = 'HTTP_X_EWA_SECURE_TOKEN';
+    /** @var string HTTP header name sent by the Sanad Secure Browser app. */
+    const HEADER_TOKEN = 'HTTP_X_Sanad_SECURE_TOKEN';
 
     /** @var string HTTP header name for the device fingerprint. */
-    const HEADER_DEVICE = 'HTTP_X_EWA_DEVICE_ID';
+    const HEADER_DEVICE = 'HTTP_X_Sanad_DEVICE_ID';
 
     /** @var string HTTP header that identifies the app (not secret, just an identifier). */
-    const HEADER_APP_ID = 'HTTP_X_EWA_APP';
+    const HEADER_APP_ID = 'HTTP_X_Sanad_APP';
 
     /** @var string Expected value for the app identifier header. */
-    const EXPECTED_APP_ID = 'ewa-secure-browser-v1';
+    const EXPECTED_APP_ID = 'sanad-secure-browser-v1';
 
     /**
      * Issue a new signed session token for a user+quiz combination.
@@ -72,7 +72,7 @@ class token_manager {
         $token = $payloadb64 . '.' . $signature;
 
         // Delete any existing unexpired sessions for this user+quiz.
-        $DB->delete_records('quizaccess_ewa_sessions', [
+        $DB->delete_records('quizaccess_sanad_sessions', [
             'quizid' => $quizid,
             'userid' => $userid,
         ]);
@@ -85,21 +85,21 @@ class token_manager {
         $record->deviceid = $deviceid;
         $record->timecreated = $now;
         $record->timeexpires = $now + $expiry;
-        $DB->insert_record('quizaccess_ewa_sessions', $record);
+        $DB->insert_record('quizaccess_sanad_sessions', $record);
 
         return $token;
     }
 
     /**
-     * Validate an incoming token from the EWA Secure Browser HTTP headers or Session query.
+     * Validate an incoming token from the Sanad Secure Browser HTTP headers or Session query.
      *
      * @param int $quizid Expected quiz ID.
      * @param int $userid Expected user ID.
      * @return bool True if the token is valid and not expired.
      */
     public static function validate_from_request(int $quizid, int $userid): bool {
-        // 1. First verify if it's the EWA app (via header OR user-agent fallback)
-        if (!self::is_ewa_browser_request()) {
+        // 1. First verify if it's the Sanad app (via header OR user-agent fallback)
+        if (!self::is_sanad_browser_request()) {
             return false;
         }
 
@@ -107,13 +107,13 @@ class token_manager {
         $token = $_SERVER[self::HEADER_TOKEN] ?? '';
         if (empty($token)) {
             // Fallback for page loads/POSTs where custom headers are lost: read from URL query parameters.
-            $token = optional_param('ewatoken', '', PARAM_RAW);
+            $token = optional_param('sanadtoken', '', PARAM_RAW);
         }
 
         if (empty($token)) {
             global $DB;
             $session = $DB->get_record_select(
-                'quizaccess_ewa_sessions',
+                'quizaccess_sanad_sessions',
                 'quizid = :quizid AND userid = :userid AND timeexpires > :now',
                 ['quizid' => $quizid, 'userid' => $userid, 'now' => time()],
                 'token',
@@ -147,7 +147,7 @@ class token_manager {
         }
 
         // Find the session record by token and quizid.
-        $record = $DB->get_record('quizaccess_ewa_sessions', [
+        $record = $DB->get_record('quizaccess_sanad_sessions', [
             'token'  => $token,
             'quizid' => $quizid,
         ]);
@@ -176,7 +176,7 @@ class token_manager {
 
         if (time() > $record->timeexpires) {
             // Token has expired — clean up.
-            $DB->delete_records('quizaccess_ewa_sessions', ['id' => $record->id]);
+            $DB->delete_records('quizaccess_sanad_sessions', ['id' => $record->id]);
             return false;
         }
 
@@ -186,31 +186,31 @@ class token_manager {
         if ($isteachertoken) {
             // If it is a teacher token, we do NOT bind or check the device ID on the teacher's session record.
             // Instead, we ensure the student has their own session record in the database.
-            $studentsession = $DB->get_record('quizaccess_ewa_sessions', [
+            $studentsession = $DB->get_record('quizaccess_sanad_sessions', [
                 'quizid' => $quizid,
                 'userid' => $userid,
             ]);
             if ($studentsession && time() > $studentsession->timeexpires) {
-                $DB->delete_records('quizaccess_ewa_sessions', ['id' => $studentsession->id]);
+                $DB->delete_records('quizaccess_sanad_sessions', ['id' => $studentsession->id]);
                 $studentsession = null;
             }
             if (!$studentsession) {
                 // Issue a new session/token for the student.
-                $settings = $DB->get_record('quizaccess_ewa_lockdown', ['quizid' => $quizid]);
+                $settings = $DB->get_record('quizaccess_sanad_lockdown', ['quizid' => $quizid]);
                 $expiry = $settings ? (int)$settings->tokenexpiry : 1800;
                 self::issue($quizid, $userid, $requestdeviceid, $expiry);
             } else {
                 // If student session exists but deviceid is not set yet, bind it.
                 if (empty($studentsession->deviceid) && !empty($requestdeviceid)) {
                     $studentsession->deviceid = $requestdeviceid;
-                    $DB->update_record('quizaccess_ewa_sessions', $studentsession);
+                    $DB->update_record('quizaccess_sanad_sessions', $studentsession);
                 }
             }
         } else {
             // If the session record has no device ID bound yet, bind the current request device ID.
             if (empty($record->deviceid) && !empty($requestdeviceid)) {
                 $record->deviceid = $requestdeviceid;
-                $DB->update_record('quizaccess_ewa_sessions', $record);
+                $DB->update_record('quizaccess_sanad_sessions', $record);
             } else if (!empty($record->deviceid) && !empty($requestdeviceid) && $record->deviceid !== $requestdeviceid) {
                 // If the device ID in request does not match the bound device ID, log violation and deny.
                 violation_logger::log(
@@ -228,13 +228,13 @@ class token_manager {
     }
 
     /**
-     * Check whether the current HTTP request originates from the EWA Secure Browser.
+     * Check whether the current HTTP request originates from the Sanad Secure Browser.
      *
      * Supports both custom App ID headers and the User-Agent fallback.
      *
-     * @return bool True if the request has the EWA app identifier.
+     * @return bool True if the request has the Sanad app identifier.
      */
-    public static function is_ewa_browser_request(): bool {
+    public static function is_sanad_browser_request(): bool {
         // Check header first.
         $appid = $_SERVER[self::HEADER_APP_ID] ?? '';
         if ($appid === self::EXPECTED_APP_ID) {
@@ -258,7 +258,7 @@ class token_manager {
      */
     public static function revoke(int $quizid, int $userid): void {
         global $DB;
-        $DB->delete_records('quizaccess_ewa_sessions', [
+        $DB->delete_records('quizaccess_sanad_sessions', [
             'quizid' => $quizid,
             'userid' => $userid,
         ]);
@@ -268,7 +268,7 @@ class token_manager {
      * Build the payload URL that gets embedded in the QR code.
      *
      * The URL points to the Moodle quiz entry page with the token as a query
-     * parameter. When the EWA app loads this URL it will also inject the token
+     * parameter. When the Sanad app loads this URL it will also inject the token
      * as an HTTP header on every subsequent request.
      *
      * @param int    $quizid  The quiz ID.
@@ -279,8 +279,8 @@ class token_manager {
     public static function build_launch_url(int $quizid, int $cmid, string $token): string {
         global $CFG;
         return $CFG->wwwroot . '/mod/quiz/view.php?id=' . $cmid
-            . '&ewatoken=' . urlencode($token)
-            . '&ewalaunch=1';
+            . '&sanadtoken=' . urlencode($token)
+            . '&sanadlaunch=1';
     }
 
     /**
@@ -292,7 +292,7 @@ class token_manager {
      */
     public static function get_short_code(string $token): string {
         global $DB;
-        $record = $DB->get_record('quizaccess_ewa_sessions', ['token' => $token], 'id');
+        $record = $DB->get_record('quizaccess_sanad_sessions', ['token' => $token], 'id');
         if (!$record) {
             return '';
         }
@@ -323,7 +323,7 @@ class token_manager {
             return null;
         }
 
-        $record = $DB->get_record('quizaccess_ewa_sessions', ['id' => $id]);
+        $record = $DB->get_record('quizaccess_sanad_sessions', ['id' => $id]);
         return $record ?: null;
     }
 
@@ -336,7 +336,7 @@ class token_manager {
         global $CFG;
         // Use Moodle's own secret as the base material.
         $base = isset($CFG->passwordsaltmain) ? $CFG->passwordsaltmain : $CFG->wwwroot;
-        return substr(hash('sha256', $base . 'quizaccess_ewa_lockdown'), 0, 32);
+        return substr(hash('sha256', $base . 'quizaccess_sanad_lockdown'), 0, 32);
     }
 
     /**

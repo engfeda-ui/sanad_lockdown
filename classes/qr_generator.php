@@ -15,21 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * QR Code generator for quizaccess_ewa_lockdown.
+ * QR Code generator for quizaccess_sanad_lockdown.
  *
  * Generates a QR code as an inline base64-encoded PNG. Uses a pure-PHP
  * QR generator that ships with Moodle core (or falls back to Google Charts
  * API as a secondary option when unit-testing outside a full Moodle install).
  *
- * @package   quizaccess_ewa_lockdown
- * @copyright 2026 Mahmoud Salem <m.salem@ewa.bh>
+ * @package   quizaccess_sanad_lockdown
+ * @copyright 2026 Mahmoud Salem <m.salem@sanad.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace quizaccess_ewa_lockdown;
+namespace quizaccess_sanad_lockdown;
 
 /**
- * Builds QR codes for the EWA Secure Browser launch URL.
+ * Builds QR codes for the Sanad Secure Browser launch URL.
  */
 class qr_generator {
     /**
@@ -47,7 +47,7 @@ class qr_generator {
         $datauri = self::get_data_uri($url, $size);
         $altesc  = htmlspecialchars($alt, ENT_QUOTES, 'UTF-8');
         return '<img src="' . $datauri . '" width="' . $size . '" height="' . $size
-            . '" alt="' . $altesc . '" class="ewa-qrcode" />';
+            . '" alt="' . $altesc . '" class="sanad-qrcode" />';
     }
 
     /**

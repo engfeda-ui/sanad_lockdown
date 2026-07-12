@@ -11,7 +11,7 @@ define(['jquery'], function($) {
             // could be implemented here.
             
             // Example hook: fade in the QR code smoothly.
-            $('.ewa-lockdown-preflight').hide().fadeIn(500);
+            $('.sanad-lockdown-preflight').hide().fadeIn(500);
         }
     };
 });

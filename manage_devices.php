@@ -18,8 +18,8 @@
 /**
  * Admin Kiosk Control Panel and Device Manager.
  *
- * @package   quizaccess_ewa_lockdown
- * @copyright 2026 Mahmoud Salem <m.salem@ewa.bh>
+ * @package   quizaccess_sanad_lockdown
+ * @copyright 2026 Mahmoud Salem <m.salem@sanad.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -33,10 +33,10 @@ $context = context_system::instance();
 require_capability('moodle/site:config', $context);
 
 // Set up page.
-$PAGE->set_url(new moodle_url('/mod/quiz/accessrule/ewa_lockdown/manage_devices.php'));
+$PAGE->set_url(new moodle_url('/mod/quiz/accessrule/sanad_lockdown/manage_devices.php'));
 $PAGE->set_context($context);
-$PAGE->set_title(get_string('pluginname', 'quizaccess_ewa_lockdown') . ' - Device Manager');
-$PAGE->set_heading('EWA Kiosk Admin Control Center');
+$PAGE->set_title(get_string('pluginname', 'quizaccess_sanad_lockdown') . ' - Device Manager');
+$PAGE->set_heading('Sanad Kiosk Admin Control Center');
 
 global $DB, $OUTPUT, $PAGE;
 
@@ -49,35 +49,35 @@ $msgtype = 'success'; // 'success' or 'error'
 if (!empty($action) && confirm_sesskey()) {
     try {
         if ($action === 'approve') {
-            $device = $DB->get_record('quizaccess_ewa_devices', ['id' => $id], '*', MUST_EXIST);
+            $device = $DB->get_record('quizaccess_sanad_devices', ['id' => $id], '*', MUST_EXIST);
             $device->status = 1; // Active
             $device->expirydate = time() + (365 * 86400); // 1 Year Default
             $device->timemodified = time();
-            $DB->update_record('quizaccess_ewa_devices', $device);
+            $DB->update_record('quizaccess_sanad_devices', $device);
             $msg = "تم تفعيل الجهاز {$device->hardwareid} بنجاح لمدة عام!";
         } elseif ($action === 'block') {
-            $device = $DB->get_record('quizaccess_ewa_devices', ['id' => $id], '*', MUST_EXIST);
+            $device = $DB->get_record('quizaccess_sanad_devices', ['id' => $id], '*', MUST_EXIST);
             $device->status = 2; // Suspended
             $device->timemodified = time();
-            $DB->update_record('quizaccess_ewa_devices', $device);
+            $DB->update_record('quizaccess_sanad_devices', $device);
             $msg = "تم حظر وتجميد ترخيص الجهاز {$device->hardwareid} بنجاح.";
         } elseif ($action === 'delete') {
-            $device = $DB->get_record('quizaccess_ewa_devices', ['id' => $id], '*', MUST_EXIST);
-            $DB->delete_records('quizaccess_ewa_devices', ['id' => $id]);
+            $device = $DB->get_record('quizaccess_sanad_devices', ['id' => $id], '*', MUST_EXIST);
+            $DB->delete_records('quizaccess_sanad_devices', ['id' => $id]);
             $msg = "تم حذف الجهاز {$device->hardwareid} نهائياً من النظام.";
         } elseif ($action === 'extend') {
             $days = required_param('days', PARAM_INT);
-            $device = $DB->get_record('quizaccess_ewa_devices', ['id' => $id], '*', MUST_EXIST);
+            $device = $DB->get_record('quizaccess_sanad_devices', ['id' => $id], '*', MUST_EXIST);
             $device->expirydate = time() + ($days * 86400);
             $device->status = 1; // Ensure active
             $device->timemodified = time();
-            $DB->update_record('quizaccess_ewa_devices', $device);
+            $DB->update_record('quizaccess_sanad_devices', $device);
             $msg = "تم تمديد ترخيص الجهاز {$device->hardwareid} إلى {$days} يوماً.";
         } elseif ($action === 'resetpass') {
             $userid = required_param('userid', PARAM_INT);
             $newpassword = required_param('newpassword', PARAM_RAW);
             if (strlen($newpassword) < 6) {
-                throw new moodle_exception('errorpasswordlength', 'quizaccess_ewa_lockdown', '', null, 'يجب ألا تقل كلمة المرور عن 6 خانات.');
+                throw new moodle_exception('errorpasswordlength', 'quizaccess_sanad_lockdown', '', null, 'يجب ألا تقل كلمة المرور عن 6 خانات.');
             }
             $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
 
@@ -97,20 +97,20 @@ if (!empty($action) && confirm_sesskey()) {
 }
 
 // 3. Retrieve Dashboard Stats & Lists.
-$totaldevices = $DB->count_records('quizaccess_ewa_devices');
-$activedevices = $DB->count_records_select('quizaccess_ewa_devices', 'status = 1 AND expirydate > :now', ['now' => time()]);
-$pendingdevices = $DB->count_records('quizaccess_ewa_devices', ['status' => 0]);
-$activeexams = $DB->count_records_select('quizaccess_ewa_sessions', 'timeexpires > :now', ['now' => time()]);
+$totaldevices = $DB->count_records('quizaccess_sanad_devices');
+$activedevices = $DB->count_records_select('quizaccess_sanad_devices', 'status = 1 AND expirydate > :now', ['now' => time()]);
+$pendingdevices = $DB->count_records('quizaccess_sanad_devices', ['status' => 0]);
+$activeexams = $DB->count_records_select('quizaccess_sanad_sessions', 'timeexpires > :now', ['now' => time()]);
 
 // Get all devices.
-$devices = $DB->get_records('quizaccess_ewa_devices', null, 'timecreated DESC');
+$devices = $DB->get_records('quizaccess_sanad_devices', null, 'timecreated DESC');
 
 // Get active exam sessions with details.
 $sqlsessions = "
     SELECT s.id, s.token, s.deviceid, s.timecreated, s.timeexpires,
            u.id AS userid, u.firstname, u.lastname, u.email,
            q.id AS quizid, q.name AS quizname
-      FROM {quizaccess_ewa_sessions} s
+      FROM {quizaccess_sanad_sessions} s
       JOIN {user} u ON u.id = s.userid
       JOIN {quiz} q ON q.id = s.quizid
      WHERE s.timeexpires > :now
@@ -122,7 +122,7 @@ $sqlviolations = "
     SELECT v.id, v.violationtype, v.deviceid, v.timecreated, v.details,
            u.firstname, u.lastname, u.email,
            q.name AS quizname
-      FROM {quizaccess_ewa_violations} v
+      FROM {quizaccess_sanad_violations} v
       JOIN {user} u ON u.id = v.userid
       JOIN {quiz} q ON q.id = v.quizid
   ORDER BY v.timecreated DESC
@@ -155,13 +155,13 @@ echo $OUTPUT->header();
         font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    .ewa-container {
+    .sanad-container {
         padding: 20px;
         max-width: 1300px;
         margin: 0 auto;
     }
 
-    .ewa-title {
+    .sanad-title {
         font-weight: 700;
         color: var(--dash-accent);
         margin-bottom: 25px;
@@ -171,7 +171,7 @@ echo $OUTPUT->header();
     }
 
     /* Message Alert */
-    .ewa-alert {
+    .sanad-alert {
         padding: 15px 20px;
         border-radius: 10px;
         margin-bottom: 25px;
@@ -181,12 +181,12 @@ echo $OUTPUT->header();
         gap: 10px;
         animation: slideDown 0.3s ease;
     }
-    .ewa-alert-success {
+    .sanad-alert-success {
         background-color: rgba(16, 185, 129, 0.15);
         border: 1px solid var(--dash-success);
         color: #34d399;
     }
-    .ewa-alert-error {
+    .sanad-alert-error {
         background-color: rgba(239, 68, 68, 0.15);
         border: 1px solid var(--dash-danger);
         color: #f87171;
@@ -198,14 +198,14 @@ echo $OUTPUT->header();
     }
 
     /* Metric Cards Grid */
-    .ewa-metrics-grid {
+    .sanad-metrics-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
         gap: 20px;
         margin-bottom: 30px;
     }
 
-    .ewa-metric-card {
+    .sanad-metric-card {
         background: var(--dash-card-bg);
         border: 1px solid var(--dash-glass-border);
         border-radius: 16px;
@@ -215,11 +215,11 @@ echo $OUTPUT->header();
         position: relative;
         overflow: hidden;
     }
-    .ewa-metric-card:hover {
+    .sanad-metric-card:hover {
         transform: translateY(-3px);
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     }
-    .ewa-metric-card::after {
+    .sanad-metric-card::after {
         content: '';
         position: absolute;
         bottom: 0;
@@ -231,7 +231,7 @@ echo $OUTPUT->header();
         border-radius: 50%;
     }
 
-    .ewa-metric-title {
+    .sanad-metric-title {
         font-size: 13px;
         font-weight: 700;
         color: var(--dash-text-muted);
@@ -239,7 +239,7 @@ echo $OUTPUT->header();
         margin-bottom: 8px;
     }
 
-    .ewa-metric-value {
+    .sanad-metric-value {
         font-size: 32px;
         font-weight: 800;
         color: var(--dash-text);
@@ -247,19 +247,19 @@ echo $OUTPUT->header();
     }
 
     /* Primary and secondary layouts */
-    .ewa-layout {
+    .sanad-layout {
         display: grid;
         grid-template-columns: 2fr 1fr;
         gap: 25px;
     }
 
     @media (max-width: 992px) {
-        .ewa-layout {
+        .sanad-layout {
             grid-template-columns: 1fr;
         }
     }
 
-    .ewa-card {
+    .sanad-card {
         background: var(--dash-card-bg);
         border: 1px solid var(--dash-glass-border);
         border-radius: 16px;
@@ -268,7 +268,7 @@ echo $OUTPUT->header();
         margin-bottom: 25px;
     }
 
-    .ewa-card-title {
+    .sanad-card-title {
         font-size: 18px;
         font-weight: 700;
         color: var(--dash-text);
@@ -279,17 +279,17 @@ echo $OUTPUT->header();
     }
 
     /* Table Styles */
-    .ewa-table-container {
+    .sanad-table-container {
         overflow-x: auto;
     }
 
-    .ewa-table {
+    .sanad-table {
         width: 100%;
         border-collapse: collapse;
         text-align: right;
     }
 
-    .ewa-table th {
+    .sanad-table th {
         background-color: var(--dash-secondary);
         color: var(--dash-text);
         padding: 14px 16px;
@@ -298,43 +298,43 @@ echo $OUTPUT->header();
         border-bottom: 2px solid var(--dash-glass-border);
     }
 
-    .ewa-table td {
+    .sanad-table td {
         padding: 14px 16px;
         font-size: 14px;
         color: var(--dash-text);
         border-bottom: 1px solid var(--dash-glass-border);
     }
 
-    .ewa-table tr:hover {
+    .sanad-table tr:hover {
         background-color: rgba(255, 255, 255, 0.02);
     }
 
     /* Status Badges */
-    .ewa-badge {
+    .sanad-badge {
         padding: 6px 12px;
         border-radius: 20px;
         font-size: 11px;
         font-weight: 700;
         display: inline-block;
     }
-    .ewa-badge-pending {
+    .sanad-badge-pending {
         background-color: rgba(245, 158, 11, 0.15);
         color: var(--dash-warning);
         border: 1px solid var(--dash-warning);
     }
-    .ewa-badge-active {
+    .sanad-badge-active {
         background-color: rgba(16, 185, 129, 0.15);
         color: var(--dash-success);
         border: 1px solid var(--dash-success);
     }
-    .ewa-badge-suspended {
+    .sanad-badge-suspended {
         background-color: rgba(239, 68, 68, 0.15);
         color: var(--dash-danger);
         border: 1px solid var(--dash-danger);
     }
 
     /* Controls & Buttons */
-    .ewa-btn {
+    .sanad-btn {
         padding: 6px 14px;
         border-radius: 8px;
         font-size: 12px;
@@ -347,35 +347,35 @@ echo $OUTPUT->header();
         align-items: center;
         gap: 5px;
     }
-    .ewa-btn-primary {
+    .sanad-btn-primary {
         background-color: var(--dash-accent);
         color: #ffffff !important;
     }
-    .ewa-btn-primary:hover {
+    .sanad-btn-primary:hover {
         background-color: var(--dash-accent-hover);
     }
-    .ewa-btn-success {
+    .sanad-btn-success {
         background-color: var(--dash-success);
         color: #ffffff !important;
     }
-    .ewa-btn-success:hover {
+    .sanad-btn-success:hover {
         background-color: #059669;
     }
-    .ewa-btn-danger {
+    .sanad-btn-danger {
         background-color: var(--dash-danger);
         color: #ffffff !important;
     }
-    .ewa-btn-danger:hover {
+    .sanad-btn-danger:hover {
         background-color: #dc2626;
     }
-    .ewa-btn-warning {
+    .sanad-btn-warning {
         background-color: var(--dash-warning);
         color: #ffffff !important;
     }
-    .ewa-btn-warning:hover {
+    .sanad-btn-warning:hover {
         background-color: #d97706;
     }
-    .ewa-btn-icon {
+    .sanad-btn-icon {
         padding: 6px 8px;
     }
 
@@ -426,52 +426,52 @@ echo $OUTPUT->header();
     }
 </style>
 
-<div class="ewa-container" dir="rtl">
-    <div class="ewa-title">🔑 لوحة تفعيل الأجهزة ومراقبة الاختبارات (Kiosk Admin)</div>
+<div class="sanad-container" dir="rtl">
+    <div class="sanad-title">🔑 لوحة تفعيل الأجهزة ومراقبة الاختبارات (Kiosk Admin)</div>
 
     <!-- Notifications Alert -->
     <?php if (!empty($msg)) : ?>
-        <div class="ewa-alert ewa-alert-<?php echo $msgtype; ?>">
+        <div class="sanad-alert sanad-alert-<?php echo $msgtype; ?>">
             <span><?php echo ($msgtype === 'success' ? '✅' : '❌'); ?></span>
             <span><?php echo s($msg); ?></span>
         </div>
     <?php endif; ?>
 
     <!-- Dashboard Stat Cards -->
-    <div class="ewa-metrics-grid">
-        <div class="ewa-metric-card">
-            <div class="ewa-metric-title">الأجهزة المسجلة</div>
-            <div class="ewa-metric-value"><?php echo $totaldevices; ?></div>
+    <div class="sanad-metrics-grid">
+        <div class="sanad-metric-card">
+            <div class="sanad-metric-title">الأجهزة المسجلة</div>
+            <div class="sanad-metric-value"><?php echo $totaldevices; ?></div>
         </div>
-        <div class="ewa-metric-card">
-            <div class="ewa-metric-title">الرخص النشطة حالياً</div>
-            <div class="ewa-metric-value" style="color: #34d399;"><?php echo $activedevices; ?></div>
+        <div class="sanad-metric-card">
+            <div class="sanad-metric-title">الرخص النشطة حالياً</div>
+            <div class="sanad-metric-value" style="color: #34d399;"><?php echo $activedevices; ?></div>
         </div>
-        <div class="ewa-metric-card">
-            <div class="ewa-metric-title">أجهزة بانتظار التفعيل</div>
-            <div class="ewa-metric-value" style="color: #fbbf24;"><?php echo $pendingdevices; ?></div>
+        <div class="sanad-metric-card">
+            <div class="sanad-metric-title">أجهزة بانتظار التفعيل</div>
+            <div class="sanad-metric-value" style="color: #fbbf24;"><?php echo $pendingdevices; ?></div>
         </div>
-        <div class="ewa-metric-card">
-            <div class="ewa-metric-title">الطلاب في الامتحانات الآن</div>
-            <div class="ewa-metric-value" style="color: #22d3ee;"><?php echo $activeexams; ?></div>
+        <div class="sanad-metric-card">
+            <div class="sanad-metric-title">الطلاب في الامتحانات الآن</div>
+            <div class="sanad-metric-value" style="color: #22d3ee;"><?php echo $activeexams; ?></div>
         </div>
     </div>
 
     <!-- Main Layout Grid -->
-    <div class="ewa-layout">
+    <div class="sanad-layout">
         
         <!-- Right Panel: Device List -->
         <div>
-            <div class="ewa-card">
-                <div class="ewa-card-title">
+            <div class="sanad-card">
+                <div class="sanad-card-title">
                     <span>📱 قائمة أجهزة التابلت المسجلة</span>
                 </div>
                 
                 <!-- Simple live filter -->
                 <input type="text" id="deviceSearch" class="search-box" placeholder="ابحث برمز الجهاز (Hardware ID) أو نوع الموديل..." onkeyup="filterDevices()">
 
-                <div class="ewa-table-container">
-                    <table class="ewa-table" id="deviceTable">
+                <div class="sanad-table-container">
+                    <table class="sanad-table" id="deviceTable">
                         <thead>
                             <tr>
                                 <th>الشركة / الموديل</th>
@@ -520,7 +520,7 @@ echo $OUTPUT->header();
                                         </td>
                                         <td style="font-family: monospace; font-size: 15px; font-weight: 700; color: var(--dash-accent);"><?php echo $formattedid; ?></td>
                                         <td>
-                                            <span class="ewa-badge ewa-badge-<?php echo $badgeclass; ?>"><?php echo $badgelabel; ?></span>
+                                            <span class="sanad-badge sanad-badge-<?php echo $badgeclass; ?>"><?php echo $badgelabel; ?></span>
                                         </td>
                                         <td>
                                             <span style="<?php echo $expired ? 'color: var(--dash-danger); font-weight: 700;' : ''; ?>">
@@ -529,21 +529,21 @@ echo $OUTPUT->header();
                                         </td>
                                         <td>
                                             <?php if ($d->status == 0 || $expired) : ?>
-                                                <a href="?action=approve&id=<?php echo $d->id; ?>&sesskey=<?php echo sesskey(); ?>" class="ewa-btn ewa-btn-success">تفعيل الرخصه</a>
+                                                <a href="?action=approve&id=<?php echo $d->id; ?>&sesskey=<?php echo sesskey(); ?>" class="sanad-btn sanad-btn-success">تفعيل الرخصه</a>
                                             <?php endif; ?>
 
                                             <?php if ($d->status == 1 && !$expired) : ?>
-                                                <a href="?action=block&id=<?php echo $d->id; ?>&sesskey=<?php echo sesskey(); ?>" class="ewa-btn ewa-btn-warning">تعطيل وحظر</a>
+                                                <a href="?action=block&id=<?php echo $d->id; ?>&sesskey=<?php echo sesskey(); ?>" class="sanad-btn sanad-btn-warning">تعطيل وحظر</a>
                                             <?php endif; ?>
 
                                             <?php if ($d->status == 2) : ?>
-                                                <a href="?action=approve&id=<?php echo $d->id; ?>&sesskey=<?php echo sesskey(); ?>" class="ewa-btn ewa-btn-success">إلغاء الحظر</a>
+                                                <a href="?action=approve&id=<?php echo $d->id; ?>&sesskey=<?php echo sesskey(); ?>" class="sanad-btn sanad-btn-success">إلغاء الحظر</a>
                                             <?php endif; ?>
 
                                             <!-- Dropdown or quick extend of 1 year -->
-                                            <a href="?action=extend&id=<?php echo $d->id; ?>&days=365&sesskey=<?php echo sesskey(); ?>" class="ewa-btn ewa-btn-primary" title="تجديد سنة">+ سنة</a>
+                                            <a href="?action=extend&id=<?php echo $d->id; ?>&days=365&sesskey=<?php echo sesskey(); ?>" class="sanad-btn sanad-btn-primary" title="تجديد سنة">+ سنة</a>
                                             
-                                            <a href="?action=delete&id=<?php echo $d->id; ?>&sesskey=<?php echo sesskey(); ?>" class="ewa-btn ewa-btn-danger ewa-btn-icon" onclick="return confirm('هل أنت متأكد من حذف هذا الجهاز نهائياً؟');" title="حذف">🗑️</a>
+                                            <a href="?action=delete&id=<?php echo $d->id; ?>&sesskey=<?php echo sesskey(); ?>" class="sanad-btn sanad-btn-danger sanad-btn-icon" onclick="return confirm('هل أنت متأكد من حذف هذا الجهاز نهائياً؟');" title="حذف">🗑️</a>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -554,8 +554,8 @@ echo $OUTPUT->header();
             </div>
 
             <!-- Active Exam Monitor Grid -->
-            <div class="ewa-card">
-                <div class="ewa-card-title">
+            <div class="sanad-card">
+                <div class="sanad-card-title">
                     <span>
                         <span class="live-pulse"></span>
                         مراقبة جلسات الاختبارات النشطة الآن
@@ -563,8 +563,8 @@ echo $OUTPUT->header();
                     <span style="font-size: 13px; color: var(--dash-text-muted);">تحديث فوري لكل الأجهزة المتصلة بالاختبارات</span>
                 </div>
 
-                <div class="ewa-table-container">
-                    <table class="ewa-table">
+                <div class="sanad-table-container">
+                    <table class="sanad-table">
                         <thead>
                             <tr>
                                 <th>اسم الطالب</th>
@@ -607,8 +607,8 @@ echo $OUTPUT->header();
         <div>
             
             <!-- Quick Password Reset Tools Card -->
-            <div class="ewa-card">
-                <div class="ewa-card-title">🔐 إدارة وتغيير كلمة مرور طالب</div>
+            <div class="sanad-card">
+                <div class="sanad-card-title">🔐 إدارة وتغيير كلمة مرور طالب</div>
                 
                 <form action="" method="post" class="reset-form">
                     <input type="hidden" name="action" value="resetpass">
@@ -633,13 +633,13 @@ echo $OUTPUT->header();
                         <input type="text" name="newpassword" value="EwaStudent@2026" placeholder="اكتب كلمة السر هنا" required>
                     </div>
 
-                    <button type="submit" class="ewa-btn ewa-btn-success" style="width: 100%; justify-content: center; height: 45px; font-size: 14px;">🔄 حفظ وتغيير كلمة المرور فوراً</button>
+                    <button type="submit" class="sanad-btn sanad-btn-success" style="width: 100%; justify-content: center; height: 45px; font-size: 14px;">🔄 حفظ وتغيير كلمة المرور فوراً</button>
                 </form>
             </div>
 
             <!-- Security Violations Alerts Card -->
-            <div class="ewa-card">
-                <div class="ewa-card-title" style="color: var(--dash-danger);">🚨 سجل الخروقات والانتهاكات الأمنية الأخيرة</div>
+            <div class="sanad-card">
+                <div class="sanad-card-title" style="color: var(--dash-danger);">🚨 سجل الخروقات والانتهاكات الأمنية الأخيرة</div>
                 <div style="display: flex; flex-direction: column; gap: 12px; max-height: 400px; overflow-y: auto;">
                     <?php if (empty($violations)) : ?>
                         <div style="text-align: center; color: var(--dash-text-muted); font-size: 13px;">لم يتم تسجيل أي خروقات أمنية مؤخراً. ممتاز!</div>

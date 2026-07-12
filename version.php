@@ -15,10 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for the quizaccess_ewa_lockdown plugin.
+ * Version information for the quizaccess_sanad_lockdown plugin.
  *
- * @package   quizaccess_ewa_lockdown
- * @copyright 2026 Mahmoud Salem <m.salem@ewa.bh>
+ * @package   quizaccess_sanad_lockdown
+ * @copyright 2026 Mahmoud Salem <m.salem@sanad.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -27,6 +27,6 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->version   = 2026071100;
 $plugin->requires  = 2024100700; // Moodle 4.5 minimum.
 $plugin->supported = [405, 500]; // Moodle 4.5 – 5.0.
-$plugin->component = 'quizaccess_ewa_lockdown';
+$plugin->component = 'quizaccess_sanad_lockdown';
 $plugin->maturity  = MATURITY_STABLE;
 $plugin->release   = 'v1.2.0'; // Added: Teacher monitoring + Whitelisted URLs.

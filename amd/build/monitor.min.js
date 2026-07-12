@@ -14,10 +14,10 @@
 // along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * AMD module: EWA Monitor Dashboard — auto-refresh, modals, and live data.
+ * AMD module: Sanad Monitor Dashboard — auto-refresh, modals, and live data.
  *
- * @module    quizaccess_ewa_lockdown/monitor
- * @copyright 2026 Mahmoud Salem <m.salem@ewa.bh>
+ * @module    quizaccess_sanad_lockdown/monitor
+ * @copyright 2026 Mahmoud Salem <m.salem@sanad.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notification) {
@@ -54,7 +54,7 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
     // ── Bind events on page-load elements ────────────────────────────────────
     function bindStaticEvents() {
         // QR show buttons (delegated — rows may be re-rendered).
-        $(document).on('click', '.ewa-show-qr', function() {
+        $(document).on('click', '.sanad-show-qr', function() {
             var qrdata    = $(this).data('qrb64');
             var name      = $(this).data('name');
             var url       = $(this).data('qrurl');
@@ -63,21 +63,21 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
         });
 
         // Violation buttons (delegated).
-        $(document).on('click', '.ewa-btn-violations', function() {
+        $(document).on('click', '.sanad-btn-violations', function() {
             var name       = $(this).data('name');
             var violations = $(this).data('violations');
             openViolationsModal(name, violations);
         });
 
         // QR modal close.
-        $('#ewa-qr-close, #ewa-qr-close-btn, #ewa-qr-modal .ewa-modal-backdrop').on('click', closeQrModal);
+        $('#sanad-qr-close, #sanad-qr-close-btn, #sanad-qr-modal .sanad-modal-backdrop').on('click', closeQrModal);
 
         // Violations modal close.
-        $('#ewa-violations-close, #ewa-violations-close-btn, #ewa-violations-modal .ewa-modal-backdrop').on('click', closeViolationsModal);
+        $('#sanad-violations-close, #sanad-violations-close-btn, #sanad-violations-modal .sanad-modal-backdrop').on('click', closeViolationsModal);
 
         // Fullscreen QR.
-        $('#ewa-qr-fullscreen').on('click', function() {
-            var img = document.getElementById('ewa-qr-img');
+        $('#sanad-qr-fullscreen').on('click', function() {
+            var img = document.getElementById('sanad-qr-img');
             if (img.requestFullscreen) {
                 img.requestFullscreen();
             } else if (img.webkitRequestFullscreen) {
@@ -102,7 +102,7 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
     }
 
     function fetchAndUpdateData() {
-        $('#ewa-refresh-icon').addClass('fa-spin');
+        $('#sanad-refresh-icon').addClass('fa-spin');
 
         $.ajax({
             url:  Config.monitorUrl,
@@ -114,12 +114,12 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
                     updateStatsBar(response.students);
                     updateStudentRows(response.students);
                 }
-                $('#ewa-refresh-icon').removeClass('fa-spin');
+                $('#sanad-refresh-icon').removeClass('fa-spin');
                 secondsLeft = refreshSeconds;
                 startAutoRefresh();
             },
             error: function() {
-                $('#ewa-refresh-icon').removeClass('fa-spin');
+                $('#sanad-refresh-icon').removeClass('fa-spin');
                 secondsLeft = refreshSeconds;
                 startAutoRefresh();
             }
@@ -132,7 +132,7 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
         countdownTimer = setInterval(function() {
             secondsLeft--;
             if (secondsLeft < 0) { secondsLeft = 0; }
-            var el = document.getElementById('ewa-refresh-countdown');
+            var el = document.getElementById('sanad-refresh-countdown');
             if (el) {
                 el.textContent = 'Auto-refresh in ' + secondsLeft + 's';
             }
@@ -149,20 +149,20 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
             violations += (s.violationcount || 0);
         });
 
-        setStatNumber('.ewa-stat-total .ewa-stat-number',      students.length);
-        setStatNumber('.ewa-stat-active .ewa-stat-number',     active);
-        setStatNumber('.ewa-stat-waiting .ewa-stat-number',    waiting);
-        setStatNumber('.ewa-stat-expired .ewa-stat-number',    expired);
-        setStatNumber('.ewa-stat-violations .ewa-stat-number', violations);
+        setStatNumber('.sanad-stat-total .sanad-stat-number',      students.length);
+        setStatNumber('.sanad-stat-active .sanad-stat-number',     active);
+        setStatNumber('.sanad-stat-waiting .sanad-stat-number',    waiting);
+        setStatNumber('.sanad-stat-expired .sanad-stat-number',    expired);
+        setStatNumber('.sanad-stat-violations .sanad-stat-number', violations);
     }
 
     function setStatNumber(sel, val) {
         var el = document.querySelector(sel);
         if (el && el.textContent != String(val)) {
             el.textContent = val;
-            el.closest('.ewa-stat-card').classList.add('ewa-pulse');
+            el.closest('.sanad-stat-card').classList.add('sanad-pulse');
             setTimeout(function() {
-                el.closest('.ewa-stat-card').classList.remove('ewa-pulse');
+                el.closest('.sanad-stat-card').classList.remove('sanad-pulse');
             }, 600);
         }
     }
@@ -173,16 +173,16 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
             if (!row) { return; }
 
             // Update status badge.
-            var statusTd = row.querySelector('.ewa-td-status');
+            var statusTd = row.querySelector('.sanad-td-status');
             if (statusTd) {
-                var badge = statusTd.querySelector('.ewa-badge');
+                var badge = statusTd.querySelector('.sanad-badge');
                 if (badge && badge.dataset.status !== s.status) {
                     statusTd.innerHTML = renderStatusBadge(s.status);
                 }
             }
 
             // Update last heartbeat.
-            var hbTd = row.querySelector('.ewa-td-hb');
+            var hbTd = row.querySelector('.sanad-td-hb');
             if (hbTd && s.lastheartbeat) {
                 var ago = Math.round(Date.now() / 1000) - s.lastheartbeat;
                 hbTd.innerHTML = '<span class="' + (ago > 120 ? 'text-danger' : 'text-success') + '">'
@@ -190,50 +190,50 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
             }
 
             // Update violation count badge.
-            var violTd = row.querySelector('.ewa-td-violations');
+            var violTd = row.querySelector('.sanad-td-violations');
             if (violTd) {
                 var cnt = s.violationcount || 0;
-                var existing = violTd.querySelector('.ewa-btn-violations, .ewa-badge-success');
+                var existing = violTd.querySelector('.sanad-btn-violations, .sanad-badge-success');
                 if (existing && parseInt(existing.textContent) !== cnt) {
                     if (cnt > 0) {
-                        var vcls = cnt >= 3 ? 'ewa-badge ewa-badge-danger' : 'ewa-badge ewa-badge-warning';
-                        violTd.innerHTML = '<button type="button" class="' + vcls + ' ewa-btn-violations"'
+                        var vcls = cnt >= 3 ? 'sanad-badge sanad-badge-danger' : 'sanad-badge sanad-badge-warning';
+                        violTd.innerHTML = '<button type="button" class="' + vcls + ' sanad-btn-violations"'
                             + ' data-userid="' + s.userid + '"'
                             + ' data-name="' + escHtml(s.fullname) + '"'
                             + ' data-violations=\'' + JSON.stringify(s.violations) + '\'>'
                             + '<i class="fa fa-exclamation-triangle mr-1"></i>' + cnt
                             + '</button>';
                     } else {
-                        violTd.innerHTML = '<span class="ewa-badge ewa-badge-success"><i class="fa fa-check mr-1"></i>0</span>';
+                        violTd.innerHTML = '<span class="sanad-badge sanad-badge-success"><i class="fa fa-check mr-1"></i>0</span>';
                     }
                 }
             }
 
             // Update row class.
-            row.className = row.className.replace(/ewa-row-\w+/g, '').trim();
-            row.classList.add('ewa-row-' + s.status);
-            if (s.violationcount >= 3) { row.classList.add('ewa-row-alert'); }
+            row.className = row.className.replace(/sanad-row-\w+/g, '').trim();
+            row.classList.add('sanad-row-' + s.status);
+            if (s.violationcount >= 3) { row.classList.add('sanad-row-alert'); }
         });
     }
 
     function renderStatusBadge(status) {
         var badges = {
-            'active':  '<span class="ewa-badge ewa-badge-success" data-status="active"><i class="fa fa-check-circle mr-1"></i>Active</span>',
-            'waiting': '<span class="ewa-badge ewa-badge-warning" data-status="waiting"><i class="fa fa-hourglass-half mr-1"></i>Waiting</span>',
-            'expired': '<span class="ewa-badge ewa-badge-danger"  data-status="expired"><i class="fa fa-times-circle mr-1"></i>Expired</span>'
+            'active':  '<span class="sanad-badge sanad-badge-success" data-status="active"><i class="fa fa-check-circle mr-1"></i>Active</span>',
+            'waiting': '<span class="sanad-badge sanad-badge-warning" data-status="waiting"><i class="fa fa-hourglass-half mr-1"></i>Waiting</span>',
+            'expired': '<span class="sanad-badge sanad-badge-danger"  data-status="expired"><i class="fa fa-times-circle mr-1"></i>Expired</span>'
         };
-        return badges[status] || '<span class="ewa-badge ewa-badge-secondary">' + escHtml(status) + '</span>';
+        return badges[status] || '<span class="sanad-badge sanad-badge-secondary">' + escHtml(status) + '</span>';
     }
 
     // ── QR Modal ──────────────────────────────────────────────────────────────
     function openQrModal(name, imgSrc, url, shortcode) {
-        document.getElementById('ewa-qr-modal-title').textContent = 'QR Code — ' + name;
-        document.getElementById('ewa-qr-student-name').textContent = name;
-        document.getElementById('ewa-qr-img').src = imgSrc;
-        document.getElementById('ewa-qr-url-text').textContent = url;
+        document.getElementById('sanad-qr-modal-title').textContent = 'QR Code — ' + name;
+        document.getElementById('sanad-qr-student-name').textContent = name;
+        document.getElementById('sanad-qr-img').src = imgSrc;
+        document.getElementById('sanad-qr-url-text').textContent = url;
         
         var isArabic = $('html').attr('lang') === 'ar';
-        var shortCodeEl = document.getElementById('ewa-qr-short-code');
+        var shortCodeEl = document.getElementById('sanad-qr-short-code');
         if (shortcode) {
             shortCodeEl.innerHTML = (isArabic ? 'الكود المختصر: ' : 'Short Code: ')
                 + '<span class="badge badge-secondary p-2">' + escHtml(shortcode) + '</span>';
@@ -242,13 +242,13 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
             shortCodeEl.style.display = 'none';
         }
 
-        var modal = document.getElementById('ewa-qr-modal');
+        var modal = document.getElementById('sanad-qr-modal');
         modal.removeAttribute('hidden');
         document.body.style.overflow = 'hidden';
     }
 
     function closeQrModal() {
-        var modal = document.getElementById('ewa-qr-modal');
+        var modal = document.getElementById('sanad-qr-modal');
         modal.setAttribute('hidden', '');
         document.body.style.overflow = '';
     }
@@ -261,7 +261,7 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
             ? 'المخالفات المرصودة — ' + name + ' (' + violations.length + ')'
             : 'Violations — ' + name + ' (' + violations.length + ')';
             
-        document.getElementById('ewa-violations-modal-title').textContent = modalTitle;
+        document.getElementById('sanad-violations-modal-title').textContent = modalTitle;
 
         var headers = {
             num: '#',
@@ -271,7 +271,7 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
             details: isArabic ? 'التفاصيل' : 'Details'
         };
 
-        var html = '<table class="ewa-viol-table"><thead><tr>'
+        var html = '<table class="sanad-viol-table"><thead><tr>'
             + '<th>' + headers.num + '</th>'
             + '<th>' + headers.type + '</th>'
             + '<th>' + headers.time + '</th>'
@@ -351,14 +351,14 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
         }
         html += '</tbody></table>';
 
-        document.getElementById('ewa-violations-content').innerHTML = html;
-        var modal = document.getElementById('ewa-violations-modal');
+        document.getElementById('sanad-violations-content').innerHTML = html;
+        var modal = document.getElementById('sanad-violations-modal');
         modal.removeAttribute('hidden');
         document.body.style.overflow = 'hidden';
     }
 
     function closeViolationsModal() {
-        var modal = document.getElementById('ewa-violations-modal');
+        var modal = document.getElementById('sanad-violations-modal');
         modal.setAttribute('hidden', '');
         document.body.style.overflow = '';
     }
@@ -382,8 +382,8 @@ define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notificat
     // ── Pulse animation style injection ──────────────────────────────────────
     (function addPulseStyle() {
         var style = document.createElement('style');
-        style.textContent = '@keyframes ewaPulse{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}'
-            + '.ewa-pulse{animation:ewaPulse .6s ease}';
+        style.textContent = '@keyframes sanadPulse{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}'
+            + '.sanad-pulse{animation:sanadPulse .6s ease}';
         document.head.appendChild(style);
     })();
 

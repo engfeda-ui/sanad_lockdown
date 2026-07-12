@@ -15,17 +15,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Implementation of the quizaccess_ewa_lockdown plugin.
+ * Implementation of the quizaccess_sanad_lockdown plugin.
  *
- * This access rule enforces that students use the EWA Secure Browser Android
+ * This access rule enforces that students use the Sanad Secure Browser Android
  * app to access a quiz. It:
- *   - Blocks any request that does not carry the EWA app HTTP headers.
+ *   - Blocks any request that does not carry the Sanad app HTTP headers.
  *   - Issues a signed HMAC session token and embeds it in a QR code.
  *   - Validates the token on every page load while the quiz is in progress.
  *   - Logs all violations to the database.
  *
- * @package   quizaccess_ewa_lockdown
- * @copyright 2026 Mahmoud Salem <m.salem@ewa.bh>
+ * @package   quizaccess_sanad_lockdown
+ * @copyright 2026 Mahmoud Salem <m.salem@sanad.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -42,17 +42,17 @@ if (class_exists('\mod_quiz\local\access_rule_base')) {
     require_once($CFG->dirroot . '/mod/quiz/accessrule/accessrulebase.php');
 }
 
-use quizaccess_ewa_lockdown\token_manager;
-use quizaccess_ewa_lockdown\qr_generator;
-use quizaccess_ewa_lockdown\violation_logger;
+use quizaccess_sanad_lockdown\token_manager;
+use quizaccess_sanad_lockdown\qr_generator;
+use quizaccess_sanad_lockdown\violation_logger;
 
 /**
- * Access rule: requires the EWA Secure Browser Android app.
+ * Access rule: requires the Sanad Secure Browser Android app.
  *
- * @copyright 2026 Mahmoud Salem <m.salem@ewa.bh>
+ * @copyright 2026 Mahmoud Salem <m.salem@sanad.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class quizaccess_ewa_lockdown extends quiz_access_rule_base {
+class quizaccess_sanad_lockdown extends quiz_access_rule_base {
     /**
      * Return an instance of this rule if the quiz has it enabled.
      *
@@ -62,7 +62,7 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
      * @return quiz_access_rule_base|null The rule instance or null.
      */
     public static function make(quiz $quizobj, $timenow, $canignoretimelimits) {
-        if (empty($quizobj->get_quiz()->ewa_lockdown_enabled)) {
+        if (empty($quizobj->get_quiz()->sanad_lockdown_enabled)) {
             return null;
         }
         return new self($quizobj, $timenow);
@@ -78,45 +78,45 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
         // Enable / disable toggle.
         $mform->addElement(
             'selectyesno',
-            'ewa_lockdown_enabled',
-            get_string('requireewalockdown', 'quizaccess_ewa_lockdown')
+            'sanad_lockdown_enabled',
+            get_string('requiresanadlockdown', 'quizaccess_sanad_lockdown')
         );
-        $mform->addHelpButton('ewa_lockdown_enabled', 'requireewalockdown', 'quizaccess_ewa_lockdown');
-        $mform->setDefault('ewa_lockdown_enabled', 0);
+        $mform->addHelpButton('sanad_lockdown_enabled', 'requiresanadlockdown', 'quizaccess_sanad_lockdown');
+        $mform->setDefault('sanad_lockdown_enabled', 0);
 
         // Token expiry.
         $mform->addElement(
             'text',
-            'ewa_lockdown_tokenexpiry',
-            get_string('tokenexpiry', 'quizaccess_ewa_lockdown'),
+            'sanad_lockdown_tokenexpiry',
+            get_string('tokenexpiry', 'quizaccess_sanad_lockdown'),
             ['size' => 10]
         );
-        $mform->setType('ewa_lockdown_tokenexpiry', PARAM_INT);
-        $mform->setDefault('ewa_lockdown_tokenexpiry', 1800);
-        $mform->addHelpButton('ewa_lockdown_tokenexpiry', 'tokenexpiry', 'quizaccess_ewa_lockdown');
-        $mform->addRule('ewa_lockdown_tokenexpiry', null, 'numeric', null, 'client');
-        $mform->hideIf('ewa_lockdown_tokenexpiry', 'ewa_lockdown_enabled', 'eq', 0);
+        $mform->setType('sanad_lockdown_tokenexpiry', PARAM_INT);
+        $mform->setDefault('sanad_lockdown_tokenexpiry', 1800);
+        $mform->addHelpButton('sanad_lockdown_tokenexpiry', 'tokenexpiry', 'quizaccess_sanad_lockdown');
+        $mform->addRule('sanad_lockdown_tokenexpiry', null, 'numeric', null, 'client');
+        $mform->hideIf('sanad_lockdown_tokenexpiry', 'sanad_lockdown_enabled', 'eq', 0);
 
         // Emergency exit password.
         $mform->addElement(
             'passwordunmask',
-            'ewa_lockdown_exitpassword',
-            get_string('exitpassword', 'quizaccess_ewa_lockdown')
+            'sanad_lockdown_exitpassword',
+            get_string('exitpassword', 'quizaccess_sanad_lockdown')
         );
-        $mform->setType('ewa_lockdown_exitpassword', PARAM_RAW);
-        $mform->addHelpButton('ewa_lockdown_exitpassword', 'exitpassword', 'quizaccess_ewa_lockdown');
-        $mform->hideIf('ewa_lockdown_exitpassword', 'ewa_lockdown_enabled', 'eq', 0);
+        $mform->setType('sanad_lockdown_exitpassword', PARAM_RAW);
+        $mform->addHelpButton('sanad_lockdown_exitpassword', 'exitpassword', 'quizaccess_sanad_lockdown');
+        $mform->hideIf('sanad_lockdown_exitpassword', 'sanad_lockdown_enabled', 'eq', 0);
 
         // Allowed Whitelisted Domains / URLs.
         $mform->addElement(
             'textarea',
-            'ewa_lockdown_alloweddomains',
-            get_string('alloweddomains', 'quizaccess_ewa_lockdown'),
-            ['rows' => 4, 'cols' => 60, 'placeholder' => "backup-lms.ewa.edu.sa\ncdn.ewa.edu.sa"]
+            'sanad_lockdown_alloweddomains',
+            get_string('alloweddomains', 'quizaccess_sanad_lockdown'),
+            ['rows' => 4, 'cols' => 60, 'placeholder' => "backup-lms.sanad.com\ncdn.sanad.com"]
         );
-        $mform->setType('ewa_lockdown_alloweddomains', PARAM_RAW);
-        $mform->addHelpButton('ewa_lockdown_alloweddomains', 'alloweddomains', 'quizaccess_ewa_lockdown');
-        $mform->hideIf('ewa_lockdown_alloweddomains', 'ewa_lockdown_enabled', 'eq', 0);
+        $mform->setType('sanad_lockdown_alloweddomains', PARAM_RAW);
+        $mform->addHelpButton('sanad_lockdown_alloweddomains', 'alloweddomains', 'quizaccess_sanad_lockdown');
+        $mform->hideIf('sanad_lockdown_alloweddomains', 'sanad_lockdown_enabled', 'eq', 0);
     }
 
     /**
@@ -127,18 +127,18 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
     public static function save_settings($quiz) {
         global $DB;
 
-        $enabled        = !empty($quiz->ewa_lockdown_enabled) ? 1 : 0;
+        $enabled        = !empty($quiz->sanad_lockdown_enabled) ? 1 : 0;
         // FIX: Enforce minimum expiry of 300 seconds to prevent instantly-expiring tokens.
-        $expiry         = max(300, isset($quiz->ewa_lockdown_tokenexpiry) ? (int)$quiz->ewa_lockdown_tokenexpiry : 1800);
-        $exitpass       = isset($quiz->ewa_lockdown_exitpassword) ? trim($quiz->ewa_lockdown_exitpassword) : '';
-        $alloweddomains = isset($quiz->ewa_lockdown_alloweddomains) ? trim($quiz->ewa_lockdown_alloweddomains) : '';
+        $expiry         = max(300, isset($quiz->sanad_lockdown_tokenexpiry) ? (int)$quiz->sanad_lockdown_tokenexpiry : 1800);
+        $exitpass       = isset($quiz->sanad_lockdown_exitpassword) ? trim($quiz->sanad_lockdown_exitpassword) : '';
+        $alloweddomains = isset($quiz->sanad_lockdown_alloweddomains) ? trim($quiz->sanad_lockdown_alloweddomains) : '';
 
         if (!$enabled) {
-            $DB->delete_records('quizaccess_ewa_lockdown', ['quizid' => $quiz->id]);
+            $DB->delete_records('quizaccess_sanad_lockdown', ['quizid' => $quiz->id]);
             return;
         }
 
-        $record = $DB->get_record('quizaccess_ewa_lockdown', ['quizid' => $quiz->id]);
+        $record = $DB->get_record('quizaccess_sanad_lockdown', ['quizid' => $quiz->id]);
         if ($record) {
             $record->enabled        = $enabled;
             $record->tokenexpiry    = $expiry;
@@ -152,7 +152,7 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
                     $record->exitpassword = password_hash($exitpass, PASSWORD_BCRYPT);
                 }
             }
-            $DB->update_record('quizaccess_ewa_lockdown', $record);
+            $DB->update_record('quizaccess_sanad_lockdown', $record);
         } else {
             $record = new stdClass();
             $record->quizid         = $quiz->id;
@@ -165,7 +165,7 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
             $isalreadyhash = (strpos($exitpass, '$2y$') === 0 && strlen($exitpass) === 60);
             $record->exitpassword   = ($exitpass !== '' && !$isalreadyhash)
                 ? password_hash($exitpass, PASSWORD_BCRYPT) : null;
-            $DB->insert_record('quizaccess_ewa_lockdown', $record);
+            $DB->insert_record('quizaccess_sanad_lockdown', $record);
         }
     }
 
@@ -176,9 +176,9 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
      */
     public static function delete_settings($quiz) {
         global $DB;
-        $DB->delete_records('quizaccess_ewa_lockdown', ['quizid' => $quiz->id]);
-        $DB->delete_records('quizaccess_ewa_sessions', ['quizid' => $quiz->id]);
-        $DB->delete_records('quizaccess_ewa_violations', ['quizid' => $quiz->id]);
+        $DB->delete_records('quizaccess_sanad_lockdown', ['quizid' => $quiz->id]);
+        $DB->delete_records('quizaccess_sanad_sessions', ['quizid' => $quiz->id]);
+        $DB->delete_records('quizaccess_sanad_violations', ['quizid' => $quiz->id]);
     }
 
     /**
@@ -189,17 +189,17 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
      */
     public static function get_settings_sql($quizid) {
         return [
-            'ewald.enabled AS ewa_lockdown_enabled,'
-            . ' ewald.tokenexpiry AS ewa_lockdown_tokenexpiry,'
-            . ' ewald.exitpassword AS ewa_lockdown_exitpassword,'
-            . ' ewald.alloweddomains AS ewa_lockdown_alloweddomains',
-            'LEFT JOIN {quizaccess_ewa_lockdown} ewald ON ewald.quizid = quiz.id',
+            'sanadld.enabled AS sanad_lockdown_enabled,'
+            . ' sanadld.tokenexpiry AS sanad_lockdown_tokenexpiry,'
+            . ' sanadld.exitpassword AS sanad_lockdown_exitpassword,'
+            . ' sanadld.alloweddomains AS sanad_lockdown_alloweddomains',
+            'LEFT JOIN {quizaccess_sanad_lockdown} sanadld ON sanadld.quizid = quiz.id',
             [],
         ];
     }
 
     /**
-     * Prevent a new attempt if the request does not come from the EWA app
+     * Prevent a new attempt if the request does not come from the Sanad app
      * or if the token is invalid.
      *
      * @param int    $numprevattempts Number of previous attempts.
@@ -214,7 +214,7 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
             return false; // Let teachers review/preview without constraints.
         }
 
-        if (!token_manager::is_ewa_browser_request()) {
+        if (!token_manager::is_sanad_browser_request()) {
             violation_logger::log(
                 $this->quiz->id,
                 $USER->id,
@@ -222,7 +222,7 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
                 '',
                 ['page' => 'prevent_new_attempt']
             );
-            return get_string('mustuseewaapp', 'quizaccess_ewa_lockdown');
+            return get_string('mustusesanadapp', 'quizaccess_sanad_lockdown');
         }
 
         if (!token_manager::validate_from_request($this->quiz->id, $USER->id)) {
@@ -232,7 +232,7 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
                 violation_logger::TYPE_INVALID_TOKEN,
                 $_SERVER[token_manager::HEADER_DEVICE] ?? ''
             );
-            return get_string('tokenerror', 'quizaccess_ewa_lockdown');
+            return get_string('tokenerror', 'quizaccess_sanad_lockdown');
         }
 
         return false;
@@ -241,7 +241,7 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
     /**
      * Whether the user needs to pass a preflight check before starting.
      *
-     * If the request is NOT from the EWA app, we show the preflight page
+     * If the request is NOT from the Sanad app, we show the preflight page
      * containing the QR code. If it IS from the app with a valid token,
      * no preflight is required.
      *
@@ -256,7 +256,7 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
             return false; // Teachers do not need preflight check.
         }
 
-        if (!token_manager::is_ewa_browser_request()) {
+        if (!token_manager::is_sanad_browser_request()) {
             return true;
         }
 
@@ -282,13 +282,13 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
 
         if (!$isteacher) {
             // Students see a text instruction indicating they need the QR from the teacher.
-            $html  = '<div class="ewa-lockdown-preflight">';
+            $html  = '<div class="sanad-lockdown-preflight">';
             $html .= '<div class="alert alert-danger" role="alert">';
-            $html .= '<strong>' . get_string('accessdenied', 'quizaccess_ewa_lockdown') . '</strong> ';
-            $html .= get_string('mustuseewaapp', 'quizaccess_ewa_lockdown');
+            $html .= '<strong>' . get_string('accessdenied', 'quizaccess_sanad_lockdown') . '</strong> ';
+            $html .= get_string('mustusesanadapp', 'quizaccess_sanad_lockdown');
             $html .= '</div>';
             $html .= '<p class="font-weight-bold text-center text-primary" style="font-size:1.1em; margin: 15px 0;"><strong>'
-                . get_string('requestfromteacher', 'quizaccess_ewa_lockdown') . '</strong></p>';
+                . get_string('requestfromteacher', 'quizaccess_sanad_lockdown') . '</strong></p>';
             $html .= '</div>';
 
             $mform->addElement('html', $html);
@@ -297,7 +297,7 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
 
         $quizid  = $this->quizobj->get_quizid();
         $cmid    = $this->quizobj->get_cmid();
-        $expiry  = (int)($this->quiz->ewa_lockdown_tokenexpiry ?? 1800);
+        $expiry  = (int)($this->quiz->sanad_lockdown_tokenexpiry ?? 1800);
 
         // Issue a token (this replaces any previous one for this user+quiz).
         $token   = token_manager::issue($quizid, $USER->id, '', $expiry);
@@ -305,26 +305,26 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
         $qrimg   = qr_generator::get_img_tag(
             $url,
             300,
-            get_string('qrcode_alttext', 'quizaccess_ewa_lockdown')
+            get_string('qrcode_alttext', 'quizaccess_sanad_lockdown')
         );
 
         $shortcode = token_manager::get_short_code($token);
 
         // Build the HTML to show in the preflight form (visible for teachers).
-        $html  = '<div class="ewa-lockdown-preflight">';
+        $html  = '<div class="sanad-lockdown-preflight">';
         $html .= '<div class="alert alert-warning" role="alert">';
-        $html .= '<strong>' . get_string('accessdenied', 'quizaccess_ewa_lockdown') . '</strong> ';
-        $html .= get_string('mustuseewaapp', 'quizaccess_ewa_lockdown');
+        $html .= '<strong>' . get_string('accessdenied', 'quizaccess_sanad_lockdown') . '</strong> ';
+        $html .= get_string('mustusesanadapp', 'quizaccess_sanad_lockdown');
         $html .= '</div>';
-        $html .= '<p>' . get_string('scanqrtostart', 'quizaccess_ewa_lockdown') . '</p>';
-        $html .= '<div class="ewa-qrcode-wrapper text-center">' . $qrimg . '</div>';
+        $html .= '<p>' . get_string('scanqrtostart', 'quizaccess_sanad_lockdown') . '</p>';
+        $html .= '<div class="sanad-qrcode-wrapper text-center">' . $qrimg . '</div>';
         if ($shortcode !== '') {
             $html .= '<p class="text-center font-weight-bold my-3" style="font-size:1.15em;">';
-            $html .= get_string('shortcode', 'quizaccess_ewa_lockdown') . ': '
+            $html .= get_string('shortcode', 'quizaccess_sanad_lockdown') . ': '
                 . '<span class="badge badge-secondary p-2">' . s($shortcode) . '</span>';
             $html .= '</p>';
         }
-        $html .= '<p class="text-muted small">' . get_string('downloadapp', 'quizaccess_ewa_lockdown') . '</p>';
+        $html .= '<p class="text-muted small">' . get_string('downloadapp', 'quizaccess_sanad_lockdown') . '</p>';
         $html .= '</div>';
 
         $mform->addElement('html', $html);
@@ -345,7 +345,7 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
      */
     public function validate_preflight_check($data, $files, $errors, $attemptid) {
         // Prevent any manual submission of the preflight form.
-        $errors['ewa_lockdown_qr'] = get_string('mustuseewaapp', 'quizaccess_ewa_lockdown');
+        $errors['sanad_lockdown_qr'] = get_string('mustusesanadapp', 'quizaccess_sanad_lockdown');
         return $errors;
     }
 
@@ -367,8 +367,8 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
     public function description() {
         global $USER;
 
-        // If accessed from within the EWA secure browser with a valid token, hide the QR.
-        if (token_manager::is_ewa_browser_request() && token_manager::validate_from_request($this->quiz->id, $USER->id)) {
+        // If accessed from within the Sanad secure browser with a valid token, hide the QR.
+        if (token_manager::is_sanad_browser_request() && token_manager::validate_from_request($this->quiz->id, $USER->id)) {
             return [];
         }
 
@@ -383,26 +383,26 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
             // Students see a text instruction indicating they need the QR from the teacher.
             $inner  = \html_writer::tag(
                 'p',
-                \html_writer::tag('strong', get_string('accessdenied', 'quizaccess_ewa_lockdown')),
+                \html_writer::tag('strong', get_string('accessdenied', 'quizaccess_sanad_lockdown')),
                 ['class' => 'text-danger text-center']
             );
-            $inner .= \html_writer::tag('p', get_string('mustuseewaapp', 'quizaccess_ewa_lockdown'), ['class' => 'text-center']);
+            $inner .= \html_writer::tag('p', get_string('mustusesanadapp', 'quizaccess_sanad_lockdown'), ['class' => 'text-center']);
             $inner .= \html_writer::tag(
                 'p',
-                get_string('requestfromteacher', 'quizaccess_ewa_lockdown'),
+                get_string('requestfromteacher', 'quizaccess_sanad_lockdown'),
                 ['class' => 'font-weight-bold text-center text-primary', 'style' => 'font-size: 1.1em;']
             );
 
             return [
                 \html_writer::div(
                     $inner,
-                    'ewa-lockdown-description p-3 border rounded bg-light mb-3',
+                    'sanad-lockdown-description p-3 border rounded bg-light mb-3',
                     ['style' => 'max-width:500px;margin:0 auto']
                 ),
             ];
         }
 
-        $expiry  = (int)($this->quiz->ewa_lockdown_tokenexpiry ?? 1800);
+        $expiry  = (int)($this->quiz->sanad_lockdown_tokenexpiry ?? 1800);
 
         // Issue a token (replaces any previous one for this user+quiz).
         $token   = token_manager::issue($quizid, $USER->id, '', $expiry);
@@ -410,14 +410,14 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
         $qrimg   = qr_generator::get_img_tag(
             $url,
             250,
-            get_string('qrcode_alttext', 'quizaccess_ewa_lockdown')
+            get_string('qrcode_alttext', 'quizaccess_sanad_lockdown')
         );
 
         // Monitor dashboard button for teachers.
-        $monitorurl = new \moodle_url('/mod/quiz/accessrule/ewa_lockdown/monitor.php', ['cmid' => $cmid]);
+        $monitorurl = new \moodle_url('/mod/quiz/accessrule/sanad_lockdown/monitor.php', ['cmid' => $cmid]);
         $monitorbtn = \html_writer::link(
             $monitorurl,
-            '<i class="fa fa-desktop mr-1"></i>' . get_string('monitor_link', 'quizaccess_ewa_lockdown'),
+            '<i class="fa fa-desktop mr-1"></i>' . get_string('monitor_link', 'quizaccess_sanad_lockdown'),
             [
                 'class'  => 'btn btn-primary btn-sm mb-3',
                 'target' => '_blank',
@@ -430,19 +430,19 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
         // Use html_writer::div so the content is treated as raw HTML (not escaped).
         // The quiz renderer wraps each description() item in <p> tags with html_writer
         // which escapes strings — returning an html_writer output bypasses that.
-        $inner  = \html_writer::tag('p', \html_writer::tag('strong', get_string('scanqrtostart', 'quizaccess_ewa_lockdown')));
-        $inner .= \html_writer::div($qrimg, 'ewa-qrcode-wrapper text-center mb-2');
+        $inner  = \html_writer::tag('p', \html_writer::tag('strong', get_string('scanqrtostart', 'quizaccess_sanad_lockdown')));
+        $inner .= \html_writer::div($qrimg, 'sanad-qrcode-wrapper text-center mb-2');
         if ($shortcode !== '') {
             $inner .= \html_writer::tag(
                 'p',
-                get_string('shortcode', 'quizaccess_ewa_lockdown') . ': ' .
+                get_string('shortcode', 'quizaccess_sanad_lockdown') . ': ' .
                     \html_writer::span(s($shortcode), 'badge badge-secondary p-2'),
                 ['class' => 'text-center font-weight-bold my-2', 'style' => 'font-size:1.15em;']
             );
         }
         $inner .= \html_writer::tag(
             'p',
-            get_string('downloadapp', 'quizaccess_ewa_lockdown'),
+            get_string('downloadapp', 'quizaccess_sanad_lockdown'),
             ['class' => 'text-muted small text-center']
         );
         $inner .= \html_writer::div($monitorbtn, 'text-center mt-3');
@@ -450,7 +450,7 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
         return [
             \html_writer::div(
                 $inner,
-                'ewa-lockdown-description text-center p-3 border rounded bg-light mb-3',
+                'sanad-lockdown-description text-center p-3 border rounded bg-light mb-3',
                 ['style' => 'max-width:500px;margin:0 auto']
             ),
         ];

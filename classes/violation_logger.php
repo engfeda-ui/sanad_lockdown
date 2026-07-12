@@ -15,20 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Violation logger for quizaccess_ewa_lockdown.
+ * Violation logger for quizaccess_sanad_lockdown.
  *
- * @package   quizaccess_ewa_lockdown
- * @copyright 2026 Mahmoud Salem <m.salem@ewa.bh>
+ * @package   quizaccess_sanad_lockdown
+ * @copyright 2026 Mahmoud Salem <m.salem@sanad.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace quizaccess_ewa_lockdown;
+namespace quizaccess_sanad_lockdown;
 
 /**
  * Records security violations detected during secure exams.
  */
 class violation_logger {
-    /** @var string Attempt from non-EWA browser */
+    /** @var string Attempt from non-Sanad browser */
     const TYPE_WRONG_BROWSER   = 'wrong_browser';
 
     /** @var string Session token is invalid */
@@ -69,7 +69,7 @@ class violation_logger {
         $record->details       = !empty($details) ? json_encode($details) : null;
         $record->timecreated   = time();
 
-        $DB->insert_record('quizaccess_ewa_violations', $record);
+        $DB->insert_record('quizaccess_sanad_violations', $record);
     }
 
     /**
@@ -91,7 +91,7 @@ class violation_logger {
             $params['violationtype'] = $violationtype;
         }
 
-        return $DB->count_records_select('quizaccess_ewa_violations', $where, $params);
+        return $DB->count_records_select('quizaccess_sanad_violations', $where, $params);
     }
 
     /**
@@ -103,6 +103,6 @@ class violation_logger {
      */
     public static function get_all(int $quizid, int $userid): array {
         global $DB;
-        return $DB->get_records('quizaccess_ewa_violations', ['quizid' => $quizid, 'userid' => $userid], 'timecreated ASC');
+        return $DB->get_records('quizaccess_sanad_violations', ['quizid' => $quizid, 'userid' => $userid], 'timecreated ASC');
     }
 }
