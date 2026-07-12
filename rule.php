@@ -145,9 +145,12 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
             $record->alloweddomains = $alloweddomains;
             $record->timemodified   = time();
             // FIX: Only update the exit password hash when the teacher actually enters a new one.
-            // Previously, leaving the field blank would erase the existing password (set it to null).
+            // Also, avoid re-hashing the pre-populated hash if the user didn't change it.
             if ($exitpass !== '') {
-                $record->exitpassword = password_hash($exitpass, PASSWORD_BCRYPT);
+                $isalreadyhash = (strpos($exitpass, '$2y$') === 0 && strlen($exitpass) === 60);
+                if (!$isalreadyhash) {
+                    $record->exitpassword = password_hash($exitpass, PASSWORD_BCRYPT);
+                }
             }
             $DB->update_record('quizaccess_ewa_lockdown', $record);
         } else {
@@ -159,7 +162,9 @@ class quizaccess_ewa_lockdown extends quiz_access_rule_base {
             $record->timecreated    = time();
             $record->timemodified   = time();
             // Only set password if one was provided during initial creation.
-            $record->exitpassword   = $exitpass !== '' ? password_hash($exitpass, PASSWORD_BCRYPT) : null;
+            $isalreadyhash = (strpos($exitpass, '$2y$') === 0 && strlen($exitpass) === 60);
+            $record->exitpassword   = ($exitpass !== '' && !$isalreadyhash)
+                ? password_hash($exitpass, PASSWORD_BCRYPT) : null;
             $DB->insert_record('quizaccess_ewa_lockdown', $record);
         }
     }
