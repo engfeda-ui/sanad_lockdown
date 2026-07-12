@@ -45,15 +45,9 @@ if (file_exists($target_path)) {
     echo "Exists: No (The folder is not there anymore!)\n";
 }
 
-echo "\n=== Access Rule Directory Listing ===\n";
-$parent_path = '/var/www/html/mod/quiz/accessrule';
-if (is_dir($parent_path)) {
-    $dirs = scandir($parent_path);
-    foreach ($dirs as $d) {
-        if ($d != '.' && $d != '..') {
-            $p = $parent_path . '/' . $d;
-            $owner = posix_getpwuid(fileowner($p));
-            echo " - $d (Owner: " . $owner['name'] . ", Writable: " . (is_writable($p) ? 'Yes' : 'No') . ")\n";
-        }
-    }
-}
+echo "\n=== Shell Directory Listing ===\n";
+echo shell_exec('ls -la /var/www/html/mod/quiz/accessrule/');
+
+echo "\n=== EWA Lockdown Folder Details ===\n";
+echo shell_exec('ls -la /var/www/html/mod/quiz/accessrule/ewa_lockdown/');
+?>
