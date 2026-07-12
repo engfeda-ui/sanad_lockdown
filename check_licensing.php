@@ -1,27 +1,25 @@
 <?php
 header('Content-Type: text/plain');
-echo "=== System Info ===\n";
-echo "Current PHP User: " . exec('whoami') . "\n";
-echo "Document Root: " . $_SERVER['DOCUMENT_ROOT'] . "\n";
-
-echo "\n=== Listing /var/www/html ===\n";
-if (is_dir('/var/www/html')) {
-    foreach (scandir('/var/www/html') as $file) {
+echo "=== Licensing Folder Check ===\n";
+$dir = '/var/www/html/licensing';
+if (is_dir($dir)) {
+    echo "Directory exists: Yes\n";
+    echo "Permissions: " . substr(sprintf('%o', fileperms($dir)), -4) . "\n";
+    $owner = posix_getpwuid(fileowner($dir));
+    $group = posix_getgrgid(filegroup($dir));
+    echo "Owner: " . ($owner ? $owner['name'] : fileowner($dir)) . "\n";
+    echo "Group: " . ($group ? $group['name'] : filegroup($dir)) . "\n";
+    echo "Is Writable by PHP: " . (is_writable($dir) ? 'Yes' : 'No') . "\n";
+    
+    echo "\n=== Files in $dir ===\n";
+    foreach (scandir($dir) as $file) {
         if ($file === '.' || $file === '..') continue;
-        $path = '/var/www/html/' . $file;
-        echo $file . (is_dir($path) ? ' (dir)' : ' (file)') . "\n";
+        $path = $dir . '/' . $file;
+        $fperms = substr(sprintf('%o', fileperms($path)), -4);
+        $fowner = posix_getpwuid(fileowner($path));
+        $fowner_name = $fowner ? $fowner['name'] : fileowner($path);
+        echo "$file | Owner: $fowner_name | Perms: $fperms\n";
     }
 } else {
-    echo "/var/www/html does not exist\n";
-}
-
-echo "\n=== Listing /home/ubuntu/moodle-project ===\n";
-if (is_dir('/home/ubuntu/moodle-project')) {
-    foreach (scandir('/home/ubuntu/moodle-project') as $file) {
-        if ($file === '.' || $file === '..') continue;
-        $path = '/home/ubuntu/moodle-project/' . $file;
-        echo $file . (is_dir($path) ? ' (dir)' : ' (file)') . "\n";
-    }
-} else {
-    echo "/home/ubuntu/moodle-project does not exist\n";
+    echo "Directory $dir does not exist\n";
 }
