@@ -83,4 +83,39 @@ class rule_test extends \advanced_testcase {
         $this->assertEquals(1, violation_logger::count($quizid, $userid, violation_logger::TYPE_WRONG_BROWSER));
         $this->assertEquals(1, violation_logger::count($quizid, $userid, violation_logger::TYPE_FOCUS_LOST));
     }
+
+    public function test_teacher_token_scanned_by_student() {
+        global $DB;
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course();
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $quizid = $quiz->id;
+
+        $teacher = $this->getDataGenerator()->create_user();
+        $student = $this->getDataGenerator()->create_user();
+
+        $cm = get_coursemodule_from_instance('quiz', $quizid);
+        $context = \context_module::instance($cm->id);
+        
+        $roleid = $DB->get_field('role', 'id', ['shortname' => 'editingteacher']);
+        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, $roleid);
+        assign_capability('mod/quiz:preview', CAP_ALLOW, $roleid, $context->id);
+
+        $teachertoken = token_manager::issue($quizid, $teacher->id, '', 1800);
+
+        $_SERVER['HTTP_X_EWA_DEVICE_ID'] = 'student-device-999';
+        
+        $this->assertTrue(token_manager::validate($quizid, $student->id, $teachertoken));
+
+        $studentsession = $DB->get_record('quizaccess_ewa_sessions', [
+            'quizid' => $quizid,
+            'userid' => $student->id,
+        ]);
+        $this->assertNotEmpty($studentsession);
+        $this->assertEquals('student-device-999', $studentsession->deviceid);
+        $this->assertNotEquals($teachertoken, $studentsession->token);
+
+        unset($_SERVER['HTTP_X_EWA_DEVICE_ID']);
+    }
 }

@@ -157,6 +157,7 @@ class token_manager {
         }
 
         // If the token was not issued for this student, check if it was issued for a teacher/admin.
+        $isteachertoken = false;
         if ((int) $record->userid !== (int) $userid) {
             $cm = get_coursemodule_from_instance('quiz', $quizid);
             if (!$cm) {
@@ -170,6 +171,7 @@ class token_manager {
             ) {
                 return false;
             }
+            $isteachertoken = true;
         }
 
         if (time() > $record->timeexpires) {
@@ -181,20 +183,45 @@ class token_manager {
         // Get the device ID from the request headers.
         $requestdeviceid = $_SERVER[self::HEADER_DEVICE] ?? '';
 
-        // If the session record has no device ID bound yet, bind the current request device ID.
-        if (empty($record->deviceid) && !empty($requestdeviceid)) {
-            $record->deviceid = $requestdeviceid;
-            $DB->update_record('quizaccess_ewa_sessions', $record);
-        } else if (!empty($record->deviceid) && !empty($requestdeviceid) && $record->deviceid !== $requestdeviceid) {
-            // If the device ID in request does not match the bound device ID, log violation and deny.
-            violation_logger::log(
-                $quizid,
-                $userid,
-                violation_logger::TYPE_DEVICE_MISMATCH,
-                $requestdeviceid,
-                ['bound_device' => $record->deviceid]
-            );
-            return false;
+        if ($isteachertoken) {
+            // If it is a teacher token, we do NOT bind or check the device ID on the teacher's session record.
+            // Instead, we ensure the student has their own session record in the database.
+            $studentsession = $DB->get_record('quizaccess_ewa_sessions', [
+                'quizid' => $quizid,
+                'userid' => $userid,
+            ]);
+            if ($studentsession && time() > $studentsession->timeexpires) {
+                $DB->delete_records('quizaccess_ewa_sessions', ['id' => $studentsession->id]);
+                $studentsession = null;
+            }
+            if (!$studentsession) {
+                // Issue a new session/token for the student.
+                $settings = $DB->get_record('quizaccess_ewa_lockdown', ['quizid' => $quizid]);
+                $expiry = $settings ? (int)$settings->tokenexpiry : 1800;
+                self::issue($quizid, $userid, $requestdeviceid, $expiry);
+            } else {
+                // If student session exists but deviceid is not set yet, bind it.
+                if (empty($studentsession->deviceid) && !empty($requestdeviceid)) {
+                    $studentsession->deviceid = $requestdeviceid;
+                    $DB->update_record('quizaccess_ewa_sessions', $studentsession);
+                }
+            }
+        } else {
+            // If the session record has no device ID bound yet, bind the current request device ID.
+            if (empty($record->deviceid) && !empty($requestdeviceid)) {
+                $record->deviceid = $requestdeviceid;
+                $DB->update_record('quizaccess_ewa_sessions', $record);
+            } else if (!empty($record->deviceid) && !empty($requestdeviceid) && $record->deviceid !== $requestdeviceid) {
+                // If the device ID in request does not match the bound device ID, log violation and deny.
+                violation_logger::log(
+                    $quizid,
+                    $userid,
+                    violation_logger::TYPE_DEVICE_MISMATCH,
+                    $requestdeviceid,
+                    ['bound_device' => $record->deviceid]
+                );
+                return false;
+            }
         }
 
         return true;

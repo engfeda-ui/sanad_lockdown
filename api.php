@@ -214,6 +214,30 @@ if (!$session) {
     exit;
 }
 
+// If the token belongs to a teacher (someone with preview/viewreports capability),
+// we redirect to the student's actual session using the device ID.
+$cm = get_coursemodule_from_instance('quiz', $quizid);
+if ($cm) {
+    $context = \context_module::instance($cm->id);
+    if (
+        has_capability('mod/quiz:preview', $context, $session->userid) ||
+        has_capability('mod/quiz:viewreports', $context, $session->userid)
+    ) {
+        $studentsession = $DB->get_record_sql(
+            'SELECT s.*, l.tokenexpiry AS quiz_tokenexpiry,
+                    l.exitpassword AS quiz_exitpassword,
+                    l.alloweddomains AS quiz_alloweddomains
+               FROM {quizaccess_ewa_sessions} s
+               LEFT JOIN {quizaccess_ewa_lockdown} l ON l.quizid = s.quizid
+              WHERE s.deviceid = :deviceid AND s.quizid = :quizid',
+            ['deviceid' => $deviceid, 'quizid' => $quizid]
+        );
+        if ($studentsession) {
+            $session = $studentsession;
+        }
+    }
+}
+
 // Check if token has expired.
 if (time() > $session->timeexpires) {
     $DB->delete_records('quizaccess_ewa_sessions', ['id' => $session->id]);
