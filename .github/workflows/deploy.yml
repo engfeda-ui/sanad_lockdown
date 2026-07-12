@@ -30,12 +30,15 @@ jobs:
 
       - name: Delete Old ewa_lockdown Folder from Server
         run: |
-          ssh -tt -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
             # Path 1: local staging workspace
             rm -rf /home/ubuntu/moodle-project/mod/quiz/accessrule/ewa_lockdown
             
-            # Path 2: Apache web root directory
-            sudo rm -rf /var/www/html/mod/quiz/accessrule/ewa_lockdown
+            # Path 2: Apache web root directory (try as user first)
+            rm -rf /var/www/html/mod/quiz/accessrule/ewa_lockdown
             
-            echo 'Deleted old ewa_lockdown folder from both staging and web root directories.'
+            # Path 3: Try with non-interactive sudo if needed
+            sudo -n rm -rf /var/www/html/mod/quiz/accessrule/ewa_lockdown || true
+            
+            echo 'Completed old folder deletion attempts.'
           "
