@@ -24,6 +24,15 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Rebrand Plugin Folder on Server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            if [ -d /home/ubuntu/moodle-project/mod/quiz/accessrule/ewa_lockdown ]; then
+              rm -rf /home/ubuntu/moodle-project/mod/quiz/accessrule/ewa_lockdown
+              echo 'Removed old ewa_lockdown folder'
+            fi
+          "
+
       - name: Deploy via rsync
         run: |
-          rsync -avz --no-perms --no-owner --no-group --delete --exclude '.git*' ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/ubuntu/moodle-project/mod/quiz/accessrule/ewa_lockdown/
+          rsync -avz --no-perms --no-owner --no-group --delete --exclude '.git*' ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/ubuntu/moodle-project/mod/quiz/accessrule/sanad_lockdown/
