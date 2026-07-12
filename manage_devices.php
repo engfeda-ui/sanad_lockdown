@@ -138,8 +138,8 @@ echo $OUTPUT->header();
     :root {
         --dash-primary: #0f172a;
         --dash-secondary: #1e293b;
-        --dash-accent: #06b6d4;
-        --dash-accent-hover: #0891b2;
+        --dash-accent: #1a5296;
+        --dash-accent-hover: #0f3e7a;
         --dash-success: #10b981;
         --dash-danger: #ef4444;
         --dash-warning: #f59e0b;

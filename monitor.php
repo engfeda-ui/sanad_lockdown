@@ -632,7 +632,7 @@ function sanad_inline_styles(): string
   --sanad-green:   #22c55e;
   --sanad-yellow:  #f59e0b;
   --sanad-red:     #ef4444;
-  --sanad-blue:    #3b82f6;
+  --sanad-blue:    #1a5296;
   --sanad-gray:    #6b7280;
   --sanad-dark:    #1e293b;
   --sanad-surface: #f8fafc;
