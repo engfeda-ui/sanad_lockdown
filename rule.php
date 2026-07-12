@@ -112,7 +112,7 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
             'textarea',
             'sanad_lockdown_alloweddomains',
             get_string('alloweddomains', 'quizaccess_sanad_lockdown'),
-            ['rows' => 4, 'cols' => 60, 'placeholder' => "backup-lms.sanad.com\ncdn.sanad.com"]
+            ['rows' => 4, 'cols' => 60, 'placeholder' => "backup-lms.sanad.ws\ncdn.sanad.ws"]
         );
         $mform->setType('sanad_lockdown_alloweddomains', PARAM_RAW);
         $mform->addHelpButton('sanad_lockdown_alloweddomains', 'alloweddomains', 'quizaccess_sanad_lockdown');
