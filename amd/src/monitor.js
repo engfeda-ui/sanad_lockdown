@@ -17,7 +17,7 @@
  * AMD module: Sanad Monitor Dashboard — auto-refresh, modals, and live data.
  *
  * @module    quizaccess_sanad_lockdown/monitor
- * @copyright 2026 Mahmoud Salem <m.salem@sanad.com>
+ * @copyright 2026 Mahmoud Salem <eng.feda@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define(['jquery', 'core/ajax', 'core/notification'], function($, Ajax, Notification) {

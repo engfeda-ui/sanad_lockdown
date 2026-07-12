@@ -25,7 +25,7 @@
  *   - Logs all violations to the database.
  *
  * @package   quizaccess_sanad_lockdown
- * @copyright 2026 Mahmoud Salem <m.salem@sanad.com>
+ * @copyright 2026 Mahmoud Salem <eng.feda@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -49,7 +49,7 @@ use quizaccess_sanad_lockdown\violation_logger;
 /**
  * Access rule: requires the Sanad Secure Browser Android app.
  *
- * @copyright 2026 Mahmoud Salem <m.salem@sanad.com>
+ * @copyright 2026 Mahmoud Salem <eng.feda@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class quizaccess_sanad_lockdown extends quiz_access_rule_base {

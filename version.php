@@ -18,7 +18,7 @@
  * Version information for the quizaccess_sanad_lockdown plugin.
  *
  * @package   quizaccess_sanad_lockdown
- * @copyright 2026 Mahmoud Salem <m.salem@sanad.com>
+ * @copyright 2026 Mahmoud Salem <eng.feda@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
