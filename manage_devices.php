@@ -81,8 +81,8 @@ if (!empty($action) && confirm_sesskey()) {
             }
             $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
 
-            // Set password
-            $user->password = password_hash($newpassword, PASSWORD_DEFAULT);
+            // Set password using Moodle core hashing helper
+            $user->password = hash_internal_user_password($newpassword);
             $user->timemodified = time();
             $DB->update_record('user', $user);
 
