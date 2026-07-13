@@ -12,7 +12,6 @@
 .sanad-secure-kiosk .drawer-trigger,
 .sanad-secure-kiosk .breadcrumb,
 .sanad-secure-kiosk #block-region-side-pre,
-.sanad-secure-kiosk #block-region-side-post,
 .sanad-secure-kiosk .action-menu,
 .sanad-secure-kiosk .activity-navigation,
 .sanad-secure-kiosk .path-mod-quiz-attempt #page-header-wrapper {
@@ -27,13 +26,30 @@ body.sanad-secure-kiosk {
     padding: 0 !important;
 }
 
-/* 3. FIX PAGE CONTENT LAYOUT */
+/* 3. FLEXBOX RESPONSIVE PAGE CONTENT LAYOUT */
 .sanad-secure-kiosk #page-content {
-    margin-left: 310px !important;
-    margin-right: 0 !important;
-    padding: 40px !important;
     background-color: #F9F8F6 !important;
     min-height: 100vh !important;
+    padding: 30px !important;
+    margin: 0 !important;
+}
+
+/* Force Flex layout to display sidebar on the left and content on the right */
+.sanad-secure-kiosk #page-content > div {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 30px !important;
+    align-items: flex-start !important;
+    max-width: 100% !important;
+}
+
+/* Main Content Area (automatically stretches when sidebar is not present) */
+.sanad-secure-kiosk #region-main-box {
+    flex: 1 !important;
+    width: auto !important;
+    max-width: 100% !important;
+    order: 2 !important; /* Content on the right */
 }
 
 .sanad-secure-kiosk #region-main {
@@ -44,22 +60,36 @@ body.sanad-secure-kiosk {
     box-shadow: none !important;
 }
 
-/* 4. TURN QUIZ NAVIGATION INTO A LEFT SIDEBAR */
-.sanad-secure-kiosk .block_quiz_navigation {
-    position: fixed !important;
-    left: 0 !important;
-    top: 0 !important;
+/* 4. POSITION SIDEBAR ON THE LEFT */
+.sanad-secure-kiosk #block-region-side-post {
+    display: block !important; /* Ensure it is visible! */
     width: 290px !important;
-    height: 100vh !important;
-    background-color: #1A365D !important; /* Deep Blue EWA/Sanad branding */
-    color: #FFFFFF !important;
+    min-width: 290px !important;
+    max-width: 290px !important;
+    order: 1 !important; /* Sidebar on the left */
     margin: 0 !important;
+    background-color: #1A365D !important; /* Deep Blue */
+    color: #FFFFFF !important;
     padding: 24px 20px !important;
-    box-shadow: 4px 0 15px rgba(0,0,0,0.1) !important;
-    overflow-y: auto !important;
-    z-index: 1000 !important;
-    border-radius: 0 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
     border: none !important;
+    align-self: flex-start !important;
+}
+
+/* Hide other non-navigation blocks in the side post region to prevent clutter */
+.sanad-secure-kiosk #block-region-side-post .block:not(.block_quiz_navigation) {
+    display: none !important;
+}
+
+/* Style the Moodle Quiz Navigation block inside the sidebar */
+.sanad-secure-kiosk .block_quiz_navigation {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    color: #FFFFFF !important;
 }
 
 /* Brand header injection inside the sidebar */
@@ -71,7 +101,7 @@ body.sanad-secure-kiosk {
     font-weight: bold;
     color: #FFFFFF;
     text-align: center;
-    border-bottom: 2px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.15);
     padding-bottom: 20px;
     margin-bottom: 24px;
     line-height: 1.4;
@@ -238,4 +268,15 @@ body.sanad-secure-kiosk {
     display: flex !important;
     align-items: center !important;
     gap: 8px !important;
+}
+
+/* 9. REVISION / REVIEW INFO BOX CENTERING */
+.sanad-secure-kiosk .quizreviewsummary {
+    max-width: 900px !important;
+    margin: 0 auto 30px auto !important;
+    background-color: #FFFFFF !important;
+    border: 1px solid #E8E5DF !important;
+    border-radius: 16px !important;
+    padding: 24px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02) !important;
 }

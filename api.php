@@ -209,6 +209,26 @@ $session = $DB->get_record_sql(
 );
 
 if (!$session) {
+    if ($action === 'verify_exit') {
+        // Fallback: session might be deleted because the exam is finished, but we still allow exit if password matches.
+        $lockdown = $DB->get_record('quizaccess_sanad_lockdown', ['quizid' => $quizid]);
+        $exitpasswordhash = $lockdown ? $lockdown->exitpassword : null;
+        $password = $data['password'] ?? '';
+
+        if (empty($exitpasswordhash)) {
+            echo json_encode(['status' => 'verified', 'info' => 'No exit password set']);
+            exit;
+        }
+
+        if (password_verify($password, $exitpasswordhash)) {
+            echo json_encode(['status' => 'verified']);
+        } else {
+            http_response_code(401);
+            echo json_encode(['error' => 'Incorrect exit password']);
+        }
+        exit;
+    }
+
     http_response_code(401);
     echo json_encode(['error' => 'Unauthorized: Session not found']);
     exit;
@@ -241,6 +261,25 @@ if ($cm) {
 // Check if token has expired.
 if (time() > $session->timeexpires) {
     $DB->delete_records('quizaccess_sanad_sessions', ['id' => $session->id]);
+    if ($action === 'verify_exit') {
+        // Fallback: allow exit even if session expired, matching the exit password of the quiz.
+        $lockdown = $DB->get_record('quizaccess_sanad_lockdown', ['quizid' => $quizid]);
+        $exitpasswordhash = $lockdown ? $lockdown->exitpassword : null;
+        $password = $data['password'] ?? '';
+
+        if (empty($exitpasswordhash)) {
+            echo json_encode(['status' => 'verified', 'info' => 'No exit password set']);
+            exit;
+        }
+
+        if (password_verify($password, $exitpasswordhash)) {
+            echo json_encode(['status' => 'verified']);
+        } else {
+            http_response_code(401);
+            echo json_encode(['error' => 'Incorrect exit password']);
+        }
+        exit;
+    }
     http_response_code(401);
     echo json_encode(['error' => 'Unauthorized: Session has expired']);
     exit;
