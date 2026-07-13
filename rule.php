@@ -463,7 +463,7 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
      */
     public function setup_attempt_page($page) {
         if (token_manager::is_sanad_browser_request()) {
-            $page->set_layout('secure');
+            $page->set_pagelayout('secure');
             $page->add_body_class('sanad-secure-kiosk');
         }
     }
