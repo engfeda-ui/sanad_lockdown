@@ -386,7 +386,11 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
                 \html_writer::tag('strong', get_string('accessdenied', 'quizaccess_sanad_lockdown')),
                 ['class' => 'text-danger text-center']
             );
-            $inner .= \html_writer::tag('p', get_string('mustusesanadapp', 'quizaccess_sanad_lockdown'), ['class' => 'text-center']);
+            $inner .= \html_writer::tag(
+                'p',
+                get_string('mustusesanadapp', 'quizaccess_sanad_lockdown'),
+                ['class' => 'text-center']
+            );
             $inner .= \html_writer::tag(
                 'p',
                 get_string('requestfromteacher', 'quizaccess_sanad_lockdown'),

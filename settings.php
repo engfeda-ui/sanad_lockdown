@@ -26,15 +26,22 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($ADMIN->fulltree) {
-    // Add external link to the admin dashboard
+    // Add external link to the admin dashboard.
     $url = new moodle_url('/mod/quiz/accessrule/sanad_lockdown/manage_devices.php');
+
+    $desc = 'تسمح لك هذه الصفحة بمراقبة الأجهزة المتصلة بالاختبارات والانتهاكات الأمنية النشطة في وضع الكشك بالوقت الفعلي.';
+    $linktext = '📊 فتح لوحة متابعة أجهزة الكشك وتراخيصها (للمسؤول فقط)';
+
+    $html = html_writer::tag('p', $desc, ['style' => 'font-size:14px; margin-bottom: 12px;']);
+    $html .= html_writer::link($url, $linktext, [
+        'class' => 'btn btn-primary',
+        'target' => '_blank',
+        'style' => 'font-weight:bold;',
+    ]);
+
     $settings->add(new admin_setting_heading(
         'quizaccess_sanad_lockdown/devices_link',
         '',
-        html_writer::tag(
-            'div',
-            html_writer::tag('p', 'تسمح لك هذه الصفحة بمراقبة الأجهزة المتصلة بالاختبارات والانتهاكات الأمنية النشطة في وضع الكشك بالوقت الفعلي.', ['style' => 'font-size:14px; margin-bottom: 12px;'])
-            . html_writer::link($url, '📊 فتح لوحة متابعة أجهزة الكشك وتراخيصها (للمسؤول فقط)', ['class' => 'btn btn-primary', 'target' => '_blank', 'style' => 'font-weight:bold;'])
-        )
+        html_writer::tag('div', $html)
     ));
 }
