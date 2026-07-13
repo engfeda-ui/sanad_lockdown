@@ -455,4 +455,16 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
             ),
         ];
     }
+
+    /**
+     * Sets up the attempt page for the quiz, adding custom styling when inside Sanad Secure Browser.
+     *
+     * @param moodle_page $page The Moodle page object.
+     */
+    public function setup_attempt_page($page) {
+        if (token_manager::is_sanad_browser_request()) {
+            $page->set_layout('secure');
+            $page->add_body_class('sanad-secure-kiosk');
+        }
+    }
 }

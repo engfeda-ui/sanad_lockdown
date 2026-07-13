@@ -34,13 +34,13 @@ namespace quizaccess_sanad_lockdown;
  */
 class token_manager {
     /** @var string HTTP header name sent by the Sanad Secure Browser app. */
-    const HEADER_TOKEN = 'HTTP_X_Sanad_SECURE_TOKEN';
+    const HEADER_TOKEN = 'HTTP_X_SANAD_SECURE_TOKEN';
 
     /** @var string HTTP header name for the device fingerprint. */
-    const HEADER_DEVICE = 'HTTP_X_Sanad_DEVICE_ID';
+    const HEADER_DEVICE = 'HTTP_X_SANAD_DEVICE_ID';
 
     /** @var string HTTP header that identifies the app (not secret, just an identifier). */
-    const HEADER_APP_ID = 'HTTP_X_Sanad_APP';
+    const HEADER_APP_ID = 'HTTP_X_SANAD_APP';
 
     /** @var string Expected value for the app identifier header. */
     const EXPECTED_APP_ID = 'sanad-secure-browser-v1';

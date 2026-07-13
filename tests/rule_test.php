@@ -104,6 +104,7 @@ class rule_test extends \advanced_testcase {
 
         $teachertoken = token_manager::issue($quizid, $teacher->id, '', 1800);
 
+        $_SERVER['HTTP_X_SANAD_DEVICE_ID'] = 'student-device-999';
         $_SERVER['HTTP_X_Sanad_DEVICE_ID'] = 'student-device-999';
 
         $this->assertTrue(token_manager::validate($quizid, $student->id, $teachertoken));
@@ -116,6 +117,7 @@ class rule_test extends \advanced_testcase {
         $this->assertEquals('student-device-999', $studentsession->deviceid);
         $this->assertNotEquals($teachertoken, $studentsession->token);
 
+        unset($_SERVER['HTTP_X_SANAD_DEVICE_ID']);
         unset($_SERVER['HTTP_X_Sanad_DEVICE_ID']);
     }
 }

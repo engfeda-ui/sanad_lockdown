@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // 1. Verify App Identification.
-$appid = $_SERVER['HTTP_X_Sanad_APP'] ?? '';
+$appid = $_SERVER['HTTP_X_SANAD_APP'] ?? $_SERVER['HTTP_X_Sanad_APP'] ?? '';
 if ($appid !== token_manager::EXPECTED_APP_ID) {
     http_response_code(403);
     echo json_encode(['error' => 'Forbidden: Invalid App Client']);
@@ -69,7 +69,7 @@ if (empty($action)) {
 }
 
 // 2. Extract Device ID from HTTP Headers.
-$deviceid = $_SERVER['HTTP_X_Sanad_DEVICE_ID'] ?? '';
+$deviceid = $_SERVER['HTTP_X_SANAD_DEVICE_ID'] ?? $_SERVER['HTTP_X_Sanad_DEVICE_ID'] ?? '';
 if (empty($deviceid)) {
     http_response_code(401);
     echo json_encode(['error' => 'Unauthorized: Missing Device ID Header']);
@@ -189,7 +189,7 @@ if ($action === 'check_license') {
 
 // For all other actions (heartbeat, log_violation, verify_exit).
 $quizid = isset($data['quizid']) ? (int)$data['quizid'] : 0;
-$token  = $_SERVER['HTTP_X_Sanad_SECURE_TOKEN'] ?? '';
+$token  = $_SERVER['HTTP_X_SANAD_SECURE_TOKEN'] ?? $_SERVER['HTTP_X_Sanad_SECURE_TOKEN'] ?? '';
 
 if (empty($quizid) || empty($token)) {
     http_response_code(400);
