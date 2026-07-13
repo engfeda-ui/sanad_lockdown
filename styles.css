@@ -158,76 +158,32 @@ body.sanad-secure-kiosk::after {
 
 /* ==========================================================================
    5. QUIZ NAVIGATION BLOCK — FIXED RIGHT PANEL
-      Moodle 4.x can place the block in multiple locations depending on theme.
-      We target ALL possible containers and force the block visible + fixed right.
+      APPROACH: Apply position:fixed directly to .block_quiz_navigation itself.
+      This works regardless of which container Moodle puts it in.
+      The container gets no background so empty containers are invisible.
    ========================================================================== */
 
-/* --- 5a. Traditional right column (Moodle 3.x / some 4.x setups) --- */
-.sanad-secure-kiosk #block-region-side-post {
-    display: block !important;
-    position: fixed !important;
-    top: 80px !important;
-    right: 10px !important;
-    width: 215px !important;
-    min-width: 0 !important;
-    max-width: 215px !important;
-    background: #ffffff !important;
-    border: 1px solid #b8c8da !important;
-    border-radius: 6px !important;
-    padding: 12px !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
-    z-index: 800 !important;
-    max-height: calc(100vh - 100px) !important;
-    overflow-y: auto !important;
-    float: none !important;
-}
-
-/* --- 5b. Moodle 4.x right block drawer (normally hidden) --- */
+/* --- 5a. Make containers transparent — so empty ones don't create ghost boxes --- */
+.sanad-secure-kiosk #block-region-side-post,
 .sanad-secure-kiosk [data-region="right-block-drawer"],
+.sanad-secure-kiosk [data-region="blocks-column"],
 .sanad-secure-kiosk .drawer.drawer-right {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    /* Force drawers out of hidden state */
     display: block !important;
-    position: fixed !important;
-    top: 80px !important;
-    right: 10px !important;
-    left: auto !important;
-    bottom: auto !important;
-    width: 215px !important;
-    max-width: 215px !important;
-    height: auto !important;
-    max-height: calc(100vh - 100px) !important;
-    overflow-y: auto !important;
-    background: #ffffff !important;
-    border: 1px solid #b8c8da !important;
-    border-radius: 6px !important;
-    padding: 12px !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
-    z-index: 800 !important;
-    transform: none !important;
     visibility: visible !important;
     opacity: 1 !important;
+    transform: none !important;
     transition: none !important;
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
 }
 
-/* --- 5c. Moodle 4.x blocks-column wrapper --- */
-.sanad-secure-kiosk [data-region="blocks-column"] {
-    display: block !important;
-    position: fixed !important;
-    top: 80px !important;
-    right: 10px !important;
-    width: 215px !important;
-    max-width: 215px !important;
-    max-height: calc(100vh - 100px) !important;
-    overflow-y: auto !important;
-    background: #ffffff !important;
-    border: 1px solid #b8c8da !important;
-    border-radius: 6px !important;
-    padding: 12px !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
-    z-index: 800 !important;
-    float: none !important;
-}
-
-/* --- 5d. Hide ALL blocks EXCEPT quiz navigation in any of these containers --- */
+/* --- 5b. Hide ALL non-navigation blocks in any container --- */
 .sanad-secure-kiosk #block-region-side-post .block:not(.block_quiz_navigation),
 .sanad-secure-kiosk [data-region="right-block-drawer"] .block:not(.block_quiz_navigation),
 .sanad-secure-kiosk [data-region="blocks-column"] .block:not(.block_quiz_navigation),
@@ -235,14 +191,24 @@ body.sanad-secure-kiosk::after {
     display: none !important;
 }
 
-/* --- 5e. The block itself --- */
+/* --- 5c. THE BLOCK ITSELF — fixed white panel top-right --- */
 .sanad-secure-kiosk .block_quiz_navigation {
-    background: transparent !important;
-    border: none !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    box-shadow: none !important;
+    position: fixed !important;
+    top: 75px !important;
+    right: 10px !important;
+    width: 220px !important;
+    max-width: 220px !important;
+    max-height: calc(100vh - 95px) !important;
+    overflow-y: auto !important;
+    background: #ffffff !important;
+    border: 1px solid #b8c8da !important;
+    border-radius: 6px !important;
+    padding: 12px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.14) !important;
+    z-index: 950 !important;
     display: block !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
 }
 
 .sanad-secure-kiosk .block_quiz_navigation .card,
@@ -251,9 +217,10 @@ body.sanad-secure-kiosk::after {
     border: none !important;
     padding: 0 !important;
     margin: 0 !important;
+    box-shadow: none !important;
 }
 
-/* "Quiz navigation" title — RED exactly like the reference photo */
+/* "Quiz navigation" heading — RED like reference photo */
 .sanad-secure-kiosk .block_quiz_navigation .card-title,
 .sanad-secure-kiosk .block_quiz_navigation h3,
 .sanad-secure-kiosk .block_quiz_navigation h5 {
@@ -289,7 +256,7 @@ body.sanad-secure-kiosk::after {
     color: #374151 !important;
 }
 
-/* Answered: grey with red top stripe */
+/* Answered — grey body + red top stripe */
 .sanad-secure-kiosk .block_quiz_navigation .qnbutton.answered,
 .sanad-secure-kiosk .block_quiz_navigation .qnbutton.correct {
     background: #b0c0cc !important;
@@ -313,7 +280,7 @@ body.sanad-secure-kiosk::after {
     color: #7a4f00 !important;
 }
 
-/* Meta text */
+/* Meta / last-saved text */
 .sanad-secure-kiosk .block_quiz_navigation .lastchange,
 .sanad-secure-kiosk .block_quiz_navigation p {
     font-size: 10px !important;
