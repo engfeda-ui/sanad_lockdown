@@ -31,7 +31,6 @@ namespace quizaccess_sanad_lockdown;
  * Central dispatcher for all API actions from the Sanad Secure Browser app.
  */
 class api_handler {
-
     /**
      * Dispatch an incoming action to the appropriate handler method.
      *
@@ -61,7 +60,7 @@ class api_handler {
 
     // -------------------------------------------------------------------------
     // Unauthenticated actions (no session token required).
-    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------.
 
     /**
      * Resolve a human-readable short code into a session launch URL.
@@ -176,7 +175,7 @@ class api_handler {
 
     // -------------------------------------------------------------------------
     // Authenticated actions (require a valid session token).
-    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------.
 
     /**
      * Load and verify the session, then dispatch to the correct action handler.
@@ -374,7 +373,7 @@ class api_handler {
 
     // -------------------------------------------------------------------------
     // Private helper methods.
-    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------.
 
     /**
      * Verify exit password directly from the lockdown settings (session-independent fallback).

@@ -390,7 +390,7 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
 
     // -------------------------------------------------------------------------
     // Private rendering helpers.
-    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------.
 
     /**
      * Build the HTML notice shown to students who access the quiz outside the app.
