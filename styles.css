@@ -5,7 +5,7 @@
  */
 
 /* 1. HIDE MOODLE DISTRACTIONS & NAVIGATION DRAWER */
-.sanad-secure-kiosk #page-header,
+.sanad-secure-kiosk #page-header-wrapper,
 .sanad-secure-kiosk #page-footer,
 .sanad-secure-kiosk .navbar,
 .sanad-secure-kiosk #nav-drawer,
@@ -14,42 +14,152 @@
 .sanad-secure-kiosk #block-region-side-pre,
 .sanad-secure-kiosk .action-menu,
 .sanad-secure-kiosk .activity-navigation,
-.sanad-secure-kiosk .path-mod-quiz-attempt #page-header-wrapper {
+.sanad-secure-kiosk #page-header .breadcrumb,
+.sanad-secure-kiosk #page-header .header-actions-container {
     display: none !important;
 }
 
 /* 2. PAGE LEVEL RESET & WARM BACKGROUND */
 body.sanad-secure-kiosk {
-    background-color: #F9F8F6 !important;
+    background-color: #E2E8F0 !important; /* Soft grey background matching second photo */
     font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    padding-left: 260px !important; /* Make room for the left sidebar */
+}
+
+/* 3. DYNAMIC LEFT BLUE SIDEBAR CREATED VIA PSEUDO-ELEMENTS */
+body.sanad-secure-kiosk::before {
+    content: "test"; /* Match top header in second photo */
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 240px;
+    height: 100vh;
+    background-color: #153A6B !important; /* Deep Royal Blue */
+    color: #FFFFFF !important;
+    padding: 24px 20px;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    z-index: 1000;
+    box-sizing: border-box;
+    border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+body.sanad-secure-kiosk::after {
+    content: "EWA LMS"; /* Match bottom brand logo in second photo */
+    position: fixed;
+    left: 20px;
+    bottom: 30px;
+    width: 200px;
+    background-color: #FFFFFF;
+    color: #153A6B;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 800;
+    text-align: center;
+    z-index: 1001;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* Position Moodle Course Name inside left sidebar */
+.sanad-secure-kiosk #page-header {
+    display: block !important;
+    position: static !important;
     margin: 0 !important;
     padding: 0 !important;
 }
 
-/* 3. FLEXBOX RESPONSIVE PAGE CONTENT LAYOUT */
+.sanad-secure-kiosk #page-header .card {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.sanad-secure-kiosk #page-header h1,
+.sanad-secure-kiosk #page-header .page-header-headings h2 {
+    position: fixed !important;
+    left: 20px !important;
+    top: 220px !important; /* Positioned vertically below username */
+    width: 200px !important;
+    color: #FFFFFF !important;
+    font-size: 22px !important;
+    font-weight: bold !important;
+    text-align: center !important;
+    z-index: 1002 !important;
+    margin: 0 !important;
+    line-height: 1.4 !important;
+    white-space: normal !important;
+}
+
+/* Position User Info inside left sidebar */
+.sanad-secure-kiosk .usermenu {
+    display: block !important;
+    position: fixed !important;
+    left: 20px !important;
+    top: 100px !important;
+    width: 200px !important;
+    z-index: 1002 !important;
+    text-align: center !important;
+}
+
+.sanad-secure-kiosk .usermenu .userbutton {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+.sanad-secure-kiosk .usermenu .userbutton .usertext {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-size: 13px !important;
+    font-weight: normal !important;
+    margin: 0 !important;
+    line-height: 1.4 !important;
+    white-space: normal !important;
+}
+
+.sanad-secure-kiosk .usermenu .userbutton .usertext::before {
+    content: "You are logged in as ";
+    display: block;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 4px;
+}
+
+.sanad-secure-kiosk .usermenu .userbutton .avatars {
+    display: none !important; /* Hide profile picture to match screenshot style */
+}
+
+/* 4. FLEXBOX RESPONSIVE PAGE CONTENT LAYOUT */
 .sanad-secure-kiosk #page-content {
-    background-color: #F9F8F6 !important;
+    background-color: #E2E8F0 !important;
     min-height: 100vh !important;
     padding: 30px !important;
     margin: 0 !important;
 }
 
-/* Force Flex layout to display sidebar on the left and content on the right */
+/* Display sidebar on the right and content on the left */
 .sanad-secure-kiosk #page-content > div {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
-    gap: 30px !important;
+    gap: 24px !important;
     align-items: flex-start !important;
     max-width: 100% !important;
 }
 
-/* Main Content Area (automatically stretches when sidebar is not present) */
+/* Main Content Area */
 .sanad-secure-kiosk #region-main-box {
     flex: 1 !important;
     width: auto !important;
     max-width: 100% !important;
-    order: 2 !important; /* Content on the right */
+    order: 1 !important; /* Question card on the left */
 }
 
 .sanad-secure-kiosk #region-main {
@@ -60,21 +170,20 @@ body.sanad-secure-kiosk {
     box-shadow: none !important;
 }
 
-/* 4. POSITION SIDEBAR ON THE LEFT */
+/* 5. POSITION QUIZ NAVIGATION BLOCK AT THE TOP-RIGHT */
 .sanad-secure-kiosk #block-region-side-post {
-    display: block !important; /* Ensure it is visible! */
-    width: 290px !important;
-    min-width: 290px !important;
-    max-width: 290px !important;
-    order: 1 !important; /* Sidebar on the left */
+    display: block !important;
+    width: 340px !important;
+    min-width: 340px !important;
+    max-width: 340px !important;
+    order: 2 !important; /* Navigation block on the right */
     margin: 0 !important;
-    background-color: #1A365D !important; /* Deep Blue */
-    color: #FFFFFF !important;
-    padding: 24px 20px !important;
-    border-radius: 16px !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
-    border: none !important;
-    align-self: flex-start !important;
+    background-color: #FFFFFF !important;
+    color: #333333 !important;
+    padding: 16px !important;
+    border-radius: 8px !important;
+    border: 1px solid #153A6B !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
 }
 
 /* Hide other non-navigation blocks in the side post region to prevent clutter */
@@ -82,111 +191,92 @@ body.sanad-secure-kiosk {
     display: none !important;
 }
 
-/* Style the Moodle Quiz Navigation block inside the sidebar */
+/* Style the Moodle Quiz Navigation block */
 .sanad-secure-kiosk .block_quiz_navigation {
     background: transparent !important;
     border: none !important;
     padding: 0 !important;
     margin: 0 !important;
     box-shadow: none !important;
-    color: #FFFFFF !important;
 }
 
-/* Brand header injection inside the sidebar */
-.sanad-secure-kiosk .block_quiz_navigation::before {
-    content: "سَنَد للمهندسين\nمتصفح الاختبار الآمن";
-    display: block;
-    white-space: pre-wrap;
-    font-size: 18px;
-    font-weight: bold;
-    color: #FFFFFF;
-    text-align: center;
-    border-bottom: 1px solid rgba(255,255,255,0.15);
-    padding-bottom: 20px;
-    margin-bottom: 24px;
-    line-height: 1.4;
-}
-
-/* Style Sidebar Titles */
+/* Header style "Quiz navigation" in Red */
 .sanad-secure-kiosk .block_quiz_navigation .card-title,
 .sanad-secure-kiosk .block_quiz_navigation h5 {
-    color: #C26D4D !important; /* Terracotta accents */
-    font-size: 14px !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.5px !important;
+    color: #C53030 !important; /* Red */
+    font-size: 15px !important;
     font-weight: bold !important;
-    margin-bottom: 16px !important;
+    margin-bottom: 12px !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+    padding-bottom: 8px !important;
+    text-transform: none !important;
 }
 
-/* 5. STYLE QUESTION NAVIGATION GRID BUTTONS */
+/* Style Navigation Grid Buttons */
 .sanad-secure-kiosk .block_quiz_navigation .qnbutton {
-    width: 36px !important;
-    height: 36px !important;
-    line-height: 36px !important;
-    margin: 4px !important;
-    border-radius: 8px !important;
-    font-weight: 600 !important;
+    width: 32px !important;
+    height: 32px !important;
+    line-height: 32px !important;
+    margin: 3px !important;
+    border-radius: 4px !important;
+    font-weight: normal !important;
     display: inline-block !important;
     text-align: center !important;
-    border: 1px solid rgba(255,255,255,0.2) !important;
-    background-color: rgba(255,255,255,0.05) !important;
-    color: #FFFFFF !important;
-    font-size: 13px !important;
+    border: 1px solid #CBD5E1 !important;
+    background-color: #F1F5F9 !important; /* Light Grey squares */
+    color: #334155 !important;
+    font-size: 12px !important;
     transition: all 0.2s ease !important;
 }
 
 .sanad-secure-kiosk .block_quiz_navigation .qnbutton.notyetanswered {
-    background-color: rgba(255,255,255,0.1) !important;
+    background-color: #F1F5F9 !important;
 }
 
 .sanad-secure-kiosk .block_quiz_navigation .qnbutton.correct,
 .sanad-secure-kiosk .block_quiz_navigation .qnbutton.answered {
-    background-color: #C26D4D !important; /* Answered keys in terracotta */
-    border-color: #C26D4D !important;
+    background-color: #94A3B8 !important; /* Grey for answered */
+    border-color: #94A3B8 !important;
     color: #FFFFFF !important;
 }
 
+/* Red indicator line on top of answered button (custom flag style in screenshot) */
+.sanad-secure-kiosk .block_quiz_navigation .qnbutton.answered {
+    border-top: 3px solid #C53030 !important;
+}
+
 .sanad-secure-kiosk .block_quiz_navigation .qnbutton.thispage {
-    border: 2px solid #FFFFFF !important;
-    box-shadow: 0 0 8px rgba(255,255,255,0.5) !important;
+    border: 2px solid #153A6B !important;
+    font-weight: bold !important;
 }
 
 /* 6. STYLE THE MAIN QUESTION CARD */
 .sanad-secure-kiosk .que {
-    background-color: #FFFFFF !important;
-    border: 1px solid #E8E5DF !important;
-    border-radius: 16px !important;
-    padding: 30px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02) !important;
-    margin-bottom: 30px !important;
-    max-width: 900px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    background-color: #C7D9E8 !important; /* Light blue container matching second photo */
+    border: 1px solid #B0CBE0 !important;
+    border-radius: 8px !important;
+    padding: 24px !important;
+    box-shadow: none !important;
+    margin-bottom: 24px !important;
+    max-width: 1000px !important;
 }
 
-/* Left Metadata column (Question info) */
+/* Hide question metadata block left borders */
 .sanad-secure-kiosk .que .info {
-    background-color: #F0EDE6 !important;
-    border: 1px solid #E8E5DF !important;
-    border-radius: 12px !important;
-    padding: 16px !important;
-    margin-bottom: 24px !important;
+    background-color: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin-bottom: 16px !important;
     float: none !important;
-    width: 100% !important;
+    width: auto !important;
     display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
+    gap: 15px !important;
+    font-size: 13px !important;
+    color: #475569 !important;
 }
 
 .sanad-secure-kiosk .que .info .no {
-    font-size: 15px !important;
     font-weight: bold !important;
-    color: #2D2D2D !important;
-}
-
-.sanad-secure-kiosk .que .info .state {
-    font-size: 13px !important;
-    color: #71717A !important;
 }
 
 /* Content & Choices area */
@@ -196,87 +286,97 @@ body.sanad-secure-kiosk {
 }
 
 .sanad-secure-kiosk .que .qtext {
-    font-size: 18px !important;
-    font-weight: 500 !important;
-    color: #2D2D2D !important;
+    font-size: 16px !important;
+    font-weight: normal !important;
+    color: #1E293B !important;
     line-height: 1.6 !important;
-    margin-bottom: 24px !important;
+    margin-bottom: 20px !important;
 }
 
 /* Choice items */
 .sanad-secure-kiosk .que .answer div.r0,
 .sanad-secure-kiosk .que .answer div.r1 {
-    padding: 14px 16px !important;
-    border: 1px solid #E8E5DF !important;
-    border-radius: 10px !important;
-    margin-bottom: 10px !important;
-    background-color: #F9F8F6 !important;
+    padding: 10px 14px !important;
+    border: 1px solid #B0CBE0 !important;
+    border-radius: 6px !important;
+    margin-bottom: 8px !important;
+    background-color: rgba(255, 255, 255, 0.5) !important;
     transition: all 0.2s ease !important;
 }
 
 .sanad-secure-kiosk .que .answer div.r0:hover,
 .sanad-secure-kiosk .que .answer div.r1:hover {
-    border-color: #C26D4D !important;
     background-color: #FFFFFF !important;
 }
 
-/* 7. MODERN NAVIGATION BUTTONS (Next/Prev) */
+/* 7. BOTTOM NAVIGATION BUTTONS (Back/Next) */
 .sanad-secure-kiosk .submitbtns {
     display: flex !important;
     justify-content: space-between !important;
-    max-width: 900px !important;
-    margin: 20px auto !important;
+    max-width: 1000px !important;
+    margin: 20px 0 !important;
 }
 
 .sanad-secure-kiosk .submitbtns .btn {
-    padding: 12px 24px !important;
-    font-size: 14px !important;
+    padding: 10px 20px !important;
+    font-size: 13px !important;
     font-weight: bold !important;
-    border-radius: 10px !important;
-    text-transform: uppercase !important;
+    border-radius: 6px !important;
 }
 
+/* Back/Previous page button (Grey) */
 .sanad-secure-kiosk .submitbtns .btn-secondary {
-    background-color: #FFFFFF !important;
-    border: 1px solid #E8E5DF !important;
-    color: #2D2D2D !important;
-}
-
-.sanad-secure-kiosk .submitbtns .btn-primary {
-    background-color: #C26D4D !important;
-    border-color: #C26D4D !important;
+    background-color: #94A3B8 !important;
+    border-color: #94A3B8 !important;
     color: #FFFFFF !important;
 }
 
-/* 8. FLOATING TIMER PILL AT THE TOP-RIGHT */
+/* Next page button (Deep Blue) */
+.sanad-secure-kiosk .submitbtns .btn-primary {
+    background-color: #153A6B !important;
+    border-color: #153A6B !important;
+    color: #FFFFFF !important;
+}
+
+/* 8. TIMER FLOATING PILL NEXT TO HIDE BUTTON */
 .sanad-secure-kiosk #quiz-timer-wrapper {
-    position: fixed !important;
-    top: 24px !important;
-    right: 24px !important;
-    z-index: 1050 !important;
+    position: static !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 16px !important;
 }
 
 .sanad-secure-kiosk #quiz-timer {
     background-color: #FFFFFF !important;
-    border: 2px solid #C26D4D !important;
-    border-radius: 30px !important;
-    padding: 12px 24px !important;
-    font-size: 16px !important;
-    font-weight: bold !important;
-    color: #C26D4D !important;
-    box-shadow: 0 4px 15px rgba(194, 109, 77, 0.15) !important;
-    display: flex !important;
+    border: 1px solid #D32F2F !important;
+    border-radius: 4px !important;
+    padding: 4px 10px !important;
+    font-size: 13px !important;
+    font-weight: normal !important;
+    color: #D32F2F !important;
+    box-shadow: none !important;
+    display: inline-flex !important;
     align-items: center !important;
-    gap: 8px !important;
+}
+
+/* Hide timer button styled clean */
+.sanad-secure-kiosk #quiz-timer-wrapper .btn,
+.sanad-secure-kiosk #quiz-timer-wrapper a {
+    padding: 4px 10px !important;
+    font-size: 11px !important;
+    border-radius: 4px !important;
+    background-color: #E2E8F0 !important;
+    color: #475569 !important;
+    border: 1px solid #CBD5E1 !important;
 }
 
 /* 9. REVISION / REVIEW INFO BOX CENTERING */
 .sanad-secure-kiosk .quizreviewsummary {
-    max-width: 900px !important;
-    margin: 0 auto 30px auto !important;
+    max-width: 1000px !important;
+    margin-bottom: 24px !important;
     background-color: #FFFFFF !important;
-    border: 1px solid #E8E5DF !important;
-    border-radius: 16px !important;
-    padding: 24px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02) !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 8px !important;
+    padding: 20px !important;
 }
