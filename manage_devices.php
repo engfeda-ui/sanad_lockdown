@@ -40,58 +40,9 @@ $PAGE->set_heading('Sanad Kiosk Admin Control Center');
 
 global $DB, $OUTPUT, $PAGE;
 
-// 2. Handle Actions (Approve, Block, Delete, Expiry, Reset Password)
-$action = optional_param('action', '', PARAM_ALPHAEXT);
-$id     = optional_param('id', 0, PARAM_INT);
-$msg    = '';
-$msgtype = 'success'; // 'success' or 'error'
-
-if (!empty($action) && confirm_sesskey()) {
-    try {
-        if ($action === 'approve') {
-            $device = $DB->get_record('quizaccess_sanad_devices', ['id' => $id], '*', MUST_EXIST);
-            $device->status = 1; // Active
-            $device->expirydate = time() + (365 * 86400); // 1 Year Default
-            $device->timemodified = time();
-            $DB->update_record('quizaccess_sanad_devices', $device);
-            $msg = "تم تفعيل الجهاز {$device->hardwareid} بنجاح لمدة عام!";
-        } elseif ($action === 'block') {
-            $device = $DB->get_record('quizaccess_sanad_devices', ['id' => $id], '*', MUST_EXIST);
-            $device->status = 2; // Suspended
-            $device->timemodified = time();
-            $DB->update_record('quizaccess_sanad_devices', $device);
-            $msg = "تم حظر وتجميد ترخيص الجهاز {$device->hardwareid} بنجاح.";
-        } elseif ($action === 'delete') {
-            $device = $DB->get_record('quizaccess_sanad_devices', ['id' => $id], '*', MUST_EXIST);
-            $DB->delete_records('quizaccess_sanad_devices', ['id' => $id]);
-            $msg = "تم حذف الجهاز {$device->hardwareid} نهائياً من النظام.";
-        } elseif ($action === 'extend') {
-            $days = required_param('days', PARAM_INT);
-            $device = $DB->get_record('quizaccess_sanad_devices', ['id' => $id], '*', MUST_EXIST);
-            $device->expirydate = time() + ($days * 86400);
-            $device->status = 1; // Ensure active
-            $device->timemodified = time();
-            $DB->update_record('quizaccess_sanad_devices', $device);
-            $msg = "تم تمديد ترخيص الجهاز {$device->hardwareid} إلى {$days} يوماً.";
-        } elseif ($action === 'resetpass') {
-            $userid = required_param('userid', PARAM_INT);
-            $newpassword = required_param('newpassword', PARAM_RAW);
-            if (strlen($newpassword) < 6) {
-                throw new moodle_exception('errorpasswordlength', 'quizaccess_sanad_lockdown', '', null, 'يجب ألا تقل كلمة المرور عن 6 خانات.');
-            }
-            $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
-
-            // Set the password hash and update user via Moodle API
-            $user->password = hash_internal_user_password($newpassword);
-            $user->timemodified = time();
-            user_update_user($user);
-            $msg = "تم بنجاح تغيير كلمة مرور الطالب ({$user->firstname} {$user->lastname}) إلى الكلمة الجديدة.";
-        }
-    } catch (Exception $e) {
-        $msg = "حدث خطأ: " . $e->getMessage();
-        $msgtype = 'error';
-    }
-}
+// 2. Actions Disabled (Read-Only Monitor Panel)
+$msg = '';
+$msgtype = 'success';
 
 // 3. Retrieve Dashboard Stats & Lists.
 $totaldevices = $DB->count_records('quizaccess_sanad_devices');
@@ -475,13 +426,12 @@ echo $OUTPUT->header();
                                 <th>رمز الجهاز (Hardware ID)</th>
                                 <th>حالة التفعيل</th>
                                 <th>تاريخ الانتهاء</th>
-                                <th>الإجراءات السريعة</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($devices)) : ?>
                                 <tr>
-                                    <td colspan="5" style="text-align: center; color: var(--dash-text-muted);">لا توجد أجهزة مسجلة في قاعدة البيانات بعد. قم بتشغيل التطبيق على التابلت ليتم تسجيله تلقائياً.</td>
+                                    <td colspan="4" style="text-align: center; color: var(--dash-text-muted);">لا توجد أجهزة مسجلة في قاعدة البيانات بعد. قم بتشغيل التطبيق على التابلت ليتم تسجيله تلقائياً.</td>
                                 </tr>
                             <?php else : ?>
                                 <?php foreach ($devices as $d) : ?>
@@ -524,24 +474,7 @@ echo $OUTPUT->header();
                                                 <?php echo $expirystr; ?>
                                             </span>
                                         </td>
-                                        <td>
-                                            <?php if ($d->status == 0 || $expired) : ?>
-                                                <a href="?action=approve&id=<?php echo $d->id; ?>&sesskey=<?php echo sesskey(); ?>" class="sanad-btn sanad-btn-success">تفعيل الرخصه</a>
-                                            <?php endif; ?>
 
-                                            <?php if ($d->status == 1 && !$expired) : ?>
-                                                <a href="?action=block&id=<?php echo $d->id; ?>&sesskey=<?php echo sesskey(); ?>" class="sanad-btn sanad-btn-warning">تعطيل وحظر</a>
-                                            <?php endif; ?>
-
-                                            <?php if ($d->status == 2) : ?>
-                                                <a href="?action=approve&id=<?php echo $d->id; ?>&sesskey=<?php echo sesskey(); ?>" class="sanad-btn sanad-btn-success">إلغاء الحظر</a>
-                                            <?php endif; ?>
-
-                                            <!-- Dropdown or quick extend of 1 year -->
-                                            <a href="?action=extend&id=<?php echo $d->id; ?>&days=365&sesskey=<?php echo sesskey(); ?>" class="sanad-btn sanad-btn-primary" title="تجديد سنة">+ سنة</a>
-                                            
-                                            <a href="?action=delete&id=<?php echo $d->id; ?>&sesskey=<?php echo sesskey(); ?>" class="sanad-btn sanad-btn-danger sanad-btn-icon" onclick="return confirm('هل أنت متأكد من حذف هذا الجهاز نهائياً؟');" title="حذف">🗑️</a>
-                                        </td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php endif; ?>
@@ -604,35 +537,7 @@ echo $OUTPUT->header();
         <div>
             
             <!-- Quick Password Reset Tools Card -->
-            <div class="sanad-card">
-                <div class="sanad-card-title">🔐 إدارة وتغيير كلمة مرور طالب</div>
-                
-                <form action="" method="post" class="reset-form">
-                    <input type="hidden" name="action" value="resetpass">
-                    <input type="hidden" name="sesskey" value="<?php echo sesskey(); ?>">
 
-                    <div style="display: flex; flex-direction: column; gap: 5px;">
-                        <label style="font-size: 12px; font-weight: 700; color: var(--dash-text-muted);">1. حدد الطالب من القائمة:</label>
-                        <select name="userid" required style="width: 100%;">
-                            <option value="">-- اختر الطالب --</option>
-                            <?php
-                                // Fetch all students (role student) or simply all active users (since they are only students on this site).
-                                $allstudents = $DB->get_records_select('user', 'id > 2 AND suspended = 0 AND deleted = 0', [], 'firstname ASC', 'id,firstname,lastname,email');
-                            foreach ($allstudents as $student) {
-                                echo "<option value=\"{$student->id}\">{$student->firstname} {$student->lastname} ({$student->email})</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 5px;">
-                        <label style="font-size: 12px; font-weight: 700; color: var(--dash-text-muted);">2. اكتب كلمة المرور الجديدة:</label>
-                        <input type="text" name="newpassword" value="Sanad@2026" placeholder="اكتب كلمة السر هنا" required>
-                    </div>
-
-                    <button type="submit" class="sanad-btn sanad-btn-success" style="width: 100%; justify-content: center; height: 45px; font-size: 14px;">🔄 حفظ وتغيير كلمة المرور فوراً</button>
-                </form>
-            </div>
 
             <!-- Security Violations Alerts Card -->
             <div class="sanad-card">
