@@ -1,45 +1,78 @@
 /**
  * quizaccess_sanad_lockdown Stylesheet
- * Kiosk mode: hides Moodle chrome and adds minimal cosmetic polish.
- * Active ONLY when body has class .sanad-secure-kiosk.
+ * Matches the exact layout visible in Fully Exam Kiosk on a Moodle quiz.
+ * Active ONLY when body carries the .sanad-secure-kiosk class.
  *
- * DESIGN PRINCIPLE: Never override Moodle quiz content layout.
- * Only hide distractions and theme the surrounding shell.
+ * RULE: Never override Moodle's internal quiz/question rendering.
+ *       Only remove distracting chrome and apply light cosmetic polish.
  */
 
 /* ==========================================================================
-   1. HIDE MOODLE NAVIGATION CHROME
+   1. HIDE ONLY THE MOODLE CHROME THAT CLUTTERS A KIOSK VIEW
+      Keep: #page-header (EWA LMS bar + username), course title, quiz form.
+      Hide: hamburger navbar, nav-drawer, footer, breadcrumbs.
    ========================================================================== */
-.sanad-secure-kiosk #page-header-wrapper,
-.sanad-secure-kiosk #page-footer,
+
+/* Bootstrap top navbar (hamburger + site-level links) */
 .sanad-secure-kiosk .navbar,
+.sanad-secure-kiosk .fixed-top {
+    display: none !important;
+}
+
+/* Left navigation drawer and its toggle buttons */
 .sanad-secure-kiosk #nav-drawer,
 .sanad-secure-kiosk .drawer-left-toggle,
 .sanad-secure-kiosk .drawer-right-toggle,
 .sanad-secure-kiosk #theme_boost-drawers-primary,
-.sanad-secure-kiosk .fixed-top,
+.sanad-secure-kiosk [data-region="drawer"],
+.sanad-secure-kiosk .drawer-trigger {
+    display: none !important;
+}
+
+/* Page footer */
+.sanad-secure-kiosk #page-footer {
+    display: none !important;
+}
+
+/* Breadcrumb navigation */
 .sanad-secure-kiosk .breadcrumb,
-.sanad-secure-kiosk #block-region-side-pre,
-.sanad-secure-kiosk .action-menu,
-.sanad-secure-kiosk .activity-navigation,
-.sanad-secure-kiosk #page-header .breadcrumb,
-.sanad-secure-kiosk #page-header .header-actions-container {
+.sanad-secure-kiosk ol.breadcrumb {
+    display: none !important;
+}
+
+/* Activity navigation (prev/next activity links) */
+.sanad-secure-kiosk .activity-navigation {
+    display: none !important;
+}
+
+/* Side pre block region */
+.sanad-secure-kiosk #block-region-side-pre {
+    display: none !important;
+}
+
+/* Action menus (cog icons) */
+.sanad-secure-kiosk .action-menu {
     display: none !important;
 }
 
 /* ==========================================================================
-   2. BODY — LIGHT GREY BACKGROUND, BOTTOM PADDING FOR BLUE BAR
+   2. BODY — REMOVE NAVBAR MARGIN, SET LAVENDER-GREY BACKGROUND
    ========================================================================== */
 body.sanad-secure-kiosk {
-    background: #edf1f5 !important;
+    background-color: #ebeef5 !important;
     font-family: 'Segoe UI', Arial, sans-serif !important;
-    margin: 0 !important;
-    padding: 0 0 68px 0 !important;   /* space for fixed bottom bar only */
+    padding-top: 0 !important;
     padding-left: 0 !important;
-    overflow-x: hidden !important;
+    margin: 0 !important;
 }
 
-/* Remove old pseudo-element sidebar */
+/* Remove the body top-padding Boost adds for the fixed navbar */
+body.sanad-secure-kiosk,
+body.sanad-secure-kiosk #page-wrapper {
+    padding-top: 0 !important;
+}
+
+/* Remove old pseudo-element sidebar injected by previous CSS versions */
 body.sanad-secure-kiosk::before,
 body.sanad-secure-kiosk::after {
     content: none !important;
@@ -47,72 +80,72 @@ body.sanad-secure-kiosk::after {
 }
 
 /* ==========================================================================
-   3. BOTTOM BLUE TITLE BAR  (like Fully Kiosk bottom nav)
+   3. PAGE HEADER BAR — KEEP VISIBLE (EWA LMS logo + logged-in user)
+      Just tighten the spacing, do not reposition or hide it.
    ========================================================================== */
-body.sanad-secure-kiosk #page-header {
-    display: flex !important;
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    top: auto !important;
-    height: 60px !important;
-    background: #1c3f6e !important;
-    z-index: 1000 !important;
-    margin: 0 !important;
-    padding: 0 20px !important;
-    align-items: center !important;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.3) !important;
+.sanad-secure-kiosk #page-header-wrapper {
+    display: block !important;   /* counteract any previous display:none */
 }
 
-.sanad-secure-kiosk #page-header .card,
-.sanad-secure-kiosk #page-header .card-body {
+.sanad-secure-kiosk #page-header {
+    display: block !important;
+    position: static !important;
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #d0d7e2 !important;
+    padding: 8px 16px !important;
+    margin: 0 !important;
+}
+
+.sanad-secure-kiosk #page-header .card {
     background: transparent !important;
     border: none !important;
+    box-shadow: none !important;
     padding: 0 !important;
     margin: 0 !important;
-    box-shadow: none !important;
 }
 
+/* Course / activity title */
 .sanad-secure-kiosk #page-header h1,
 .sanad-secure-kiosk #page-header .page-header-headings h2 {
-    position: static !important;
-    color: #ffffff !important;
-    font-size: 20px !important;
+    font-size: 24px !important;
     font-weight: 700 !important;
-    text-align: left !important;
-    margin: 0 !important;
+    color: #1a202c !important;
+    text-align: center !important;
+    margin: 8px 0 !important;
     padding: 0 !important;
+    position: static !important;
     width: auto !important;
-    z-index: auto !important;
-    line-height: 1.2 !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
 }
 
+/* User menu — keep visible in header */
 .sanad-secure-kiosk .usermenu {
-    display: none !important;
+    display: block !important;
+    position: static !important;
 }
 
 /* ==========================================================================
-   4. PAGE CONTENT AREA — no extra margin or padding tricks
+   4. PAGE CONTENT — FULL WIDTH, NO LEFT MARGIN
    ========================================================================== */
 .sanad-secure-kiosk #page-content {
     background: transparent !important;
-    padding: 16px !important;
+    padding: 14px !important;
     margin: 0 !important;
+    min-height: calc(100vh - 80px) !important;
 }
 
-/* Remove container max-width restrictions so content fills screen */
 .sanad-secure-kiosk #page-content .container-fluid,
-.sanad-secure-kiosk #page-content .container,
-.sanad-secure-kiosk #region-main-box {
+.sanad-secure-kiosk #page-content .container {
     max-width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
+}
+
+.sanad-secure-kiosk #region-main-box {
+    max-width: 100% !important;
     width: 100% !important;
     float: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 .sanad-secure-kiosk #region-main {
@@ -124,27 +157,28 @@ body.sanad-secure-kiosk #page-header {
 }
 
 /* ==========================================================================
-   5. QUIZ NAVIGATION BLOCK — RIGHT-SIDE FLOATING PANEL
+   5. QUIZ NAVIGATION BLOCK — FIXED RIGHT PANEL
+      Matches the white panel with "Quiz navigation" in red seen in the photo.
    ========================================================================== */
 .sanad-secure-kiosk #block-region-side-post {
     display: block !important;
     position: fixed !important;
     top: 10px !important;
     right: 10px !important;
-    width: 220px !important;
+    width: 210px !important;
     min-width: 0 !important;
-    max-width: 220px !important;
+    max-width: 210px !important;
     background: #ffffff !important;
-    border: 1px solid #c9d6e3 !important;
-    border-radius: 8px !important;
+    border: 1px solid #b8c8da !important;
+    border-radius: 6px !important;
     padding: 12px !important;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.12) !important;
-    z-index: 900 !important;
-    max-height: calc(100vh - 90px) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10) !important;
+    z-index: 800 !important;
+    max-height: calc(100vh - 30px) !important;
     overflow-y: auto !important;
 }
 
-/* Hide non-quiz-navigation blocks */
+/* Hide non-navigation blocks */
 .sanad-secure-kiosk #block-region-side-post .block:not(.block_quiz_navigation) {
     display: none !important;
 }
@@ -165,51 +199,52 @@ body.sanad-secure-kiosk #page-header {
     margin: 0 !important;
 }
 
-/* "Quiz navigation" heading — red like Fully Kiosk */
+/* "Quiz navigation" title — RED exactly like the photo */
 .sanad-secure-kiosk .block_quiz_navigation .card-title,
 .sanad-secure-kiosk .block_quiz_navigation h3,
 .sanad-secure-kiosk .block_quiz_navigation h5 {
-    color: #c0392b !important;
+    color: #cc2200 !important;
     font-size: 13px !important;
     font-weight: 700 !important;
-    margin: 0 0 8px !important;
+    margin: 0 0 8px 0 !important;
     padding-bottom: 6px !important;
-    border-bottom: 1px solid #e8ecf0 !important;
+    border-bottom: 1px solid #e2e8f0 !important;
 }
 
-/* Number buttons */
+/* Number grid buttons — match the photo squares */
 .sanad-secure-kiosk .block_quiz_navigation .qnbutton {
-    width: 30px !important;
-    height: 30px !important;
-    line-height: 30px !important;
+    width: 28px !important;
+    height: 28px !important;
+    line-height: 28px !important;
     margin: 2px !important;
-    border-radius: 4px !important;
+    border-radius: 3px !important;
     font-size: 11px !important;
     font-weight: 500 !important;
     display: inline-block !important;
     text-align: center !important;
-    border: 1px solid #c9d6e3 !important;
-    background: #f0f4f8 !important;
+    border: 1px solid #c0cdd8 !important;
+    background: #f4f7fa !important;
     color: #374151 !important;
     cursor: pointer !important;
     text-decoration: none !important;
-    transition: background 0.15s !important;
 }
 
 .sanad-secure-kiosk .block_quiz_navigation .qnbutton.notyetanswered {
-    background: #f0f4f8 !important;
-    border-color: #c9d6e3 !important;
+    background: #f4f7fa !important;
+    border-color: #c0cdd8 !important;
     color: #374151 !important;
 }
 
+/* Answered: grey with small red top-triangle (matches flagged squares in photo) */
 .sanad-secure-kiosk .block_quiz_navigation .qnbutton.answered,
 .sanad-secure-kiosk .block_quiz_navigation .qnbutton.correct {
-    background: #94a3b8 !important;
-    border-color: #94a3b8 !important;
+    background: #b0c0cc !important;
+    border-color: #8fa0aa !important;
     color: #ffffff !important;
-    border-top: 3px solid #c0392b !important;
+    border-top: 3px solid #cc2200 !important;
 }
 
+/* Current page button */
 .sanad-secure-kiosk .block_quiz_navigation .qnbutton.thispage {
     background: #1c3f6e !important;
     border: 2px solid #1c3f6e !important;
@@ -217,71 +252,61 @@ body.sanad-secure-kiosk #page-header {
     font-weight: 700 !important;
 }
 
+/* Flagged */
 .sanad-secure-kiosk .block_quiz_navigation .qnbutton.flagged {
-    background: #fef9c3 !important;
-    border-color: #f59e0b !important;
-    color: #78350f !important;
+    background: #fff8e1 !important;
+    border-color: #e6a817 !important;
+    color: #7a4f00 !important;
 }
 
-/* Last saved text */
+/* "Last saved" and meta text */
 .sanad-secure-kiosk .block_quiz_navigation .lastchange,
 .sanad-secure-kiosk .block_quiz_navigation p {
     font-size: 10px !important;
     color: #6b7280 !important;
-    margin: 6px 0 3px !important;
+    margin: 6px 0 2px 0 !important;
+    line-height: 1.4 !important;
 }
 
-/* Finish attempt link */
+/* "Finish attempt..." link */
 .sanad-secure-kiosk .block_quiz_navigation .endtestlink a,
-.sanad-secure-kiosk .block_quiz_navigation .finishattemptbutton {
-    display: block !important;
-    margin-top: 8px !important;
-    padding: 6px 8px !important;
-    background: #c0392b !important;
-    color: #ffffff !important;
-    border-radius: 4px !important;
+.sanad-secure-kiosk .block_quiz_navigation .endtestlink {
     font-size: 12px !important;
-    font-weight: 600 !important;
-    text-align: center !important;
-    text-decoration: none !important;
-    border: none !important;
+    color: #1a56db !important;
+    text-decoration: underline !important;
     cursor: pointer !important;
 }
 
 /* ==========================================================================
-   6. QUIZ FORM — RIGHT MARGIN TO AVOID NAV PANEL OVERLAP
+   6. QUIZ FORM — RIGHT MARGIN TO CLEAR THE FIXED NAV PANEL
    ========================================================================== */
 .sanad-secure-kiosk #responseform {
-    margin-right: 240px !important;
+    margin-right: 230px !important;
 }
 
 /* ==========================================================================
-   7. QUESTION CARD — LIGHT BLUE TINT, CLEAN BORDERS
+   7. QUESTION CARD (.que)
+      Light-blue container matching the photo — Moodle internal layout intact.
    ========================================================================== */
 .sanad-secure-kiosk .que {
-    background: #cde3f0 !important;
-    border: 1px solid #a8c8e0 !important;
-    border-radius: 8px !important;
-    margin-bottom: 16px !important;
+    background-color: #c8dff0 !important;
+    border: 1px solid #9cbcd8 !important;
+    border-radius: 6px !important;
+    margin-bottom: 14px !important;
     overflow: hidden !important;
     box-shadow: none !important;
-    /* DO NOT set padding here — let Moodle control internal layout */
+    padding: 0 !important;  /* Moodle controls internal padding */
 }
 
-/* Question info bar */
+/* Info bar (Question N | state | marks | flag) */
 .sanad-secure-kiosk .que .info {
     background: transparent !important;
     border-right: none !important;
-    border-bottom: 1px solid #a8c8e0 !important;
-    padding: 8px 14px !important;
+    border-bottom: 1px solid #9cbcd8 !important;
+    padding: 7px 14px !important;
     margin: 0 !important;
     float: none !important;
     width: auto !important;
-    min-width: 0 !important;
-    display: flex !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    gap: 10px !important;
     font-size: 12px !important;
     color: #374151 !important;
 }
@@ -291,60 +316,47 @@ body.sanad-secure-kiosk #page-header {
     color: #1c3f6e !important;
 }
 
-.sanad-secure-kiosk .que .info .state,
-.sanad-secure-kiosk .que .info .grade {
-    color: #4b5563 !important;
-}
-
-.sanad-secure-kiosk .que .info .editquestion,
-.sanad-secure-kiosk .que .info .flaggedprompt {
-    margin-left: auto !important;
-}
-
-/* Content area — keep Moodle defaults, just add padding */
+/* Question content body */
 .sanad-secure-kiosk .que .content {
-    padding: 16px 20px !important;
+    padding: 14px 18px !important;
     margin: 0 !important;
     background: transparent !important;
 }
 
-/* Question text */
+/* Question stem text */
 .sanad-secure-kiosk .que .qtext {
     font-size: 15px !important;
     font-weight: 500 !important;
     color: #111827 !important;
     line-height: 1.65 !important;
-    margin-bottom: 16px !important;
+    margin-bottom: 14px !important;
 }
 
 /* ==========================================================================
-   8. ANSWER CHOICES — WHITE BORDERED CARDS (ONE PER ROW)
-   DO NOT use display:flex — Moodle lays these out internally
+   8. ANSWER CHOICE ROWS
+      White bordered cards — one per line. Do NOT touch layout/flex.
    ========================================================================== */
 .sanad-secure-kiosk .que .answer .r0,
 .sanad-secure-kiosk .que .answer .r1 {
     background: #ffffff !important;
-    border: 1px solid #c9d6e3 !important;
-    border-radius: 6px !important;
-    padding: 10px 14px !important;
-    margin-bottom: 8px !important;
+    border: 1px solid #b8cad8 !important;
+    border-radius: 5px !important;
+    padding: 9px 13px !important;
+    margin-bottom: 7px !important;
     color: #111827 !important;
     font-size: 14px !important;
-    transition: border-color 0.15s, background 0.15s !important;
 }
 
 .sanad-secure-kiosk .que .answer .r0:hover,
 .sanad-secure-kiosk .que .answer .r1:hover {
-    background: #f0f7ff !important;
+    background: #eef5fb !important;
     border-color: #1c3f6e !important;
 }
 
-/* Inputs inside choices */
+/* Radio / checkbox accent */
 .sanad-secure-kiosk .que .answer input[type="radio"],
 .sanad-secure-kiosk .que .answer input[type="checkbox"] {
     accent-color: #1c3f6e !important;
-    width: 16px !important;
-    height: 16px !important;
     cursor: pointer !important;
 }
 
@@ -353,18 +365,31 @@ body.sanad-secure-kiosk #page-header {
    ========================================================================== */
 .sanad-secure-kiosk #quiz-timer {
     background: #ffffff !important;
-    border: 1px solid #c0392b !important;
+    border: 1px solid #b8cad8 !important;
     border-radius: 4px !important;
     padding: 3px 10px !important;
     font-size: 13px !important;
-    font-weight: 600 !important;
-    color: #c0392b !important;
+    color: #374151 !important;
+    font-weight: 500 !important;
 }
 
 /* ==========================================================================
-   10. NAVIGATION BUTTONS (Back / Next)
+   10. BACK / PREVIOUS PAGE / NEXT PAGE BUTTONS
+       Match the photo: grey "Back"/"Previous page", dark-blue "Next page".
    ========================================================================== */
-/* Next — deep blue */
+
+/* "Back" link (top-left plain button) */
+.sanad-secure-kiosk #page-content .btn.btn-secondary,
+.sanad-secure-kiosk .que .formulation ~ .submitbtns .btn-secondary {
+    background: #9ca3af !important;
+    border-color: #9ca3af !important;
+    color: #ffffff !important;
+    font-weight: 500 !important;
+    border-radius: 5px !important;
+    padding: 7px 18px !important;
+}
+
+/* "Next page" — dark blue as seen in photo */
 .sanad-secure-kiosk .submitbtns input[type="submit"][name="next"],
 .sanad-secure-kiosk .mod_quiz-next-nav,
 .sanad-secure-kiosk .submitbtns .btn-primary {
@@ -372,20 +397,21 @@ body.sanad-secure-kiosk #page-header {
     border-color: #1c3f6e !important;
     color: #ffffff !important;
     font-weight: 600 !important;
-    padding: 8px 20px !important;
+    padding: 8px 22px !important;
     border-radius: 5px !important;
+    font-size: 14px !important;
 }
 
-/* Previous — slate grey */
+/* "Previous page" */
 .sanad-secure-kiosk .submitbtns input[type="submit"][name="previous"],
-.sanad-secure-kiosk .mod_quiz-prev-nav,
-.sanad-secure-kiosk .submitbtns .btn-secondary {
-    background: #94a3b8 !important;
-    border-color: #94a3b8 !important;
+.sanad-secure-kiosk .mod_quiz-prev-nav {
+    background: #9ca3af !important;
+    border-color: #9ca3af !important;
     color: #ffffff !important;
-    font-weight: 600 !important;
-    padding: 8px 20px !important;
+    font-weight: 500 !important;
+    padding: 8px 18px !important;
     border-radius: 5px !important;
+    font-size: 14px !important;
 }
 
 /* ==========================================================================
@@ -393,38 +419,42 @@ body.sanad-secure-kiosk #page-header {
    ========================================================================== */
 .sanad-secure-kiosk .quizreviewsummary {
     background: #ffffff !important;
-    border: 1px solid #c9d6e3 !important;
-    border-radius: 8px !important;
-    padding: 16px !important;
-    margin-bottom: 16px !important;
+    border: 1px solid #c0cdd8 !important;
+    border-radius: 6px !important;
+    padding: 14px !important;
+    margin-bottom: 14px !important;
     font-size: 13px !important;
 }
 
 /* ==========================================================================
-   12. SCROLLBAR
+   12. THIN SCROLLBAR
    ========================================================================== */
 .sanad-secure-kiosk ::-webkit-scrollbar {
     width: 5px !important;
+    height: 5px !important;
 }
 
 .sanad-secure-kiosk ::-webkit-scrollbar-track {
-    background: #edf1f5 !important;
+    background: #ebeef5 !important;
 }
 
 .sanad-secure-kiosk ::-webkit-scrollbar-thumb {
-    background: #94a3b8 !important;
+    background: #9ca3af !important;
     border-radius: 3px !important;
 }
 
 /* ==========================================================================
-   13. TABLET RESPONSIVE (portrait / small landscape)
+   13. TABLET PORTRAIT / NARROW SCREEN
    ========================================================================== */
-@media (max-width: 900px) {
+@media (max-width: 860px) {
+    /* Stack nav panel above quiz content */
     .sanad-secure-kiosk #block-region-side-post {
         position: static !important;
         width: 100% !important;
         max-width: 100% !important;
-        margin: 0 0 14px !important;
+        margin: 0 0 12px 0 !important;
+        right: auto !important;
+        top: auto !important;
     }
 
     .sanad-secure-kiosk #responseform {
@@ -432,8 +462,9 @@ body.sanad-secure-kiosk #page-header {
     }
 
     .sanad-secure-kiosk .block_quiz_navigation .qnbutton {
-        width: 28px !important;
-        height: 28px !important;
-        line-height: 28px !important;
+        width: 32px !important;
+        height: 32px !important;
+        line-height: 32px !important;
+        font-size: 12px !important;
     }
 }
