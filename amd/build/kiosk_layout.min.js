@@ -40,7 +40,7 @@ define([], function() {
             return;
         }
 
-        var block = document.querySelector('.block_quiz_navigation');
+        var block = document.querySelector('#mod_quiz_navblock, .block_quiz_navigation');
         if (!block) {
             return;
         }
@@ -54,6 +54,8 @@ define([], function() {
         // and re-attach directly to body so no ancestor can clip it.
         body.appendChild(block);
         block.classList.add('sanad-kiosk-nav-panel');
+        // Add a helper class to target its internal Moodle cards
+        block.classList.add('block_quiz_navigation');
     };
 
     return {
