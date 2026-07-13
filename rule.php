@@ -385,6 +385,9 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
         if (token_manager::is_sanad_browser_request()) {
             $page->set_pagelayout('standard');
             $page->add_body_class('sanad-secure-kiosk');
+            // Move the quiz navigation block to document.body so that
+            // position:fixed is never clipped by a hidden ancestor drawer.
+            $page->requires->js_call_amd('quizaccess_sanad_lockdown/kiosk_layout', 'init');
         }
     }
 
