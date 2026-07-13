@@ -22,9 +22,9 @@
 /* Left navigation drawer and its toggle buttons */
 .sanad-secure-kiosk #nav-drawer,
 .sanad-secure-kiosk .drawer-left-toggle,
-.sanad-secure-kiosk .drawer-right-toggle,
 .sanad-secure-kiosk #theme_boost-drawers-primary,
-.sanad-secure-kiosk [data-region="drawer"],
+.sanad-secure-kiosk [data-region="drawer-left"],
+.sanad-secure-kiosk .drawer-left,
 .sanad-secure-kiosk .drawer-trigger {
     display: none !important;
 }
@@ -164,55 +164,57 @@ body.sanad-secure-kiosk::after {
    ========================================================================== */
 
 /* --- 5a. Make containers transparent — so empty ones don't create ghost boxes --- */
+/* --- 5a. Style Moodle's block drawer container to be fixed on the right --- */
 .sanad-secure-kiosk #block-region-side-post,
 .sanad-secure-kiosk [data-region="right-block-drawer"],
-.sanad-secure-kiosk [data-region="blocks-column"],
 .sanad-secure-kiosk .drawer.drawer-right {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: fixed !important;
+    top: 60px !important; /* right below the white header */
+    right: 0 !important;
+    width: 250px !important;
+    height: calc(100vh - 60px) !important;
+    background: #ffffff !important;
+    border-left: 1px solid #d0d7e2 !important;
+    z-index: 950 !important;
+    transform: none !important;
+    transition: none !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
+    overflow-y: auto !important;
+    left: auto !important;
+    bottom: auto !important;
+}
+
+/* Force standard inner block wrappers to display properly */
+.sanad-secure-kiosk [data-region="blocks-column"] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* --- 5b. Style the navigation block itself inside the drawer --- */
+.sanad-secure-kiosk .block_quiz_navigation,
+.sanad-secure-kiosk #mod_quiz_navblock {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
+    width: auto !important;
+    max-width: 100% !important;
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
-    /* Force drawers out of hidden state */
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
-    position: static !important;
-    width: auto !important;
-    height: auto !important;
-}
-
-/* --- 5b. Hide ALL non-navigation blocks in any container --- */
-.sanad-secure-kiosk #block-region-side-post .block:not(.block_quiz_navigation),
-.sanad-secure-kiosk [data-region="right-block-drawer"] .block:not(.block_quiz_navigation),
-.sanad-secure-kiosk [data-region="blocks-column"] .block:not(.block_quiz_navigation),
-.sanad-secure-kiosk .drawer.drawer-right .block:not(.block_quiz_navigation) {
-    display: none !important;
-}
-
-/* --- 5c. THE BLOCK ITSELF — fixed white panel top-right --- */
-.sanad-secure-kiosk .block_quiz_navigation {
-    position: fixed !important;
-    top: 75px !important;
-    right: 10px !important;
-    width: 220px !important;
-    max-width: 220px !important;
-    max-height: calc(100vh - 95px) !important;
-    overflow-y: auto !important;
-    background: #ffffff !important;
-    border: 1px solid #b8c8da !important;
-    border-radius: 6px !important;
-    padding: 12px !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.14) !important;
-    z-index: 950 !important;
-    display: block !important;
     margin: 0 !important;
-    box-sizing: border-box !important;
 }
 
 .sanad-secure-kiosk .block_quiz_navigation .card,
-.sanad-secure-kiosk .block_quiz_navigation .card-body {
+.sanad-secure-kiosk .block_quiz_navigation .card-body,
+.sanad-secure-kiosk #mod_quiz_navblock .card,
+.sanad-secure-kiosk #mod_quiz_navblock .card-body {
     background: transparent !important;
     border: none !important;
     padding: 0 !important;
@@ -223,23 +225,27 @@ body.sanad-secure-kiosk::after {
 /* "Quiz navigation" heading — RED like reference photo */
 .sanad-secure-kiosk .block_quiz_navigation .card-title,
 .sanad-secure-kiosk .block_quiz_navigation h3,
-.sanad-secure-kiosk .block_quiz_navigation h5 {
+.sanad-secure-kiosk .block_quiz_navigation h5,
+.sanad-secure-kiosk #mod_quiz_navblock .card-title,
+.sanad-secure-kiosk #mod_quiz_navblock h3,
+.sanad-secure-kiosk #mod_quiz_navblock h5 {
     color: #cc2200 !important;
-    font-size: 13px !important;
+    font-size: 14px !important;
     font-weight: 700 !important;
-    margin: 0 0 8px 0 !important;
-    padding-bottom: 6px !important;
+    margin: 0 0 12px 0 !important;
+    padding-bottom: 8px !important;
     border-bottom: 1px solid #e2e8f0 !important;
 }
 
 /* Number grid buttons */
-.sanad-secure-kiosk .block_quiz_navigation .qnbutton {
-    width: 28px !important;
-    height: 28px !important;
-    line-height: 28px !important;
-    margin: 2px !important;
-    border-radius: 3px !important;
-    font-size: 11px !important;
+.sanad-secure-kiosk .block_quiz_navigation .qnbutton,
+.sanad-secure-kiosk #mod_quiz_navblock .qnbutton {
+    width: 32px !important;
+    height: 32px !important;
+    line-height: 32px !important;
+    margin: 3px !important;
+    border-radius: 4px !important;
+    font-size: 12px !important;
     font-weight: 500 !important;
     display: inline-block !important;
     text-align: center !important;
@@ -250,7 +256,8 @@ body.sanad-secure-kiosk::after {
     text-decoration: none !important;
 }
 
-.sanad-secure-kiosk .block_quiz_navigation .qnbutton.notyetanswered {
+.sanad-secure-kiosk .block_quiz_navigation .qnbutton.notyetanswered,
+.sanad-secure-kiosk #mod_quiz_navblock .qnbutton.notyetanswered {
     background: #f4f7fa !important;
     border-color: #c0cdd8 !important;
     color: #374151 !important;
@@ -258,7 +265,9 @@ body.sanad-secure-kiosk::after {
 
 /* Answered — grey body + red top stripe */
 .sanad-secure-kiosk .block_quiz_navigation .qnbutton.answered,
-.sanad-secure-kiosk .block_quiz_navigation .qnbutton.correct {
+.sanad-secure-kiosk .block_quiz_navigation .qnbutton.correct,
+.sanad-secure-kiosk #mod_quiz_navblock .qnbutton.answered,
+.sanad-secure-kiosk #mod_quiz_navblock .qnbutton.correct {
     background: #b0c0cc !important;
     border-color: #8fa0aa !important;
     color: #ffffff !important;
@@ -266,7 +275,8 @@ body.sanad-secure-kiosk::after {
 }
 
 /* Current page */
-.sanad-secure-kiosk .block_quiz_navigation .qnbutton.thispage {
+.sanad-secure-kiosk .block_quiz_navigation .qnbutton.thispage,
+.sanad-secure-kiosk #mod_quiz_navblock .qnbutton.thispage {
     background: #1c3f6e !important;
     border: 2px solid #1c3f6e !important;
     color: #ffffff !important;
@@ -274,7 +284,8 @@ body.sanad-secure-kiosk::after {
 }
 
 /* Flagged */
-.sanad-secure-kiosk .block_quiz_navigation .qnbutton.flagged {
+.sanad-secure-kiosk .block_quiz_navigation .qnbutton.flagged,
+.sanad-secure-kiosk #mod_quiz_navblock .qnbutton.flagged {
     background: #fff8e1 !important;
     border-color: #e6a817 !important;
     color: #7a4f00 !important;
@@ -282,15 +293,18 @@ body.sanad-secure-kiosk::after {
 
 /* Meta / last-saved text */
 .sanad-secure-kiosk .block_quiz_navigation .lastchange,
-.sanad-secure-kiosk .block_quiz_navigation p {
-    font-size: 10px !important;
+.sanad-secure-kiosk .block_quiz_navigation p,
+.sanad-secure-kiosk #mod_quiz_navblock .lastchange,
+.sanad-secure-kiosk #mod_quiz_navblock p {
+    font-size: 11px !important;
     color: #6b7280 !important;
-    margin: 6px 0 2px 0 !important;
+    margin: 8px 0 2px 0 !important;
     line-height: 1.4 !important;
 }
 
 /* "Finish attempt..." link */
-.sanad-secure-kiosk .block_quiz_navigation .endtestlink a {
+.sanad-secure-kiosk .block_quiz_navigation .endtestlink a,
+.sanad-secure-kiosk #mod_quiz_navblock .endtestlink a {
     font-size: 12px !important;
     color: #1a56db !important;
     text-decoration: underline !important;
@@ -298,10 +312,10 @@ body.sanad-secure-kiosk::after {
 }
 
 /* ==========================================================================
-   6. QUIZ FORM — RIGHT MARGIN TO CLEAR THE FIXED NAV PANEL
+   6. QUIZ FORM — RIGHT MARGIN TO CLEAR THE FIXED DRAWER
    ========================================================================== */
 .sanad-secure-kiosk #responseform {
-    margin-right: 230px !important;
+    margin-right: 270px !important;
 }
 
 /* ==========================================================================
