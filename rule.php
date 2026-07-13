@@ -128,7 +128,7 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
         global $DB;
 
         $enabled        = !empty($quiz->sanad_lockdown_enabled) ? 1 : 0;
-        // FIX: Enforce minimum expiry of 300 seconds to prevent instantly-expiring tokens.
+        // Enforce minimum expiry of 300 seconds to prevent instantly-expiring tokens.
         $expiry         = max(300, isset($quiz->sanad_lockdown_tokenexpiry) ? (int)$quiz->sanad_lockdown_tokenexpiry : 1800);
         $exitpass       = isset($quiz->sanad_lockdown_exitpassword) ? trim($quiz->sanad_lockdown_exitpassword) : '';
         $alloweddomains = isset($quiz->sanad_lockdown_alloweddomains) ? trim($quiz->sanad_lockdown_alloweddomains) : '';
@@ -144,13 +144,10 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
             $record->tokenexpiry    = $expiry;
             $record->alloweddomains = $alloweddomains;
             $record->timemodified   = time();
-            // FIX: Only update the exit password hash when the teacher actually enters a new one.
-            // Also, avoid re-hashing the pre-populated hash if the user didn't change it.
-            if ($exitpass !== '') {
-                $isalreadyhash = (strpos($exitpass, '$2y$') === 0 && strlen($exitpass) === 60);
-                if (!$isalreadyhash) {
-                    $record->exitpassword = password_hash($exitpass, PASSWORD_BCRYPT);
-                }
+            // Only update the exit password hash when the teacher enters a new plain-text value.
+            $newhash = self::hash_exit_password($exitpass);
+            if ($newhash !== null) {
+                $record->exitpassword = $newhash;
             }
             $DB->update_record('quizaccess_sanad_lockdown', $record);
         } else {
@@ -161,10 +158,7 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
             $record->alloweddomains = $alloweddomains;
             $record->timecreated    = time();
             $record->timemodified   = time();
-            // Only set password if one was provided during initial creation.
-            $isalreadyhash = (strpos($exitpass, '$2y$') === 0 && strlen($exitpass) === 60);
-            $record->exitpassword   = ($exitpass !== '' && !$isalreadyhash)
-                ? password_hash($exitpass, PASSWORD_BCRYPT) : null;
+            $record->exitpassword   = self::hash_exit_password($exitpass);
             $DB->insert_record('quizaccess_sanad_lockdown', $record);
         }
     }
@@ -281,53 +275,22 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
         $isteacher = has_capability('mod/quiz:preview', $context) || has_capability('mod/quiz:viewreports', $context);
 
         if (!$isteacher) {
-            // Students see a text instruction indicating they need the QR from the teacher.
-            $html  = '<div class="sanad-lockdown-preflight">';
-            $html .= '<div class="alert alert-danger" role="alert">';
-            $html .= '<strong>' . get_string('accessdenied', 'quizaccess_sanad_lockdown') . '</strong> ';
-            $html .= get_string('mustusesanadapp', 'quizaccess_sanad_lockdown');
-            $html .= '</div>';
-            $html .= '<p class="font-weight-bold text-center text-primary" style="font-size:1.1em; margin: 15px 0;"><strong>'
-                . get_string('requestfromteacher', 'quizaccess_sanad_lockdown') . '</strong></p>';
-            $html .= '</div>';
-
-            $mform->addElement('html', $html);
+            $mform->addElement('html', self::render_student_notice());
             return;
         }
 
-        $quizid  = $this->quizobj->get_quizid();
-        $cmid    = $this->quizobj->get_cmid();
-        $expiry  = (int)($this->quiz->sanad_lockdown_tokenexpiry ?? 1800);
-
-        // Issue a token (this replaces any previous one for this user+quiz).
-        $token   = token_manager::issue($quizid, $USER->id, '', $expiry);
-        $url     = token_manager::build_launch_url($quizid, $cmid, $token);
-        $qrimg   = qr_generator::get_img_tag(
-            $url,
+        $quizid    = $this->quizobj->get_quizid();
+        $cmid      = $this->quizobj->get_cmid();
+        $expiry    = (int)($this->quiz->sanad_lockdown_tokenexpiry ?? 1800);
+        $token     = token_manager::issue($quizid, $USER->id, '', $expiry);
+        $shortcode = token_manager::get_short_code($token);
+        $qrimg     = qr_generator::get_img_tag(
+            token_manager::build_launch_url($quizid, $cmid, $token),
             300,
             get_string('qrcode_alttext', 'quizaccess_sanad_lockdown')
         );
 
-        $shortcode = token_manager::get_short_code($token);
-
-        // Build the HTML to show in the preflight form (visible for teachers).
-        $html  = '<div class="sanad-lockdown-preflight">';
-        $html .= '<div class="alert alert-warning" role="alert">';
-        $html .= '<strong>' . get_string('accessdenied', 'quizaccess_sanad_lockdown') . '</strong> ';
-        $html .= get_string('mustusesanadapp', 'quizaccess_sanad_lockdown');
-        $html .= '</div>';
-        $html .= '<p>' . get_string('scanqrtostart', 'quizaccess_sanad_lockdown') . '</p>';
-        $html .= '<div class="sanad-qrcode-wrapper text-center">' . $qrimg . '</div>';
-        if ($shortcode !== '') {
-            $html .= '<p class="text-center font-weight-bold my-3" style="font-size:1.15em;">';
-            $html .= get_string('shortcode', 'quizaccess_sanad_lockdown') . ': '
-                . '<span class="badge badge-secondary p-2">' . s($shortcode) . '</span>';
-            $html .= '</p>';
-        }
-        $html .= '<p class="text-muted small">' . get_string('downloadapp', 'quizaccess_sanad_lockdown') . '</p>';
-        $html .= '</div>';
-
-        $mform->addElement('html', $html);
+        $mform->addElement('html', self::render_teacher_qr_panel($qrimg, $shortcode));
     }
 
     /**
@@ -380,44 +343,18 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
         $isteacher = has_capability('mod/quiz:preview', $context) || has_capability('mod/quiz:viewreports', $context);
 
         if (!$isteacher) {
-            // Students see a text instruction indicating they need the QR from the teacher.
-            $inner  = \html_writer::tag(
-                'p',
-                \html_writer::tag('strong', get_string('accessdenied', 'quizaccess_sanad_lockdown')),
-                ['class' => 'text-danger text-center']
-            );
-            $inner .= \html_writer::tag(
-                'p',
-                get_string('mustusesanadapp', 'quizaccess_sanad_lockdown'),
-                ['class' => 'text-center']
-            );
-            $inner .= \html_writer::tag(
-                'p',
-                get_string('requestfromteacher', 'quizaccess_sanad_lockdown'),
-                ['class' => 'font-weight-bold text-center text-primary', 'style' => 'font-size: 1.1em;']
-            );
-
-            return [
-                \html_writer::div(
-                    $inner,
-                    'sanad-lockdown-description p-3 border rounded bg-light mb-3',
-                    ['style' => 'max-width:500px;margin:0 auto']
-                ),
-            ];
+            return [self::render_student_notice()];
         }
 
-        $expiry  = (int)($this->quiz->sanad_lockdown_tokenexpiry ?? 1800);
-
-        // Issue a token (replaces any previous one for this user+quiz).
-        $token   = token_manager::issue($quizid, $USER->id, '', $expiry);
-        $url     = token_manager::build_launch_url($quizid, $cmid, $token);
-        $qrimg   = qr_generator::get_img_tag(
-            $url,
+        $expiry    = (int)($this->quiz->sanad_lockdown_tokenexpiry ?? 1800);
+        $token     = token_manager::issue($quizid, $USER->id, '', $expiry);
+        $shortcode = token_manager::get_short_code($token);
+        $qrimg     = qr_generator::get_img_tag(
+            token_manager::build_launch_url($quizid, $cmid, $token),
             250,
             get_string('qrcode_alttext', 'quizaccess_sanad_lockdown')
         );
 
-        // Monitor dashboard button for teachers.
         $monitorurl = new \moodle_url('/mod/quiz/accessrule/sanad_lockdown/monitor.php', ['cmid' => $cmid]);
         $monitorbtn = \html_writer::link(
             $monitorurl,
@@ -429,31 +366,10 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
             ]
         );
 
-        $shortcode = token_manager::get_short_code($token);
-
-        // Use html_writer::div so the content is treated as raw HTML (not escaped).
-        // The quiz renderer wraps each description() item in <p> tags with html_writer
-        // which escapes strings — returning an html_writer output bypasses that.
-        $inner  = \html_writer::tag('p', \html_writer::tag('strong', get_string('scanqrtostart', 'quizaccess_sanad_lockdown')));
-        $inner .= \html_writer::div($qrimg, 'sanad-qrcode-wrapper text-center mb-2');
-        if ($shortcode !== '') {
-            $inner .= \html_writer::tag(
-                'p',
-                get_string('shortcode', 'quizaccess_sanad_lockdown') . ': ' .
-                    \html_writer::span(s($shortcode), 'badge badge-secondary p-2'),
-                ['class' => 'text-center font-weight-bold my-2', 'style' => 'font-size:1.15em;']
-            );
-        }
-        $inner .= \html_writer::tag(
-            'p',
-            get_string('downloadapp', 'quizaccess_sanad_lockdown'),
-            ['class' => 'text-muted small text-center']
-        );
-        $inner .= \html_writer::div($monitorbtn, 'text-center mt-3');
-
         return [
             \html_writer::div(
-                $inner,
+                self::render_teacher_qr_panel($qrimg, $shortcode) .
+                \html_writer::div($monitorbtn, 'text-center mt-3'),
                 'sanad-lockdown-description text-center p-3 border rounded bg-light mb-3',
                 ['style' => 'max-width:500px;margin:0 auto']
             ),
@@ -470,5 +386,72 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
             $page->set_pagelayout('standard');
             $page->add_body_class('sanad-secure-kiosk');
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Private rendering helpers.
+    // -------------------------------------------------------------------------
+
+    /**
+     * Build the HTML notice shown to students who access the quiz outside the app.
+     *
+     * @return string HTML string.
+     */
+    private static function render_student_notice(): string {
+        $html  = '<div class="sanad-lockdown-preflight">';
+        $html .= '<div class="alert alert-danger" role="alert">';
+        $html .= '<strong>' . get_string('accessdenied', 'quizaccess_sanad_lockdown') . '</strong> ';
+        $html .= get_string('mustusesanadapp', 'quizaccess_sanad_lockdown');
+        $html .= '</div>';
+        $html .= '<p class="font-weight-bold text-center text-primary" style="font-size:1.1em;">';
+        $html .= '<strong>' . get_string('requestfromteacher', 'quizaccess_sanad_lockdown') . '</strong>';
+        $html .= '</p>';
+        $html .= '</div>';
+        return $html;
+    }
+
+    /**
+     * Build the HTML QR code panel shown to teachers in the preflight / description views.
+     *
+     * @param string $qrimg     The <img> tag HTML for the QR code.
+     * @param string $shortcode The short code string (may be empty).
+     * @return string HTML string.
+     */
+    private static function render_teacher_qr_panel(string $qrimg, string $shortcode): string {
+        $html  = '<div class="sanad-lockdown-preflight">';
+        $html .= '<div class="alert alert-warning" role="alert">';
+        $html .= '<strong>' . get_string('accessdenied', 'quizaccess_sanad_lockdown') . '</strong> ';
+        $html .= get_string('mustusesanadapp', 'quizaccess_sanad_lockdown');
+        $html .= '</div>';
+        $html .= '<p>' . get_string('scanqrtostart', 'quizaccess_sanad_lockdown') . '</p>';
+        $html .= '<div class="sanad-qrcode-wrapper text-center">' . $qrimg . '</div>';
+        if ($shortcode !== '') {
+            $html .= '<p class="text-center font-weight-bold my-3" style="font-size:1.15em;">';
+            $html .= get_string('shortcode', 'quizaccess_sanad_lockdown') . ': ';
+            $html .= '<span class="badge badge-secondary p-2">' . s($shortcode) . '</span>';
+            $html .= '</p>';
+        }
+        $html .= '<p class="text-muted small">' . get_string('downloadapp', 'quizaccess_sanad_lockdown') . '</p>';
+        $html .= '</div>';
+        return $html;
+    }
+
+    /**
+     * Hash a plain-text exit password with PASSWORD_BCRYPT.
+     *
+     * Returns null if the value is empty or already a bcrypt hash (prevents double-hashing).
+     *
+     * @param string $pass The plain-text (or already-hashed) password.
+     * @return string|null The bcrypt hash, or null if no update is needed.
+     */
+    private static function hash_exit_password(string $pass): ?string {
+        if ($pass === '') {
+            return null;
+        }
+        // Detect an existing bcrypt hash — do not re-hash it.
+        if (strpos($pass, '$2y$') === 0 && strlen($pass) === 60) {
+            return null;
+        }
+        return password_hash($pass, PASSWORD_BCRYPT);
     }
 }
