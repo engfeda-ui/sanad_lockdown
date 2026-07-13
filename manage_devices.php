@@ -81,13 +81,10 @@ if (!empty($action) && confirm_sesskey()) {
             }
             $user = $DB->get_record('user', ['id' => $userid], '*', MUST_EXIST);
 
-            // Set password using Moodle core hashing helper
+            // Set the password hash and update user via Moodle API
             $user->password = hash_internal_user_password($newpassword);
             $user->timemodified = time();
-            $DB->update_record('user', $user);
-
-            // Clear cache and log user out of active web sessions to force re-auth
-            \core_user::update_user($user);
+            user_update_user($user);
             $msg = "تم بنجاح تغيير كلمة مرور الطالب ({$user->firstname} {$user->lastname}) إلى الكلمة الجديدة.";
         }
     } catch (Exception $e) {
