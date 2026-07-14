@@ -45,10 +45,6 @@
     display: none !important;
 }
 
-/* Side pre block region */
-.sanad-secure-kiosk #block-region-side-pre {
-    display: none !important;
-}
 
 /* Action menus (cog icons) */
 .sanad-secure-kiosk .action-menu {
@@ -169,6 +165,7 @@ body.sanad-secure-kiosk::after {
 
 /* --- 5a. Make block drawer containers transparent to prevent ghost boxes --- */
 .sanad-secure-kiosk #block-region-side-post,
+.sanad-secure-kiosk #block-region-side-pre,
 .sanad-secure-kiosk [data-region="right-block-drawer"],
 .sanad-secure-kiosk .drawer.drawer-right,
 .sanad-secure-kiosk #theme_boost-drawers-blocks,
