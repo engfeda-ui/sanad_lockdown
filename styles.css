@@ -167,31 +167,24 @@ body.sanad-secure-kiosk::after {
       The container gets no background so empty containers are invisible.
    ========================================================================== */
 
-/* --- 5a. Make containers transparent — so empty ones don't create ghost boxes --- */
-/* --- 5a. Style Moodle's block drawer container to be fixed on the right --- */
+/* --- 5a. Make block drawer containers transparent to prevent ghost boxes --- */
 .sanad-secure-kiosk #block-region-side-post,
 .sanad-secure-kiosk [data-region="right-block-drawer"],
 .sanad-secure-kiosk .drawer.drawer-right,
 .sanad-secure-kiosk #theme_boost-drawers-blocks,
 .sanad-secure-kiosk .drawer-right {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    transform: none !important;
+    transition: none !important;
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    position: fixed !important;
-    top: 60px !important; /* right below the white header */
-    right: 0 !important;
-    width: 250px !important;
-    height: calc(100vh - 60px) !important;
-    background: #ffffff !important;
-    border-left: 1px solid #d0d7e2 !important;
-    z-index: 950 !important;
-    transform: none !important;
-    transition: none !important;
-    padding: 16px !important;
-    box-sizing: border-box !important;
-    overflow-y: auto !important;
-    left: auto !important;
-    bottom: auto !important;
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
 }
 
 /* Force standard inner block wrappers to display properly */
@@ -201,20 +194,27 @@ body.sanad-secure-kiosk::after {
     opacity: 1 !important;
 }
 
-/* --- 5b. Style the navigation block itself inside the drawer --- */
+/* --- 5b. Style the navigation block itself to float fixed on the right --- */
 .sanad-secure-kiosk .block_quiz_navigation,
 .sanad-secure-kiosk #mod_quiz_navblock {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    position: static !important;
-    width: auto !important;
-    max-width: 100% !important;
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    padding: 0 !important;
+    position: fixed !important;
+    top: 75px !important; /* right below the white header */
+    right: 15px !important;
+    width: 240px !important;
+    max-width: 240px !important;
+    max-height: calc(100vh - 100px) !important;
+    overflow-y: auto !important;
+    background: #ffffff !important;
+    border: 1px solid #b8c8da !important;
+    border-radius: 8px !important;
+    padding: 14px !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15) !important;
+    z-index: 9999 !important; /* show above everything */
     margin: 0 !important;
+    box-sizing: border-box !important;
 }
 
 .sanad-secure-kiosk .block_quiz_navigation .card,
