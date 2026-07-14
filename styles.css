@@ -68,8 +68,12 @@ body.sanad-secure-kiosk {
 
 /* Remove the body top-padding Boost adds for the fixed navbar */
 body.sanad-secure-kiosk,
-body.sanad-secure-kiosk #page-wrapper {
+body.sanad-secure-kiosk #page-wrapper,
+body.sanad-secure-kiosk #page,
+body.sanad-secure-kiosk .main-inner,
+body.sanad-secure-kiosk #page-content {
     padding-top: 0 !important;
+    margin-top: 0 !important;
 }
 
 /* Remove old pseudo-element sidebar injected by previous CSS versions */
@@ -167,7 +171,9 @@ body.sanad-secure-kiosk::after {
 /* --- 5a. Style Moodle's block drawer container to be fixed on the right --- */
 .sanad-secure-kiosk #block-region-side-post,
 .sanad-secure-kiosk [data-region="right-block-drawer"],
-.sanad-secure-kiosk .drawer.drawer-right {
+.sanad-secure-kiosk .drawer.drawer-right,
+.sanad-secure-kiosk #theme_boost-drawers-blocks,
+.sanad-secure-kiosk .drawer-right {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
