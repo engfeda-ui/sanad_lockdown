@@ -385,6 +385,8 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
         if (token_manager::is_sanad_browser_request()) {
             $page->set_pagelayout('secure');
             $page->add_body_class('sanad-secure-kiosk');
+            // Force blocks to be loaded and rendered by Moodle core
+            $this->quiz->showblocks = 1;
         }
     }
 
