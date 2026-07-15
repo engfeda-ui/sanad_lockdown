@@ -120,8 +120,9 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
             $record->enabled        = $enabled;
             $record->tokenexpiry    = $expiry;
             $record->timemodified   = time();
-            // Automatically generate a 6-digit numeric exit password if not already set.
-            if (empty($record->exitpassword)) {
+            // Automatically generate a 6-digit numeric exit password if not already set or if it is an old BCrypt hash.
+            $isbcrypt = (!empty($record->exitpassword) && strpos($record->exitpassword, '$2y$') === 0 && strlen($record->exitpassword) === 60);
+            if (empty($record->exitpassword) || $isbcrypt) {
                 try {
                     $record->exitpassword = (string)random_int(100000, 999999);
                 } catch (\Exception $e) {
