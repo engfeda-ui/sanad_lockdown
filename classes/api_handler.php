@@ -208,9 +208,9 @@ class api_handler {
         );
 
         if (!$session) {
-            // Session not found — allow exit if the password still matches.
+            // Session not found — allow exit only if the password still matches.
             if ($action === 'verify_exit') {
-                self::exit_with_fallback_check($quizid, $data['password'] ?? '');
+                self::exit_with_fallback_check($quizid, $data['password'] ?? '', $deviceid);
             } else {
                 http_response_code(401);
                 echo json_encode(['error' => 'Unauthorized: Session not found']);
@@ -224,7 +224,7 @@ class api_handler {
         if (time() > $session->timeexpires) {
             $DB->delete_records('quizaccess_sanad_sessions', ['id' => $session->id]);
             if ($action === 'verify_exit') {
-                self::exit_with_fallback_check($quizid, $data['password'] ?? '');
+                self::exit_with_fallback_check($quizid, $data['password'] ?? '', $deviceid);
             } else {
                 http_response_code(401);
                 echo json_encode(['error' => 'Unauthorized: Session has expired']);
@@ -328,7 +328,13 @@ class api_handler {
     private static function handle_verify_exit(array $data, \stdClass $session, int $quizid, string $deviceid): void {
         global $DB;
 
-        $password = $data['password'] ?? '';
+        // SECURITY: Reject empty password immediately — do not allow bypass via omitted field.
+        $password = trim($data['password'] ?? '');
+        if ($password === '') {
+            http_response_code(400);
+            echo json_encode(['error' => 'Bad Request: Exit password is required']);
+            return;
+        }
 
         // Rate limiting: max 5 failed attempts per quiz and device within 5 minutes.
         $ratelimitwindow = time() - 300;
@@ -346,9 +352,12 @@ class api_handler {
 
         $exitpasswordhash = $session->quiz_exitpassword ?? null;
 
+        // SECURITY: If no exit password is configured, DENY exit — do not silently approve.
+        // A quiz without a configured exit password remains locked; only an admin can
+        // force-terminate the session server-side via the monitor page.
         if (empty($exitpasswordhash)) {
-            token_manager::revoke($quizid, $session->userid);
-            echo json_encode(['status' => 'verified', 'info' => 'No exit password set']);
+            http_response_code(403);
+            echo json_encode(['error' => 'Forbidden: No exit password configured for this exam']);
             return;
         }
 
@@ -379,23 +388,58 @@ class api_handler {
      * Verify exit password directly from the lockdown settings (session-independent fallback).
      * Used when the session has already been deleted or expired.
      *
+     * Applies the same guards as handle_verify_exit():
+     * - Rejects empty passwords immediately.
+     * - Denies exit when no password is configured (no silent bypass).
+     * - Enforces rate limiting via the violations table.
+     *
      * @param int    $quizid   The quiz ID.
      * @param string $password The plain-text password to verify.
+     * @param string $deviceid Device fingerprint for rate limiting.
      */
-    private static function exit_with_fallback_check(int $quizid, string $password): void {
+    private static function exit_with_fallback_check(int $quizid, string $password, string $deviceid = ''): void {
         global $DB;
+
+        // SECURITY: Reject empty password immediately.
+        $password = trim($password);
+        if ($password === '') {
+            http_response_code(400);
+            echo json_encode(['error' => 'Bad Request: Exit password is required']);
+            return;
+        }
+
+        // Rate limiting: max 5 failed attempts per quiz and device within 5 minutes.
+        if ($deviceid !== '') {
+            $ratelimitwindow = time() - 300;
+            $failedattempts  = $DB->count_records_select(
+                'quizaccess_sanad_violations',
+                "quizid = :quizid AND deviceid = :deviceid "
+                . "AND violationtype = 'invalid_exit_password_attempt' AND timecreated > :window",
+                ['quizid' => $quizid, 'deviceid' => $deviceid, 'window' => $ratelimitwindow]
+            );
+            if ($failedattempts >= 5) {
+                http_response_code(429);
+                echo json_encode(['error' => 'Too many attempts. Try again later.']);
+                return;
+            }
+        }
 
         $lockdown         = $DB->get_record('quizaccess_sanad_lockdown', ['quizid' => $quizid]);
         $exitpasswordhash = $lockdown ? $lockdown->exitpassword : null;
 
+        // SECURITY: If no exit password is configured, DENY exit — do not silently approve.
         if (empty($exitpasswordhash)) {
-            echo json_encode(['status' => 'verified', 'info' => 'No exit password set']);
+            http_response_code(403);
+            echo json_encode(['error' => 'Forbidden: No exit password configured for this exam']);
             return;
         }
 
         if (password_verify($password, $exitpasswordhash)) {
             echo json_encode(['status' => 'verified']);
         } else {
+            if ($deviceid !== '') {
+                violation_logger::log($quizid, 0, 'invalid_exit_password_attempt', $deviceid);
+            }
             http_response_code(401);
             echo json_encode(['error' => 'Incorrect exit password']);
         }

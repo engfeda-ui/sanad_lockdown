@@ -144,10 +144,17 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
             $record->tokenexpiry    = $expiry;
             $record->alloweddomains = $alloweddomains;
             $record->timemodified   = time();
-            // Only update the exit password hash when the teacher enters a new plain-text value.
-            $newhash = self::hash_exit_password($exitpass);
-            if ($newhash !== null) {
-                $record->exitpassword = $newhash;
+            // If the teacher cleared the exit password field, delete the stored hash.
+            // If they entered a new plain-text value, re-hash and update it.
+            // If they left the field showing asterisks (i.e. an existing bcrypt hash),
+            // hash_exit_password() returns null and we leave the stored hash untouched.
+            if ($exitpass === '') {
+                $record->exitpassword = null;
+            } else {
+                $newhash = self::hash_exit_password($exitpass);
+                if ($newhash !== null) {
+                    $record->exitpassword = $newhash;
+                }
             }
             $DB->update_record('quizaccess_sanad_lockdown', $record);
         } else {
@@ -441,17 +448,28 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
     /**
      * Hash a plain-text exit password with PASSWORD_BCRYPT.
      *
-     * Returns null if the value is empty or already a bcrypt hash (prevents double-hashing).
+     * Returns null if:
+     *   - The value is empty (no password to store).
+     *   - The value is already a valid password hash (prevents double-hashing).
+     *     Detection uses PHP's built-in password_get_info() which is algorithm-agnostic
+     *     and reliable across all PHP versions that support PASSWORD_BCRYPT / PASSWORD_ARGON2.
+     *
+     * Note: an empty string return means "clear the password" — callers must handle
+     * that separately (see save_settings).
      *
      * @param string $pass The plain-text (or already-hashed) password.
-     * @return string|null The bcrypt hash, or null if no update is needed.
+     * @return string|null The bcrypt hash, or null if no hashing is needed.
      */
     private static function hash_exit_password(string $pass): ?string {
         if ($pass === '') {
             return null;
         }
-        // Detect an existing bcrypt hash — do not re-hash it.
-        if (strpos($pass, '$2y$') === 0 && strlen($pass) === 60) {
+        // Use PHP's built-in function to detect any recognised password hash.
+        // This handles bcrypt ($2y$), argon2i, argon2id, and future algorithms
+        // without relying on fragile prefix/length string matching.
+        $info = password_get_info($pass);
+        if ($info['algo'] !== null && $info['algo'] !== 0) {
+            // Already a valid hash — do not re-hash.
             return null;
         }
         return password_hash($pass, PASSWORD_BCRYPT);
