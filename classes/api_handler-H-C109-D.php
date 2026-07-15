@@ -46,6 +46,9 @@ class api_handler {
             case 'check_license':
                 self::handle_check_license($data);
                 break;
+            case 'check_update':
+                self::handle_check_update();
+                break;
             case 'heartbeat':
             case 'log_violation':
             case 'verify_exit':
@@ -516,5 +519,26 @@ class api_handler {
             return 'suspended';
         }
         return 'pending';
+    }
+
+    /**
+     * Check for application updates from version.json.
+     */
+    private static function handle_check_update(): void {
+        $version_file = dirname(__DIR__) . '/version.json';
+        if (file_exists($version_file)) {
+            $data = json_decode(file_get_contents($version_file), true);
+            echo json_encode([
+                'status' => 'success',
+                'version_code' => (int)($data['version_code'] ?? 1),
+                'version_name' => $data['version_name'] ?? '1.0.0',
+                'download_url' => $data['download_url'] ?? '',
+                'apk_sha256' => $data['apk_sha256'] ?? ''
+            ]);
+        } else {
+            http_response_code(404);
+            echo json_encode(['error' => 'لم يتم العثور على معلومات التحديث على السيرفر']);
+        }
+        exit;
     }
 }
