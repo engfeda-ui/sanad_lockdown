@@ -96,6 +96,14 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
         $mform->addHelpButton('sanad_lockdown_tokenexpiry', 'tokenexpiry', 'quizaccess_sanad_lockdown');
         $mform->addRule('sanad_lockdown_tokenexpiry', null, 'numeric', null, 'client');
         $mform->hideIf('sanad_lockdown_tokenexpiry', 'sanad_lockdown_enabled', 'eq', 0);
+
+        // Regenerate password checkbox.
+        $mform->addElement(
+            'checkbox',
+            'sanad_lockdown_regeneratepassword',
+            get_string('regeneratepassword', 'quizaccess_sanad_lockdown')
+        );
+        $mform->hideIf('sanad_lockdown_regeneratepassword', 'sanad_lockdown_enabled', 'eq', 0);
     }
 
     /**
@@ -106,9 +114,10 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
     public static function save_settings($quiz) {
         global $DB;
 
-        $enabled        = !empty($quiz->sanad_lockdown_enabled) ? 1 : 0;
+        $enabled      = !empty($quiz->sanad_lockdown_enabled) ? 1 : 0;
         // Enforce minimum expiry of 300 seconds to prevent instantly-expiring tokens.
-        $expiry         = max(300, isset($quiz->sanad_lockdown_tokenexpiry) ? (int)$quiz->sanad_lockdown_tokenexpiry : 1800);
+        $expiry       = max(300, isset($quiz->sanad_lockdown_tokenexpiry) ? (int)$quiz->sanad_lockdown_tokenexpiry : 1800);
+        $regenerating = !empty($quiz->sanad_lockdown_regeneratepassword);
 
         if (!$enabled) {
             $DB->delete_records('quizaccess_sanad_lockdown', ['quizid' => $quiz->id]);
@@ -117,12 +126,12 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
 
         $record = $DB->get_record('quizaccess_sanad_lockdown', ['quizid' => $quiz->id]);
         if ($record) {
-            $record->enabled        = $enabled;
-            $record->tokenexpiry    = $expiry;
-            $record->timemodified   = time();
-            // Automatically generate a 6-digit numeric exit password if not already set or if it is an old BCrypt hash.
+            $record->enabled      = $enabled;
+            $record->tokenexpiry  = $expiry;
+            $record->timemodified = time();
+            // Automatically generate a 6-digit numeric exit password if not already set, if it is an old BCrypt hash, or if regeneration is requested.
             $isbcrypt = (!empty($record->exitpassword) && strpos($record->exitpassword, '$2y$') === 0 && strlen($record->exitpassword) === 60);
-            if (empty($record->exitpassword) || $isbcrypt) {
+            if (empty($record->exitpassword) || $isbcrypt || $regenerating) {
                 try {
                     $record->exitpassword = (string)random_int(100000, 999999);
                 } catch (\Exception $e) {
