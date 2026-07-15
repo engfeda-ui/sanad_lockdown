@@ -361,8 +361,7 @@ class api_handler {
             return;
         }
 
-        $verified = password_verify($password, $exitpasswordhash) || ($password === $exitpasswordhash);
-        if ($verified) {
+        if (password_verify($password, $exitpasswordhash)) {
             token_manager::revoke($quizid, $session->userid);
             echo json_encode(['status' => 'verified']);
         } else {
@@ -435,8 +434,7 @@ class api_handler {
             return;
         }
 
-        $verified = password_verify($password, $exitpasswordhash) || ($password === $exitpasswordhash);
-        if ($verified) {
+        if (password_verify($password, $exitpasswordhash)) {
             echo json_encode(['status' => 'verified']);
         } else {
             if ($deviceid !== '') {

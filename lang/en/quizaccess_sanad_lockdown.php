@@ -34,6 +34,7 @@ $string['tokenexpiry'] = 'Session token expiry (seconds)';
 $string['tokenexpiry_help'] = 'How long a session token remains valid after the student scans the QR code. Default is 1800 seconds (30 minutes). Must be greater than or equal to the quiz time limit.';
 $string['exitpassword'] = 'Emergency exit password';
 $string['exitpassword_help'] = 'A password that supervisors can enter in the Sanad Secure Browser app to release the device from kiosk mode in case of emergency. Leave blank to disable emergency exit.';
+$string['exitpassword_encrypted'] = 'Encrypted (Please edit quiz settings and enter a new plain text password to display it here)';
 $string['alloweddomains'] = 'Allowed domains / Whitelisted URLs';
 $string['alloweddomains_help'] = 'Enter any additional external domains or URLs that the student is allowed to access during the exam (one per line, e.g., backup-lms.sanad.ws or cdn.sanad.ws). The Sanad Secure Browser will permit navigation to these hosts and block all others.';
 

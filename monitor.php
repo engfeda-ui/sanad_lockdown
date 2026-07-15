@@ -275,6 +275,24 @@ echo html_writer::tag(
     ['class' => 'text-muted mb-4']
 );
 
+// ── Emergency Exit Password Alert Banner ──────────────────────────────────────
+if (!empty($settings->exitpassword)) {
+    $isbcrypt = (strpos($settings->exitpassword, '$2y$') === 0 && strlen($settings->exitpassword) === 60);
+    if ($isbcrypt) {
+        $pwdhtml = html_writer::tag('span', get_string('exitpassword_encrypted', 'quizaccess_sanad_lockdown'), ['class' => 'text-danger font-italic']);
+    } else {
+        $pwdhtml = html_writer::tag('strong', s($settings->exitpassword), ['class' => 'text-primary', 'style' => 'font-size: 1.25em; letter-spacing: 0.5px;']);
+    }
+
+    echo html_writer::div(
+        html_writer::tag('i', '', ['class' => 'fa fa-key mr-2 text-warning'])
+        . html_writer::tag('strong', get_string('exitpassword', 'quizaccess_sanad_lockdown') . ': ')
+        . $pwdhtml,
+        'alert alert-info d-inline-block p-3 mb-4 border rounded shadow-sm',
+        ['style' => 'font-size: 15px; display: inline-flex; align-items: center; gap: 8px; background-color: #e8f4fd; border-color: #b3d7f9; color: #1d4ed8;']
+    );
+}
+
 // ── Stats bar ─────────────────────────────────────────────────────────────────
 echo html_writer::start_div('sanad-stats-bar mb-4');
 echo sanad_stat_card(count($students), get_string('total_students', 'quizaccess_sanad_lockdown'), 'sanad-stat-total', 'fa-users');

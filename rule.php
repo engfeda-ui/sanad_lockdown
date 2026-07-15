@@ -96,27 +96,6 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
         $mform->addHelpButton('sanad_lockdown_tokenexpiry', 'tokenexpiry', 'quizaccess_sanad_lockdown');
         $mform->addRule('sanad_lockdown_tokenexpiry', null, 'numeric', null, 'client');
         $mform->hideIf('sanad_lockdown_tokenexpiry', 'sanad_lockdown_enabled', 'eq', 0);
-
-        // Emergency exit password.
-        $mform->addElement(
-            'passwordunmask',
-            'sanad_lockdown_exitpassword',
-            get_string('exitpassword', 'quizaccess_sanad_lockdown')
-        );
-        $mform->setType('sanad_lockdown_exitpassword', PARAM_RAW);
-        $mform->addHelpButton('sanad_lockdown_exitpassword', 'exitpassword', 'quizaccess_sanad_lockdown');
-        $mform->hideIf('sanad_lockdown_exitpassword', 'sanad_lockdown_enabled', 'eq', 0);
-
-        // Allowed Whitelisted Domains / URLs.
-        $mform->addElement(
-            'textarea',
-            'sanad_lockdown_alloweddomains',
-            get_string('alloweddomains', 'quizaccess_sanad_lockdown'),
-            ['rows' => 4, 'cols' => 60, 'placeholder' => "backup-lms.sanad.ws\ncdn.sanad.ws"]
-        );
-        $mform->setType('sanad_lockdown_alloweddomains', PARAM_RAW);
-        $mform->addHelpButton('sanad_lockdown_alloweddomains', 'alloweddomains', 'quizaccess_sanad_lockdown');
-        $mform->hideIf('sanad_lockdown_alloweddomains', 'sanad_lockdown_enabled', 'eq', 0);
     }
 
     /**
@@ -130,8 +109,6 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
         $enabled        = !empty($quiz->sanad_lockdown_enabled) ? 1 : 0;
         // Enforce minimum expiry of 300 seconds to prevent instantly-expiring tokens.
         $expiry         = max(300, isset($quiz->sanad_lockdown_tokenexpiry) ? (int)$quiz->sanad_lockdown_tokenexpiry : 1800);
-        $exitpass       = isset($quiz->sanad_lockdown_exitpassword) ? trim($quiz->sanad_lockdown_exitpassword) : '';
-        $alloweddomains = isset($quiz->sanad_lockdown_alloweddomains) ? trim($quiz->sanad_lockdown_alloweddomains) : '';
 
         if (!$enabled) {
             $DB->delete_records('quizaccess_sanad_lockdown', ['quizid' => $quiz->id]);
@@ -142,18 +119,13 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
         if ($record) {
             $record->enabled        = $enabled;
             $record->tokenexpiry    = $expiry;
-            $record->alloweddomains = $alloweddomains;
             $record->timemodified   = time();
-            // If the teacher cleared the exit password field, delete the stored hash.
-            // If they entered a new plain-text value, re-hash and update it.
-            // If they left the field showing asterisks (i.e. an existing bcrypt hash),
-            // hash_exit_password() returns null and we leave the stored hash untouched.
-            if ($exitpass === '') {
-                $record->exitpassword = null;
-            } else {
-                $newhash = self::hash_exit_password($exitpass);
-                if ($newhash !== null) {
-                    $record->exitpassword = $newhash;
+            // Automatically generate a 6-digit numeric exit password if not already set.
+            if (empty($record->exitpassword)) {
+                try {
+                    $record->exitpassword = (string)random_int(100000, 999999);
+                } catch (\Exception $e) {
+                    $record->exitpassword = (string)mt_rand(100000, 999999);
                 }
             }
             $DB->update_record('quizaccess_sanad_lockdown', $record);
@@ -162,10 +134,13 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
             $record->quizid         = $quiz->id;
             $record->enabled        = $enabled;
             $record->tokenexpiry    = $expiry;
-            $record->alloweddomains = $alloweddomains;
             $record->timecreated    = time();
             $record->timemodified   = time();
-            $record->exitpassword   = self::hash_exit_password($exitpass);
+            try {
+                $record->exitpassword = (string)random_int(100000, 999999);
+            } catch (\Exception $e) {
+                $record->exitpassword = (string)mt_rand(100000, 999999);
+            }
             $DB->insert_record('quizaccess_sanad_lockdown', $record);
         }
     }
@@ -464,14 +439,6 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
         if ($pass === '') {
             return null;
         }
-        // Use PHP's built-in function to detect any recognised password hash.
-        // This handles bcrypt ($2y$), argon2i, argon2id, and future algorithms
-        // without relying on fragile prefix/length string matching.
-        $info = password_get_info($pass);
-        if ($info['algo'] !== null && $info['algo'] !== 0) {
-            // Already a valid hash — do not re-hash.
-            return null;
-        }
-        return password_hash($pass, PASSWORD_BCRYPT);
+        return $pass;
     }
 }
