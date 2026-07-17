@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - master
+    # FIX 5: Ignore docs/config changes that don't affect production code
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'CHANGES.md'
 
 jobs:
   deploy:
@@ -26,6 +32,31 @@ jobs:
 
       - name: Deploy via rsync
         run: |
-          rsync -avz --no-perms --no-owner --no-group --delete --exclude '.git*' ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/ubuntu/moodle-project/mod/quiz/accessrule/sanad_lockdown/
+          # FIX 1: Added --exclude '.git*' to prevent uploading .git folder to server (security risk)
+          rsync -avz --no-perms --no-owner --no-group --delete \
+            --exclude '.git*' \
+            --exclude '.github' \
+            ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/ubuntu/moodle-project/mod/quiz/accessrule/sanad_lockdown/
+
+      # FIX 2: Set correct permissions so Moodle/Apache can read plugin files
+      - name: Fix Plugin Permissions on Server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            PLUGIN_DIR='/home/ubuntu/moodle-project/mod/quiz/accessrule/sanad_lockdown'
+            sudo chown -R www-data:www-data \"\$PLUGIN_DIR\" || true
+            sudo chmod -R 755 \"\$PLUGIN_DIR\" || true
+            echo 'Permissions fixed.'
+          "
+
+      # FIX 4: Verify files landed correctly on server
+      - name: Verify Deployment on Server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "
+            PLUGIN_DIR='/home/ubuntu/moodle-project/mod/quiz/accessrule/sanad_lockdown'
+            echo '=== Plugin Files ==='
+            ls -lh \"\$PLUGIN_DIR/version.php\" \"\$PLUGIN_DIR/rule.php\" \"\$PLUGIN_DIR/lib.php\"
+            echo ''
+            echo '✅ sanad_lockdown plugin deployed successfully!'
+          "
 
 
