@@ -3,7 +3,6 @@ name: Deploy Moodle Plugin (Dual Environment)
 on:
   push:
     branches:
-      - main
       - master
       - staging
 
