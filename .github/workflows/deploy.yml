@@ -74,3 +74,15 @@ jobs:
               php /var/www/html/admin/cli/purge_caches.php
             echo '✅ ${{ env.PLUGIN_PATH }} deployed to ${{ steps.target.outputs.env }} successfully!'
           "
+
+      - name: Write Job Summary
+        if: always()
+        run: |
+          echo "## 🚀 Moodle Plugin Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Branch** | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Environment** | ${{ steps.target.outputs.env }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Plugin** | \`${{ env.PLUGIN_PATH }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Host** | \`${{ steps.target.outputs.host }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY

@@ -1,0 +1,14 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+.idea/
+
+# Moodle build artifacts
+*.pyc
+__pycache__/
+
+# Composer (if added later)
+vendor/
