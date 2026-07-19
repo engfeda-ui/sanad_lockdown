@@ -5,7 +5,11 @@ on:
   push:
     branches:
       - master
+      - staging
   pull_request:
+    branches:
+      - master
+      - staging
   workflow_dispatch:
 
 jobs:
@@ -17,11 +21,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # FIX 2: Test against both Moodle 4.4 and 4.5 stable branches
         moodle-branch: ['MOODLE_404_STABLE', 'MOODLE_405_STABLE']
         php: ['8.1', '8.2', '8.3']
         exclude:
-          # Moodle 4.5 dropped PHP 8.1 support
           - moodle-branch: 'MOODLE_405_STABLE'
             php: '8.1'
 
@@ -40,12 +42,12 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      - uses: actions/checkout@v4
         with:
           path: mod/quiz/accessrule/sanad_lockdown
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@9e72090525849c5e82e596468b86eb55e9cc5401 # v2.32.0
+        uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
           extensions: pgsql, mbstring, gd, curl, xml, zip, intl, sodium
@@ -74,7 +76,6 @@ jobs:
       - name: PHP CodeSniffer
         run: moodle-plugin-ci codechecker mod/quiz/accessrule/sanad_lockdown
 
-      # FIX 4: Added PHPDoc validation
       - name: PHP Doc Check
         run: moodle-plugin-ci phpdoc mod/quiz/accessrule/sanad_lockdown
         continue-on-error: true
@@ -82,7 +83,6 @@ jobs:
       - name: Moodle PHPUnit
         run: moodle-plugin-ci phpunit
 
-      # FIX 3: Added --suite default to avoid Behat failing on missing feature suites
       - name: Moodle Behat
         run: moodle-plugin-ci behat --suite default
         continue-on-error: true

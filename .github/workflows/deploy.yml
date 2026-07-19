@@ -1,10 +1,19 @@
 name: Deploy Moodle Plugin (Dual Environment)
 
+# ─────────────────────────────────────────────────────────────────
+# master  branch → Production LMS Server (150.230.241.37) — lms.sanad.ws
+# staging branch → Staging LMS Server    (80.225.79.61)  — staging-lms.sanad.ws
+# ─────────────────────────────────────────────────────────────────
 on:
   push:
     branches:
       - master
       - staging
+    paths-ignore:
+      - '**.md'
+      - '.gitignore'
+      - 'LICENSE'
+  workflow_dispatch:
 
 env:
   PLUGIN_PATH: mod/quiz/accessrule/sanad_lockdown
@@ -24,16 +33,18 @@ jobs:
         run: |
           if [ "${{ github.ref_name }}" = "staging" ]; then
             echo "host=80.225.79.61"                                      >> $GITHUB_OUTPUT
+            echo "user=ubuntu"                                            >> $GITHUB_OUTPUT
             echo "dir=/home/ubuntu/moodle-staging/${{ env.PLUGIN_PATH }}" >> $GITHUB_OUTPUT
             echo "container=moodle-staging-app"                           >> $GITHUB_OUTPUT
             echo "key=${{ secrets.STAGING_SSH_KEY }}"                     >> $GITHUB_OUTPUT
-            echo "env=🧪 STAGING"                                         >> $GITHUB_OUTPUT
+            echo "env=🧪 STAGING (staging-lms.sanad.ws)"                  >> $GITHUB_OUTPUT
           else
-            echo "host=${{ secrets.SSH_HOST }}"                           >> $GITHUB_OUTPUT
+            echo "host=150.230.241.37"                                    >> $GITHUB_OUTPUT
+            echo "user=ubuntu"                                            >> $GITHUB_OUTPUT
             echo "dir=/home/ubuntu/moodle-project/${{ env.PLUGIN_PATH }}" >> $GITHUB_OUTPUT
             echo "container=moodle-app"                                   >> $GITHUB_OUTPUT
-            echo "key=${{ secrets.SSH_PRIVATE_KEY }}"                     >> $GITHUB_OUTPUT
-            echo "env=🚀 PRODUCTION"                                      >> $GITHUB_OUTPUT
+            echo "key=${{ secrets.LMS_PROD_SSH_KEY || secrets.SSH_PRIVATE_KEY }}" >> $GITHUB_OUTPUT
+            echo "env=🚀 PRODUCTION (lms.sanad.ws)"                       >> $GITHUB_OUTPUT
           fi
 
       # ── 2. إعداد مفتاح الـ SSH ─────────────────────────────────
@@ -51,12 +62,12 @@ jobs:
           rsync -avz --delete \
             --exclude='.git' \
             --exclude='.github' \
-            ./ ubuntu@${{ steps.target.outputs.host }}:${{ steps.target.outputs.dir }}/
+            ./ ${{ steps.target.outputs.user }}@${{ steps.target.outputs.host }}:${{ steps.target.outputs.dir }}/
 
       # ── 4. ترقية المودل ومسح الكاش داخل الحاوية بصلاحيات الويب ──
       - name: Upgrade Moodle & Clear Caches
         run: |
-          ssh ubuntu@${{ steps.target.outputs.host }} "
+          ssh ${{ steps.target.outputs.user }}@${{ steps.target.outputs.host }} "
             docker exec -u www-data ${{ steps.target.outputs.container }} \
               php /var/www/html/admin/cli/upgrade.php --non-interactive 2>&1 | tail -3
             docker exec -u www-data ${{ steps.target.outputs.container }} \
