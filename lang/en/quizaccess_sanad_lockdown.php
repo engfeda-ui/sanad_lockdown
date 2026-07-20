@@ -39,6 +39,10 @@ $string['regeneratepassword'] = 'Regenerate a new emergency exit password (rando
 $string['alloweddomains'] = 'Allowed domains / Whitelisted URLs';
 $string['alloweddomains_help'] = 'Enter any additional external domains or URLs that the student is allowed to access during the exam (one per line, e.g., backup-lms.sanad.ws or cdn.sanad.ws). The Sanad Secure Browser will permit navigation to these hosts and block all others.';
 
+// Settings page strings.
+$string['settings_desc'] = 'This page allows you to monitor connected devices, licenses, and active security violations in kiosk mode in real time.';
+$string['settings_link'] = 'Open Kiosk Devices & License Monitor Dashboard (Admin only)';
+
 // Preflight / access denied strings.
 $string['accessdenied'] = 'Access Denied';
 $string['mustusesanadapp'] = 'This quiz requires the Sanad Secure Browser app on Android. You cannot open it from a regular browser.';

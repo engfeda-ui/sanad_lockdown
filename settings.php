@@ -29,8 +29,8 @@ if ($ADMIN->fulltree) {
     // Add external link to the admin dashboard.
     $url = new moodle_url('/mod/quiz/accessrule/sanad_lockdown/manage_devices.php');
 
-    $desc = 'تسمح لك هذه الصفحة بمراقبة الأجهزة المتصلة بالاختبارات والانتهاكات الأمنية النشطة في وضع الكشك بالوقت الفعلي.';
-    $linktext = '📊 فتح لوحة متابعة أجهزة الكشك وتراخيصها (للمسؤول فقط)';
+    $desc = get_string('settings_desc', 'quizaccess_sanad_lockdown');
+    $linktext = get_string('settings_link', 'quizaccess_sanad_lockdown');
 
     $html = html_writer::tag('p', $desc, ['style' => 'font-size:14px; margin-bottom: 12px;']);
     $html .= html_writer::link($url, $linktext, [

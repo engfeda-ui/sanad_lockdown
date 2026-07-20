@@ -127,3 +127,8 @@ $string['privacy:metadata:quizaccess_sanad_violations:violationtype'] = 'نوع 
 $string['privacy:metadata:quizaccess_sanad_violations:deviceid'] = 'بصمة الجهاز وقت حدوث المخالفة.';
 $string['privacy:metadata:quizaccess_sanad_violations:details'] = 'تفاصيل إضافية للمخالفة.';
 $string['privacy:metadata:quizaccess_sanad_violations:timecreated'] = 'وقت حدوث المخالفة.';
+
+// Settings page strings.
+$string['settings_desc'] = 'تسمح لك هذه الصفحة بمراقبة الأجهزة المتصلة بالاختبارات والانتهاكات الأمنية النشطة في وضع الكشك بالوقت الفعلي.';
+$string['settings_link'] = 'فتح لوحة متابعة أجهزة الكشك وتراخيصها (للمسؤول فقط)';
+
