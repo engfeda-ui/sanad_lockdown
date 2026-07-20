@@ -129,8 +129,10 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
             $record->enabled      = $enabled;
             $record->tokenexpiry  = $expiry;
             $record->timemodified = time();
-            // Automatically generate a 6-digit numeric exit password if not already set, if it is an old BCrypt hash, or if regeneration is requested.
-            $isbcrypt = (!empty($record->exitpassword) && strpos($record->exitpassword, '$2y$') === 0 && strlen($record->exitpassword) === 60);
+            // Automatically generate a 6-digit exit password if not already set,
+            // if it is an old BCrypt hash, or if regeneration is requested.
+            $isbcrypt = (!empty($record->exitpassword) && strpos($record->exitpassword, '$2y$') === 0
+                && strlen($record->exitpassword) === 60);
             if (empty($record->exitpassword) || $isbcrypt || $regenerating) {
                 try {
                     $record->exitpassword = (string)random_int(100000, 999999);
@@ -377,7 +379,7 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
         if (token_manager::is_sanad_browser_request()) {
             $page->set_pagelayout('secure');
             $page->add_body_class('sanad-secure-kiosk');
-            // Force blocks to be loaded and rendered by Moodle core
+            // Force blocks to be loaded and rendered by Moodle core.
             $this->quiz->showblocks = 1;
         }
     }

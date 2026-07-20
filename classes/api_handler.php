@@ -527,15 +527,15 @@ class api_handler {
      * Check for application updates from version.json.
      */
     private static function handle_check_update(): void {
-        $version_file = dirname(__DIR__) . '/version.json';
-        if (file_exists($version_file)) {
-            $data = json_decode(file_get_contents($version_file), true);
+        $versionfile = dirname(__DIR__) . '/version.json';
+        if (file_exists($versionfile)) {
+            $data = json_decode(file_get_contents($versionfile), true);
             echo json_encode([
                 'status' => 'success',
                 'version_code' => (int)($data['version_code'] ?? 1),
                 'version_name' => $data['version_name'] ?? '1.0.0',
                 'download_url' => $data['download_url'] ?? '',
-                'apk_sha256' => $data['apk_sha256'] ?? ''
+                'apk_sha256' => $data['apk_sha256'] ?? '',
             ]);
         } else {
             http_response_code(404);
