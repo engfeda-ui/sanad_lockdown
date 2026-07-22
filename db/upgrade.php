@@ -89,5 +89,17 @@ function xmldb_quizaccess_sanad_lockdown_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026071100, 'quizaccess', 'sanad_lockdown');
     }
 
+    // 2026072200: Add strictness field to quizaccess_sanad_lockdown table.
+    if ($oldversion < 2026072200) {
+        $table = new \xmldb_table('quizaccess_sanad_lockdown');
+        $field = new \xmldb_field('strictness', XMLDB_TYPE_CHAR, '32', null, XMLDB_NOTNULL, null, 'high', 'enabled');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2026072200, 'quizaccess', 'sanad_lockdown');
+    }
+
     return true;
 }

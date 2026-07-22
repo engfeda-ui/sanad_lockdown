@@ -10,6 +10,7 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key to quiz.id."/>
         <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="1 = Sanad Secure Browser required."/>
+        <FIELD NAME="strictness" TYPE="char" LENGTH="32" NOTNULL="true" DEFAULT="high" SEQUENCE="false" COMMENT="Security enforcement level: standard, high, exam."/>
         <FIELD NAME="tokenexpiry" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="1800" SEQUENCE="false" COMMENT="Token expiry in seconds. Default 30 minutes."/>
         <FIELD NAME="exitpassword" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Emergency exit password (bcrypt/argon2 hash, max 255 chars)."/>
         <FIELD NAME="alloweddomains" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Newline-separated list of whitelisted external domains/URLs."/>

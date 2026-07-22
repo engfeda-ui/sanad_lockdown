@@ -84,6 +84,22 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
         $mform->addHelpButton('sanad_lockdown_enabled', 'requiresanadlockdown', 'quizaccess_sanad_lockdown');
         $mform->setDefault('sanad_lockdown_enabled', 0);
 
+        // Strictness level.
+        $strictnessOptions = [
+            'standard' => get_string('strictness_standard', 'quizaccess_sanad_lockdown'),
+            'high'     => get_string('strictness_high', 'quizaccess_sanad_lockdown'),
+            'exam'     => get_string('strictness_exam', 'quizaccess_sanad_lockdown'),
+        ];
+        $mform->addElement(
+            'select',
+            'sanad_lockdown_strictness',
+            get_string('strictness', 'quizaccess_sanad_lockdown'),
+            $strictnessOptions
+        );
+        $mform->setDefault('sanad_lockdown_strictness', 'high');
+        $mform->addHelpButton('sanad_lockdown_strictness', 'strictness', 'quizaccess_sanad_lockdown');
+        $mform->hideIf('sanad_lockdown_strictness', 'sanad_lockdown_enabled', 'eq', 0);
+
         // Token expiry.
         $mform->addElement(
             'text',
@@ -115,6 +131,7 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
         global $DB;
 
         $enabled      = !empty($quiz->sanad_lockdown_enabled) ? 1 : 0;
+        $strictness   = !empty($quiz->sanad_lockdown_strictness) ? clean_param($quiz->sanad_lockdown_strictness, PARAM_ALPHA) : 'high';
         // Enforce minimum expiry of 300 seconds to prevent instantly-expiring tokens.
         $expiry       = max(300, isset($quiz->sanad_lockdown_tokenexpiry) ? (int)$quiz->sanad_lockdown_tokenexpiry : 1800);
         $regenerating = !empty($quiz->sanad_lockdown_regeneratepassword);
@@ -127,6 +144,7 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
         $record = $DB->get_record('quizaccess_sanad_lockdown', ['quizid' => $quiz->id]);
         if ($record) {
             $record->enabled      = $enabled;
+            $record->strictness   = $strictness;
             $record->tokenexpiry  = $expiry;
             $record->timemodified = time();
             // Automatically generate a 6-digit exit password if not already set,

@@ -37,7 +37,11 @@ $string['exitpassword_help'] = 'A password that supervisors can enter in the San
 $string['exitpassword_encrypted'] = 'Encrypted (Please edit quiz settings and enter a new plain text password to display it here)';
 $string['regeneratepassword'] = 'Regenerate a new emergency exit password (random)';
 $string['alloweddomains'] = 'Allowed domains / Whitelisted URLs';
-$string['alloweddomains_help'] = 'Enter any additional external domains or URLs that the student is allowed to access during the exam (one per line, e.g., backup-lms.sanad.ws or cdn.sanad.ws). The Sanad Secure Browser will permit navigation to these hosts and block all others.';
+$string['strictness'] = 'Security Lockdown Strictness Level';
+$string['strictness_help'] = 'Choose the security enforcement level for this exam: Standard (basic kiosk & notification lock), High (neutralize shortcuts & URL whitelist), or Strict Exam (Full OS Device Owner lockdown & session timer).';
+$string['strictness_standard'] = 'Standard (Basic Kiosk)';
+$string['strictness_high'] = 'High Security (Shortcut & URL Filtering)';
+$string['strictness_exam'] = 'Strict Exam Mode (Full OS Device Owner Lockdown)';
 
 // Settings page strings.
 $string['settings_desc'] = 'This page allows you to monitor connected devices, licenses, and active security violations in kiosk mode in real time.';
