@@ -85,7 +85,7 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
         $mform->setDefault('sanad_lockdown_enabled', 0);
 
         // Strictness level.
-        $strictnessOptions = [
+        $strictnessoptions = [
             'standard' => get_string('strictness_standard', 'quizaccess_sanad_lockdown'),
             'high'     => get_string('strictness_high', 'quizaccess_sanad_lockdown'),
             'exam'     => get_string('strictness_exam', 'quizaccess_sanad_lockdown'),
@@ -94,7 +94,7 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
             'select',
             'sanad_lockdown_strictness',
             get_string('strictness', 'quizaccess_sanad_lockdown'),
-            $strictnessOptions
+            $strictnessoptions
         );
         $mform->setDefault('sanad_lockdown_strictness', 'high');
         $mform->addHelpButton('sanad_lockdown_strictness', 'strictness', 'quizaccess_sanad_lockdown');
@@ -131,7 +131,8 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
         global $DB;
 
         $enabled      = !empty($quiz->sanad_lockdown_enabled) ? 1 : 0;
-        $strictness   = !empty($quiz->sanad_lockdown_strictness) ? clean_param($quiz->sanad_lockdown_strictness, PARAM_ALPHA) : 'high';
+        $strictness   = !empty($quiz->sanad_lockdown_strictness) ?
+            clean_param($quiz->sanad_lockdown_strictness, PARAM_ALPHA) : 'high';
         // Enforce minimum expiry of 300 seconds to prevent instantly-expiring tokens.
         $expiry       = max(300, isset($quiz->sanad_lockdown_tokenexpiry) ? (int)$quiz->sanad_lockdown_tokenexpiry : 1800);
         $regenerating = !empty($quiz->sanad_lockdown_regeneratepassword);
