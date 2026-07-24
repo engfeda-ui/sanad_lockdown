@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2026072200;
+$plugin->version   = 2026072500;
 $plugin->requires  = 2024100700; // Moodle 4.5 minimum.
 $plugin->supported = [405, 500]; // Moodle 4.5 – 5.0.
 $plugin->component = 'quizaccess_sanad_lockdown';
