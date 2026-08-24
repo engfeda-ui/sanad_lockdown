@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information for the quizaccess_sanad_lockdown plugin.
+ * Web service function definitions for quizaccess_sanad_lockdown.
  *
  * @package   quizaccess_sanad_lockdown
  * @copyright 2026 Mahmoud Salem <eng.feda@gmail.com>
@@ -24,9 +24,13 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2026082400;
-$plugin->requires  = 2024100700; // Moodle 4.5 minimum.
-$plugin->supported = [405, 500]; // Moodle 4.5 – 5.0.
-$plugin->component = 'quizaccess_sanad_lockdown';
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = 'v1.5.0'; // Added: Mobile Web Service API for SANAD Learn deep linking.
+$functions = [
+    'quizaccess_sanad_lockdown_get_launch_token' => [
+        'classname'   => 'quizaccess_sanad_lockdown\external\get_launch_token',
+        'methodname'  => 'execute',
+        'description' => 'Generates and returns a secure launch token and deep link for SANAD Kiosk',
+        'type'        => 'read',
+        'capabilities'=> 'mod/quiz:attempt',
+        'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE],
+    ],
+];

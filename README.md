@@ -104,6 +104,13 @@ It executes the official `moodle-plugin-ci` test suite:
 - **PHPDoc (`phpdoc`)**: Validates documentation comments.
 - **PHPUnit (`phpunit`)**: Executes unit tests in `tests/rule_test.php`.
 
+## 📋 Changelog
+
+### [v1.5.0] - 2026-08-24
+* **Added:** Mobile Web Service API (`quizaccess_sanad_lockdown_get_launch_token`) supporting direct session token generation and Deep Link URL formulation for SANAD Learn mobile integration.
+* **Added:** `db/services.php` auto-registering the external service in `MOODLE_OFFICIAL_MOBILE_SERVICE`.
+* **Enhanced:** Cross-application token resolution supporting both QR scanning, short code resolution, and direct Intent / Deep Link invocation (`sanad-kiosk://launch-quiz`).
+
 ---
 
 ## 📄 License & Credits
