@@ -122,5 +122,17 @@ function xmldb_quizaccess_sanad_lockdown_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026082600, 'quizaccess', 'sanad_lockdown');
     }
 
+    // 2026082700: Add client IP column to violations for rotation-resistant rate limiting.
+    if ($oldversion < 2026082700) {
+        $table = new \xmldb_table('quizaccess_sanad_violations');
+        $field = new \xmldb_field('ip', XMLDB_TYPE_CHAR, '45', null, null, null, null, 'deviceid');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2026082700, 'quizaccess', 'sanad_lockdown');
+    }
+
     return true;
 }

@@ -50,7 +50,7 @@
         <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="violationtype" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="Type: invalid_token, wrong_browser, focus_lost, etc."/>
-        <FIELD NAME="deviceid" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="deviceid" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/><FIELD NAME="ip" TYPE="char" LENGTH="45" NOTNULL="false" SEQUENCE="false" COMMENT="Client IP for rotation-resistant rate limiting"/>
         <FIELD NAME="details" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Extra context as JSON string."/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>

@@ -81,8 +81,12 @@ class api_handler {
             return;
         }
 
-        // Rate limiting: max 5 failed attempts per device within 5 minutes.
+        // Rate limiting: max 5 failed attempts per device within 5 minutes,
+        // plus an IP-based abuse floor so rotating device ids does not bypass it
+        // (a generous cap keeps whole classrooms behind NAT unaffected).
         $ratelimitwindow = time() - 300;
+        $clientip = getremoteaddr();
+
         $failedattempts  = $DB->count_records_select(
             'quizaccess_sanad_violations',
             "deviceid = :deviceid AND violationtype = 'failed_code_resolution' AND timecreated > :window",
@@ -91,6 +95,17 @@ class api_handler {
         if ($failedattempts >= 5) {
             http_response_code(429);
             echo json_encode(['error' => 'Too many failed code resolution attempts. Try again later.']);
+            return;
+        }
+
+        $ipattempts = $DB->count_records_select(
+            'quizaccess_sanad_violations',
+            "ip = :ip AND violationtype = 'failed_code_resolution' AND timecreated > :window",
+            ['ip' => $clientip, 'window' => $ratelimitwindow]
+        );
+        if ($ipattempts >= 50) {
+            http_response_code(429);
+            echo json_encode(['error' => 'Too many requests from this network. Try again later.']);
             return;
         }
 

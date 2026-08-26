@@ -137,3 +137,6 @@ $string['settings_link'] = 'فتح لوحة متابعة أجهزة الكشك �
 $string['exitpassword_newbtn'] = 'توليد كلمة سر خروج جديدة';
 $string['exitpassword_revealonce'] = 'دوّن هذا الرمز الآن - لن يُعرض مرة أخرى.';
 $string['exitpassword_regenerated'] = 'تم توليد كلمة سر خروج جديدة وتخزينها مشفرة.';
+
+$string['appsharedsecret'] = 'السر المشترك للتطبيق (HMAC)';
+$string['appsharedsecret_desc'] = 'سر عشوائي قوي اختياري. عند تعيينه يجب أن يرسل التطبيق ترويستي X-SANAD-TIMESTAMP و X-SANAD-SIGNATURE. اتركه فارغاً حتى يدعم تطبيق الكشك التوقيع.';

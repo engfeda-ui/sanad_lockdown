@@ -44,4 +44,16 @@ if ($ADMIN->fulltree) {
         '',
         html_writer::tag('div', $html)
     ));
+
+    // Optional HMAC shared secret for kiosk-app API authentication.
+    // Empty (default) = gate disabled. Once the kiosk app ships
+    // X-SANAD-TIMESTAMP / X-SANAD-SIGNATURE support, configure a strong
+    // random value here to make header spoofing impossible.
+    $settings->add(new admin_setting_configtext(
+        'quizaccess_sanad_lockdown/appsharedsecret',
+        get_string('appsharedsecret', 'quizaccess_sanad_lockdown'),
+        get_string('appsharedsecret_desc', 'quizaccess_sanad_lockdown'),
+        '',
+        PARAM_RAW_TRIMMED
+    ));
 }

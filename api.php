@@ -35,6 +35,25 @@ use quizaccess_sanad_lockdown\api_handler;
 // Set API response headers.
 header('Content-Type: application/json; charset=utf-8');
 
+// ── Optional app-authentication gate (HMAC) ───────────────────────────────
+// When the "app shared secret" admin setting is non-empty, every API request
+// must include:
+//   X-SANAD-TIMESTAMP: unix timestamp (±120 s window)
+//   X-SANAD-SIGNATURE: hash_hmac('sha256', timestamp, shared_secret)
+// Leave the setting empty until the kiosk app ships signature support.
+$appsecret = get_config('quizaccess_sanad_lockdown', 'appsharedsecret');
+if (!empty($appsecret)) {
+    $ts   = $_SERVER['HTTP_X_SANAD_TIMESTAMP'] ?? '';
+    $sigr = $_SERVER['HTTP_X_SANAD_SIGNATURE'] ?? '';
+    $validwindow = abs(time() - (int)$ts) <= 120;
+    $validsig    = $validwindow && hash_equals(hash_hmac('sha256', (string)$ts, $appsecret), (string)$sigr);
+    if (!$validsig) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Unauthorized: missing or invalid request signature']);
+        exit;
+    }
+}
+
 // Only allow POST requests.
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);

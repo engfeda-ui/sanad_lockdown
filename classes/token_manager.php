@@ -297,14 +297,18 @@ class token_manager {
             return '';
         }
         $secret = self::get_site_secret();
-        $sig = substr(hash_hmac('sha256', $record->id, $secret), 0, 4);
-        return $record->id . '-' . strtoupper($sig);
+        // 8 hex chars (~4 billion combinations) for new sessions.
+        $sig = strtoupper(substr(hash_hmac('sha256', $record->id, $secret), 0, 8));
+        return $record->id . '-' . $sig;
     }
 
     /**
      * Verify a short code and return the corresponding session record if valid.
      *
-     * @param string $code The input short code (e.g. "125-A8C9" or "125a8c9").
+     * Accepts both the current 8-hex-char signatures and the legacy 4-hex-char
+     * ones so codes already printed/scanned keep working until they expire.
+     *
+     * @param string $code The input short code (e.g. "125-A8C9" or "125A8C90D1B2").
      * @return \stdClass|null The session record object, or null if invalid/expired.
      */
     public static function verify_short_code(string $code): ?\stdClass {
@@ -317,9 +321,10 @@ class token_manager {
         $sig = strtoupper(trim($parts[1]));
 
         $secret = self::get_site_secret();
-        $expectedsig = strtoupper(substr(hash_hmac('sha256', $id, $secret), 0, 4));
+        $fullsig = strtoupper(hash_hmac('sha256', $id, $secret));
 
-        if ($sig !== $expectedsig) {
+        // Current 8-char signatures and legacy 4-char ones are both honoured.
+        if ($sig !== substr($fullsig, 0, 8) && $sig !== substr($fullsig, 0, 4)) {
             return null;
         }
 

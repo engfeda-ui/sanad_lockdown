@@ -138,3 +138,6 @@ $string['privacy:metadata:quizaccess_sanad_violations:timecreated'] = 'When the 
 $string['exitpassword_newbtn'] = 'Generate new exit password';
 $string['exitpassword_revealonce'] = 'Write this code down now - it will not be shown again.';
 $string['exitpassword_regenerated'] = 'A new exit password has been generated and stored encrypted.';
+
+$string['appsharedsecret'] = 'App shared secret (HMAC)';
+$string['appsharedsecret_desc'] = 'Optional strong random secret. When set, kiosk API requests must include X-SANAD-TIMESTAMP and X-SANAD-SIGNATURE = HMAC-SHA256(timestamp, secret). Keep empty until the kiosk app supports signing.';

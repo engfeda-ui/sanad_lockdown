@@ -66,10 +66,18 @@ class violation_logger {
         $record->userid        = $userid;
         $record->violationtype = $violationtype;
         $record->deviceid      = $deviceid;
+        $record->ip            = getremoteaddr();
         $record->details       = !empty($details) ? json_encode($details) : null;
         $record->timecreated   = time();
 
-        $DB->insert_record('quizaccess_sanad_violations', $record);
+        try {
+            $DB->insert_record('quizaccess_sanad_violations', $record);
+        } catch (\dml_exception $e) {
+            // Pre-migration databases may not have the ip column yet.
+            unset($record->ip);
+            unset($e);
+            $DB->insert_record('quizaccess_sanad_violations', $record);
+        }
     }
 
     /**
