@@ -24,9 +24,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2026082400;
+$plugin->version   = 2026082600;
 $plugin->requires  = 2024100700; // Moodle 4.5 minimum.
-$plugin->supported = [405, 500]; // Moodle 4.5 – 5.0.
+$plugin->supported = [405, 500]; // Moodle 4.5 - 5.0.
 $plugin->component = 'quizaccess_sanad_lockdown';
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = 'v1.5.0'; // Added: Mobile Web Service API for SANAD Learn deep linking.
+$plugin->release   = 'v1.6.0'; // Added: bcrypt-hashed exit passwords with one-time reveal + migration.

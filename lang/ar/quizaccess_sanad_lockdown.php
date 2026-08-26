@@ -133,3 +133,7 @@ $string['privacy:metadata:quizaccess_sanad_violations:timecreated'] = 'وقت ح
 // Settings page strings.
 $string['settings_desc'] = 'تسمح لك هذه الصفحة بمراقبة الأجهزة المتصلة بالاختبارات والانتهاكات الأمنية النشطة في وضع الكشك بالوقت الفعلي.';
 $string['settings_link'] = 'فتح لوحة متابعة أجهزة الكشك وتراخيصها (للمسؤول فقط)';
+
+$string['exitpassword_newbtn'] = 'توليد كلمة سر خروج جديدة';
+$string['exitpassword_revealonce'] = 'دوّن هذا الرمز الآن - لن يُعرض مرة أخرى.';
+$string['exitpassword_regenerated'] = 'تم توليد كلمة سر خروج جديدة وتخزينها مشفرة.';

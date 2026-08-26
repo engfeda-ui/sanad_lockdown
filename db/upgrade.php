@@ -101,5 +101,26 @@ function xmldb_quizaccess_sanad_lockdown_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026072200, 'quizaccess', 'sanad_lockdown');
     }
 
+    // 2026082600: Hash legacy plaintext exit passwords with bcrypt.
+    // Values already starting with '$2y$' (60 chars) are left untouched.
+    if ($oldversion < 2026082600) {
+        $rs = $DB->get_recordset('quizaccess_sanad_lockdown', [], '', 'id, exitpassword');
+        foreach ($rs as $rec) {
+            if (empty($rec->exitpassword)) {
+                continue;
+            }
+            if (strpos($rec->exitpassword, '$2y$') === 0 && strlen($rec->exitpassword) === 60) {
+                continue; // Already hashed.
+            }
+            $upd = new stdClass();
+            $upd->id = $rec->id;
+            $upd->exitpassword = password_hash($rec->exitpassword, PASSWORD_DEFAULT);
+            $DB->update_record('quizaccess_sanad_lockdown', $upd);
+        }
+        $rs->close();
+
+        upgrade_plugin_savepoint(true, 2026082600, 'quizaccess', 'sanad_lockdown');
+    }
+
     return true;
 }

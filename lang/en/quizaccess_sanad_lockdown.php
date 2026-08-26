@@ -134,3 +134,7 @@ $string['privacy:metadata:quizaccess_sanad_violations:violationtype'] = 'The typ
 $string['privacy:metadata:quizaccess_sanad_violations:deviceid'] = 'The device fingerprint at time of violation.';
 $string['privacy:metadata:quizaccess_sanad_violations:details'] = 'Additional context about the violation.';
 $string['privacy:metadata:quizaccess_sanad_violations:timecreated'] = 'When the violation occurred.';
+
+$string['exitpassword_newbtn'] = 'Generate new exit password';
+$string['exitpassword_revealonce'] = 'Write this code down now - it will not be shown again.';
+$string['exitpassword_regenerated'] = 'A new exit password has been generated and stored encrypted.';

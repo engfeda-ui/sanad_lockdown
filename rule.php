@@ -148,16 +148,16 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
             $record->strictness   = $strictness;
             $record->tokenexpiry  = $expiry;
             $record->timemodified = time();
-            // Automatically generate a 6-digit exit password if not already set,
-            // if it is an old BCrypt hash, or if regeneration is requested.
-            $isbcrypt = (!empty($record->exitpassword) && strpos($record->exitpassword, '$2y$') === 0
-                && strlen($record->exitpassword) === 60);
-            if (empty($record->exitpassword) || $isbcrypt || $regenerating) {
+            // Generate a fresh 6-digit exit password only when none exists or when
+            // regeneration is explicitly requested. The value is stored as a bcrypt
+            // hash; the plain code can be revealed once via monitor.php.
+            if (empty($record->exitpassword) || $regenerating) {
                 try {
-                    $record->exitpassword = (string)random_int(100000, 999999);
+                    $plain = (string)random_int(100000, 999999);
                 } catch (\Exception $e) {
-                    $record->exitpassword = (string)mt_rand(100000, 999999);
+                    $plain = (string)mt_rand(100000, 999999);
                 }
+                $record->exitpassword = password_hash($plain, PASSWORD_DEFAULT);
             }
             $DB->update_record('quizaccess_sanad_lockdown', $record);
         } else {
@@ -168,10 +168,11 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
             $record->timecreated    = time();
             $record->timemodified   = time();
             try {
-                $record->exitpassword = (string)random_int(100000, 999999);
+                $plain = (string)random_int(100000, 999999);
             } catch (\Exception $e) {
-                $record->exitpassword = (string)mt_rand(100000, 999999);
+                $plain = (string)mt_rand(100000, 999999);
             }
+            $record->exitpassword = password_hash($plain, PASSWORD_DEFAULT);
             $DB->insert_record('quizaccess_sanad_lockdown', $record);
         }
     }

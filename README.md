@@ -4,6 +4,7 @@
 [![PHP Version](https://img.shields.io/badge/PHP-8.2%20%7C%208.3-blue.svg?style=flat-square)](https://php.net)
 [![Database](https://img.shields.io/badge/Database-PostgreSQL%20%7C%20MySQL%20%7C%20MariaDB-purple.svg?style=flat-square)](https://docs.moodle.org)
 [![Android Compatibility](https://img.shields.io/badge/Android-8.0%20to%2014%2B-green.svg?style=flat-square)](https://developer.android.com)
+[![Version](https://img.shields.io/badge/Version-v1.6.0-blue.svg?style=flat-square)](https://github.com/engfeda-ui/sanad_lockdown)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-Moodle%20Plugin%20CI-green.svg)](#)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg?style=flat-square)](#)
 
@@ -105,6 +106,12 @@ It executes the official `moodle-plugin-ci` test suite:
 - **PHPUnit (`phpunit`)**: Executes unit tests in `tests/rule_test.php`.
 
 ## 📋 Changelog
+
+### [v1.6.0] - 2026-08-26
+* **Security (High):** Exit passwords are now stored as **bcrypt hashes** instead of plaintext. A migration step (`db/upgrade.php` @ 2026082600) hashes all existing legacy values in place — student exit codes keep working without any action.
+* **Added:** "Generate new exit password" button on the teacher monitor page. The plain code is revealed **exactly once** (session flash) with a write-it-down warning; only the hash is persisted afterwards.
+* **Changed:** `save_settings()` now always stores a bcrypt hash of freshly generated codes and no longer regenerates when it encounters an old hash.
+* **Kept:** `api_handler.php` retains a dual verification path (bcrypt + literal compare) purely as a backward-compatibility bridge during migration windows.
 
 ### [v1.5.0] - 2026-08-24
 * **Added:** Mobile Web Service API (`quizaccess_sanad_lockdown_get_launch_token`) supporting direct session token generation and Deep Link URL formulation for SANAD Learn mobile integration.

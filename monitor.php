@@ -93,6 +93,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($action)) {
 
         $notifymsg  = get_string('session_reissued', 'quizaccess_sanad_lockdown');
         $notifytype = \core\output\notification::NOTIFY_SUCCESS;
+    } elseif ($action === 'newexitpassword') {
+        // Regenerate the exam exit password. Only a bcrypt hash is stored; the
+        // plain code is revealed exactly once via a session flash message.
+        try {
+            $plainpw = (string)random_int(100000, 999999);
+        } catch (\Exception $e) {
+            $plainpw = (string)mt_rand(100000, 999999);
+        }
+        $upd = new stdClass();
+        $upd->id            = $settings->id;
+        $upd->exitpassword  = password_hash($plainpw, PASSWORD_DEFAULT);
+        $upd->timemodified  = time();
+        $DB->update_record('quizaccess_sanad_lockdown', $upd);
+        $settings->exitpassword = $upd->exitpassword;
+
+        $_SESSION['sanad_newexitpw']      = $plainpw;
+        $_SESSION['sanad_newexitpw_quiz'] = $quiz->id;
+
+        $notifymsg  = get_string('exitpassword_regenerated', 'quizaccess_sanad_lockdown');
+        $notifytype = \core\output\notification::NOTIFY_SUCCESS;
     }
 
     if (!$ajax) {
@@ -278,7 +298,14 @@ echo html_writer::tag(
 // ── Emergency Exit Password Alert Banner ──────────────────────────────────────
 if (!empty($settings->exitpassword)) {
     $isbcrypt = (strpos($settings->exitpassword, '$2y$') === 0 && strlen($settings->exitpassword) === 60);
-    if ($isbcrypt) {
+
+    if (!empty($_SESSION['sanad_newexitpw']) && ($_SESSION['sanad_newexitpw_quiz'] ?? 0) == $quiz->id) {
+        // Reveal the freshly generated code exactly once, then discard.
+        $revealpw = $_SESSION['sanad_newexitpw'];
+        unset($_SESSION['sanad_newexitpw'], $_SESSION['sanad_newexitpw_quiz']);
+        $pwdhtml = html_writer::tag('strong', s($revealpw), ['class' => 'text-success', 'style' => 'font-size: 1.25em; letter-spacing: 0.5px;'])
+            . html_writer::tag('div', get_string('exitpassword_revealonce', 'quizaccess_sanad_lockdown'), ['class' => 'small text-danger mt-1']);
+    } else if ($isbcrypt) {
         $pwdhtml = html_writer::tag('span', get_string('exitpassword_encrypted', 'quizaccess_sanad_lockdown'), ['class' => 'text-danger font-italic']);
     } else {
         $pwdhtml = html_writer::tag('strong', s($settings->exitpassword), ['class' => 'text-primary', 'style' => 'font-size: 1.25em; letter-spacing: 0.5px;']);
@@ -291,6 +318,16 @@ if (!empty($settings->exitpassword)) {
         'alert alert-info d-inline-block p-3 mb-4 border rounded shadow-sm',
         ['style' => 'font-size: 15px; display: inline-flex; align-items: center; gap: 8px; background-color: #e8f4fd; border-color: #b3d7f9; color: #1d4ed8;']
     );
+
+    // Regenerate the exit password (stores a bcrypt hash and reveals the code once).
+    $monurlbanner = new moodle_url('/mod/quiz/accessrule/sanad_lockdown/monitor.php', ['cmid' => $cmid]);
+    echo html_writer::start_tag('form', ['method' => 'post', 'action' => $monurlbanner->out(false), 'class' => 'd-inline mb-4'])
+        . html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()])
+        . html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'action', 'value' => 'newexitpassword'])
+        . html_writer::tag('button',
+            '<i class="fa fa-refresh"></i> ' . s(get_string('exitpassword_newbtn', 'quizaccess_sanad_lockdown')),
+            ['type' => 'submit', 'class' => 'btn btn-sm btn-outline-secondary mb-4'])
+        . html_writer::end_tag('form');
 }
 
 // ── Stats bar ─────────────────────────────────────────────────────────────────
