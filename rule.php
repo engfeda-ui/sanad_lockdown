@@ -185,8 +185,8 @@ class quizaccess_sanad_lockdown extends quiz_access_rule_base {
     public static function delete_settings($quiz) {
         global $DB;
         $DB->delete_records('quizaccess_sanad_lockdown', ['quizid' => $quiz->id]);
-        $DB->delete_records('quizaccess_sanad_sessions', ['quizid' => $quiz->id]);
-        $DB->delete_records('quizaccess_sanad_violations', ['quizid' => $quiz->id]);
+        $DB->delete_records('quizaccess_sanad_lockdown_se', ['quizid' => $quiz->id]);
+        $DB->delete_records('quizaccess_sanad_lockdown_vi', ['quizid' => $quiz->id]);
     }
 
     /**

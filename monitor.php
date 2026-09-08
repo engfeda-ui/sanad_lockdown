@@ -125,10 +125,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($action)) {
     }
 }
 
-// ── Data helpers ──────────────────────────────────────────────────────────────
+// Data helpers.
 
 /**
  * Return all enrolled students in this quiz's course.
+ *
+ * @param int $courseid The course ID.
+ * @param context_module $context The module context.
+ * @return array List of enrolled students.
  */
 function sanad_get_enrolled_students(int $courseid, context_module $context): array
 {
@@ -138,13 +142,18 @@ function sanad_get_enrolled_students(int $courseid, context_module $context): ar
 
 /**
  * Build the monitoring data row for a single student.
+ *
+ * @param object $user The user object.
+ * @param int $quizid The quiz ID.
+ * @param object $settings The quiz lockdown settings.
+ * @return array The student monitoring row data.
  */
 function sanad_build_student_row(object $user, int $quizid, object $settings): array
 {
     global $DB;
 
     $now     = time();
-    $session = $DB->get_record('quizaccess_sanad_sessions', ['quizid' => $quizid, 'userid' => $user->id]);
+    $session = $DB->get_record('quizaccess_sanad_lockdown_se', ['quizid' => $quizid, 'userid' => $user->id]);
 
     // Session status.
     if (!$session) {
@@ -166,7 +175,7 @@ function sanad_build_student_row(object $user, int $quizid, object $settings): a
 
     // Violations.
     $violations = $DB->get_records(
-        'quizaccess_sanad_violations',
+        'quizaccess_sanad_lockdown_vi',
         ['quizid' => $quizid, 'userid' => $user->id],
         'timecreated DESC',
         '*',
@@ -443,7 +452,7 @@ function sanad_render_student_row(array $row, int $cmid, string $sesskey): strin
     $violations = $row['violations'];
     $vcount     = $row['violationcount'];
     $qrurl      = $row['qrurl'];
-    $session    = $DB->get_record('quizaccess_sanad_sessions', ['quizid' => $quiz->id, 'userid' => $user->id]);
+    $session    = $DB->get_record('quizaccess_sanad_lockdown_se', ['quizid' => $quiz->id, 'userid' => $user->id]);
     $reissued   = $row['reissuedurl'];
 
     $now = time();

@@ -115,20 +115,20 @@ $string['ago_hours']            = 'منذ {$a} ساعة';
 
 
 // Privacy.
-$string['privacy:metadata:quizaccess_sanad_sessions'] = 'تخزين رموز جلسات الاختبار الآمنة المصدرة للطلاب.';
-$string['privacy:metadata:quizaccess_sanad_sessions:userid'] = 'المستخدم المصدر له الرمز.';
-$string['privacy:metadata:quizaccess_sanad_sessions:quizid'] = 'الاختبار المرتبط بالرمز.';
-$string['privacy:metadata:quizaccess_sanad_sessions:token'] = 'رمز الجلسة الأمني المشفر.';
-$string['privacy:metadata:quizaccess_sanad_sessions:deviceid'] = 'بصمة جهاز الأندرويد المستخدم.';
-$string['privacy:metadata:quizaccess_sanad_sessions:timecreated'] = 'وقت إنشاء الجلسة.';
-$string['privacy:metadata:quizaccess_sanad_sessions:timeexpires'] = 'وقت انتهاء صلاحية الجلسة.';
-$string['privacy:metadata:quizaccess_sanad_violations'] = 'تسجيل المخالفات الأمنية المرصودة أثناء الاختبار الآمن.';
-$string['privacy:metadata:quizaccess_sanad_violations:userid'] = 'المستخدم المرتبط بالمخالفة.';
-$string['privacy:metadata:quizaccess_sanad_violations:quizid'] = 'الاختبار الذي تم رصد المخالفة به.';
-$string['privacy:metadata:quizaccess_sanad_violations:violationtype'] = 'نوع المخالفة الأمنية.';
-$string['privacy:metadata:quizaccess_sanad_violations:deviceid'] = 'بصمة الجهاز وقت حدوث المخالفة.';
-$string['privacy:metadata:quizaccess_sanad_violations:details'] = 'تفاصيل إضافية للمخالفة.';
-$string['privacy:metadata:quizaccess_sanad_violations:timecreated'] = 'وقت حدوث المخالفة.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_se'] = 'تخزين رموز جلسات الاختبار الآمنة المصدرة للطلاب.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_se:userid'] = 'المستخدم المصدر له الرمز.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_se:quizid'] = 'الاختبار المرتبط بالرمز.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_se:token'] = 'رمز الجلسة الأمني المشفر.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_se:deviceid'] = 'بصمة جهاز الأندرويد المستخدم.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_se:timecreated'] = 'وقت إنشاء الجلسة.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_se:timeexpires'] = 'وقت انتهاء صلاحية الجلسة.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_vi'] = 'تسجيل المخالفات الأمنية المرصودة أثناء الاختبار الآمن.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_vi:userid'] = 'المستخدم المرتبط بالمخالفة.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_vi:quizid'] = 'الاختبار الذي تم رصد المخالفة به.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_vi:violationtype'] = 'نوع المخالفة الأمنية.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_vi:deviceid'] = 'بصمة الجهاز وقت حدوث المخالفة.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_vi:details'] = 'تفاصيل إضافية للمخالفة.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_vi:timecreated'] = 'وقت حدوث المخالفة.';
 
 // Settings page strings.
 $string['settings_desc'] = 'تسمح لك هذه الصفحة بمراقبة الأجهزة المتصلة بالاختبارات والانتهاكات الأمنية النشطة في وضع الكشك بالوقت الفعلي.';

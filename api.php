@@ -35,11 +35,11 @@ use quizaccess_sanad_lockdown\api_handler;
 // Set API response headers.
 header('Content-Type: application/json; charset=utf-8');
 
-// ── Optional app-authentication gate (HMAC) ───────────────────────────────
+// Optional app-authentication gate (HMAC).
 // When the "app shared secret" admin setting is non-empty, every API request
 // must include:
-//   X-SANAD-TIMESTAMP: unix timestamp (±120 s window)
-//   X-SANAD-SIGNATURE: hash_hmac('sha256', timestamp, shared_secret)
+// X-SANAD-TIMESTAMP: unix timestamp (±120 s window).
+// X-SANAD-SIGNATURE: hash_hmac('sha256', timestamp, shared_secret).
 // Leave the setting empty until the kiosk app ships signature support.
 $appsecret = get_config('quizaccess_sanad_lockdown', 'appsharedsecret');
 if (!empty($appsecret)) {

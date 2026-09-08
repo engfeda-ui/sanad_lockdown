@@ -109,7 +109,7 @@ class rule_test extends \advanced_testcase {
 
         $this->assertTrue(token_manager::validate($quizid, $student->id, $teachertoken));
 
-        $studentsession = $DB->get_record('quizaccess_sanad_sessions', [
+        $studentsession = $DB->get_record('quizaccess_sanad_lockdown_se', [
             'quizid' => $quizid,
             'userid' => $student->id,
         ]);

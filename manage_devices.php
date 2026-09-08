@@ -45,20 +45,20 @@ $msg = '';
 $msgtype = 'success';
 
 // 3. Retrieve Dashboard Stats & Lists.
-$totaldevices = $DB->count_records('quizaccess_sanad_devices');
-$activedevices = $DB->count_records_select('quizaccess_sanad_devices', 'status = 1 AND expirydate > :now', ['now' => time()]);
-$pendingdevices = $DB->count_records('quizaccess_sanad_devices', ['status' => 0]);
-$activeexams = $DB->count_records_select('quizaccess_sanad_sessions', 'timeexpires > :now', ['now' => time()]);
+$totaldevices = $DB->count_records('quizaccess_sanad_lockdown_de');
+$activedevices = $DB->count_records_select('quizaccess_sanad_lockdown_de', 'status = 1 AND expirydate > :now', ['now' => time()]);
+$pendingdevices = $DB->count_records('quizaccess_sanad_lockdown_de', ['status' => 0]);
+$activeexams = $DB->count_records_select('quizaccess_sanad_lockdown_se', 'timeexpires > :now', ['now' => time()]);
 
 // Get all devices.
-$devices = $DB->get_records('quizaccess_sanad_devices', null, 'timecreated DESC');
+$devices = $DB->get_records('quizaccess_sanad_lockdown_de', null, 'timecreated DESC');
 
 // Get active exam sessions with details.
 $sqlsessions = "
     SELECT s.id, s.token, s.deviceid, s.timecreated, s.timeexpires,
            u.id AS userid, u.firstname, u.lastname, u.email,
            q.id AS quizid, q.name AS quizname
-      FROM {quizaccess_sanad_sessions} s
+      FROM {quizaccess_sanad_lockdown_se} s
       JOIN {user} u ON u.id = s.userid
       JOIN {quiz} q ON q.id = s.quizid
      WHERE s.timeexpires > :now
@@ -70,7 +70,7 @@ $sqlviolations = "
     SELECT v.id, v.violationtype, v.deviceid, v.timecreated, v.details,
            u.firstname, u.lastname, u.email,
            q.name AS quizname
-      FROM {quizaccess_sanad_violations} v
+      FROM {quizaccess_sanad_lockdown_vi} v
       JOIN {user} u ON u.id = v.userid
       JOIN {quiz} q ON q.id = v.quizid
   ORDER BY v.timecreated DESC

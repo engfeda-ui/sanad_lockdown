@@ -23,7 +23,7 @@
       </KEYS>
     </TABLE>
 
-    <TABLE NAME="quizaccess_sanad_sessions" COMMENT="Stores active secure exam sessions per user per quiz">
+    <TABLE NAME="quizaccess_sanad_lockdown_se" COMMENT="Stores active secure exam sessions per user per quiz">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Foreign key to quiz.id."/>
@@ -44,7 +44,7 @@
       </INDEXES>
     </TABLE>
 
-    <TABLE NAME="quizaccess_sanad_violations" COMMENT="Logs security violations detected during exams">
+    <TABLE NAME="quizaccess_sanad_lockdown_vi" COMMENT="Logs security violations detected during exams">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="quizid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
@@ -64,7 +64,7 @@
       </INDEXES>
     </TABLE>
 
-    <TABLE NAME="quizaccess_sanad_devices" COMMENT="Stores Sanad Kiosk registered devices and their license status">
+    <TABLE NAME="quizaccess_sanad_lockdown_de" COMMENT="Stores Sanad Kiosk registered devices and their license status">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="hardwareid" TYPE="char" LENGTH="64" NOTNULL="true" SEQUENCE="false" COMMENT="Unique hardware ID / fingerprint of the device."/>

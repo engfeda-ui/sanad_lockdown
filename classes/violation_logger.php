@@ -71,12 +71,12 @@ class violation_logger {
         $record->timecreated   = time();
 
         try {
-            $DB->insert_record('quizaccess_sanad_violations', $record);
+            $DB->insert_record('quizaccess_sanad_lockdown_vi', $record);
         } catch (\dml_exception $e) {
             // Pre-migration databases may not have the ip column yet.
             unset($record->ip);
             unset($e);
-            $DB->insert_record('quizaccess_sanad_violations', $record);
+            $DB->insert_record('quizaccess_sanad_lockdown_vi', $record);
         }
     }
 
@@ -99,7 +99,7 @@ class violation_logger {
             $params['violationtype'] = $violationtype;
         }
 
-        return $DB->count_records_select('quizaccess_sanad_violations', $where, $params);
+        return $DB->count_records_select('quizaccess_sanad_lockdown_vi', $where, $params);
     }
 
     /**
@@ -111,6 +111,6 @@ class violation_logger {
      */
     public static function get_all(int $quizid, int $userid): array {
         global $DB;
-        return $DB->get_records('quizaccess_sanad_violations', ['quizid' => $quizid, 'userid' => $userid], 'timecreated ASC');
+        return $DB->get_records('quizaccess_sanad_lockdown_vi', ['quizid' => $quizid, 'userid' => $userid], 'timecreated ASC');
     }
 }

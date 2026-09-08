@@ -5,7 +5,7 @@
 [![PHP Version](https://img.shields.io/badge/PHP-8.2%20%7C%208.3-blue.svg?style=flat-square)](https://php.net)
 [![Database](https://img.shields.io/badge/Database-PostgreSQL%20%7C%20MySQL%20%7C%20MariaDB-purple.svg?style=flat-square)](https://docs.moodle.org)
 [![Android Compatibility](https://img.shields.io/badge/Android-8.0%20to%2014%2B-green.svg?style=flat-square)](https://developer.android.com)
-[![Version](https://img.shields.io/badge/Version-v1.7.0-blue.svg?style=flat-square)](https://github.com/engfeda-ui/sanad_lockdown)
+[![Version](https://img.shields.io/badge/Version-v1.7.1-blue.svg?style=flat-square)](https://github.com/engfeda-ui/sanad_lockdown)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-Moodle%20Plugin%20CI-green.svg)](#)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg?style=flat-square)](#)
 
@@ -107,6 +107,12 @@ It executes the official `moodle-plugin-ci` test suite:
 - **PHPUnit (`phpunit`)**: Executes unit tests in `tests/rule_test.php`.
 
 ## 📋 Changelog
+
+### [v1.7.1] - 2026-09-08
+* **CI & Standards Compliance:**
+  * **Table Prefix Standardization:** Renamed sub-tables in db/install.xml to strictly comply with Moodle's component prefix requirement (quizaccess_sanad_lockdown_se, quizaccess_sanad_lockdown_vi, quizaccess_sanad_lockdown_de) with automatic migration in db/upgrade.php (@ 2026090800).
+  * **PHPDoc Checker Fixes:** Added complete @param and @return documentation to helper functions in monitor.php.
+  * **CodeChecker Compliance:** Fixed operator spacing in db/services.php, removed PSR-12 blank line after opening brace in classes/external/get_launch_token.php, and cleaned inline comment formatting in pi.php.
 
 ### [v1.7.0] - 2026-08-26
 * **Security:** Short codes now carry **8 hex chars** of HMAC (~4 billion combinations) for newly issued sessions; legacy 4-char codes remain valid until they expire naturally — brute-forcing codes is no longer practical.

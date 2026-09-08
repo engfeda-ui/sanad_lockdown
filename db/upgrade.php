@@ -134,5 +134,22 @@ function xmldb_quizaccess_sanad_lockdown_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026082700, 'quizaccess', 'sanad_lockdown');
     }
 
+    // 2026090800: Rename sub-tables to comply with Moodle component prefix standard (max 28 chars).
+    if ($oldversion < 2026090800) {
+        $renames = [
+            'quizaccess_sanad_sessions'   => 'quizaccess_sanad_lockdown_se',
+            'quizaccess_sanad_violations' => 'quizaccess_sanad_lockdown_vi',
+            'quizaccess_sanad_devices'    => 'quizaccess_sanad_lockdown_de',
+        ];
+        foreach ($renames as $oldtable => $newtable) {
+            $table = new \xmldb_table($oldtable);
+            if ($dbman->table_exists($table)) {
+                $dbman->rename_table($table, $newtable);
+            }
+        }
+
+        upgrade_plugin_savepoint(true, 2026090800, 'quizaccess', 'sanad_lockdown');
+    }
+
     return true;
 }

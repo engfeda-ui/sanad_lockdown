@@ -120,20 +120,20 @@ $string['ago_minutes']          = '{$a}m ago';
 $string['ago_hours']            = '{$a}h ago';
 
 // Privacy.
-$string['privacy:metadata:quizaccess_sanad_sessions'] = 'Stores secure exam session tokens issued to students.';
-$string['privacy:metadata:quizaccess_sanad_sessions:userid'] = 'The user this session was issued for.';
-$string['privacy:metadata:quizaccess_sanad_sessions:quizid'] = 'The quiz this session is for.';
-$string['privacy:metadata:quizaccess_sanad_sessions:token'] = 'The HMAC security token (hashed).';
-$string['privacy:metadata:quizaccess_sanad_sessions:deviceid'] = 'A fingerprint of the Android device used.';
-$string['privacy:metadata:quizaccess_sanad_sessions:timecreated'] = 'When the session was created.';
-$string['privacy:metadata:quizaccess_sanad_sessions:timeexpires'] = 'When the session token expires.';
-$string['privacy:metadata:quizaccess_sanad_violations'] = 'Logs security violations detected during secure exams.';
-$string['privacy:metadata:quizaccess_sanad_violations:userid'] = 'The user associated with the violation.';
-$string['privacy:metadata:quizaccess_sanad_violations:quizid'] = 'The quiz during which the violation was detected.';
-$string['privacy:metadata:quizaccess_sanad_violations:violationtype'] = 'The type of violation recorded.';
-$string['privacy:metadata:quizaccess_sanad_violations:deviceid'] = 'The device fingerprint at time of violation.';
-$string['privacy:metadata:quizaccess_sanad_violations:details'] = 'Additional context about the violation.';
-$string['privacy:metadata:quizaccess_sanad_violations:timecreated'] = 'When the violation occurred.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_se'] = 'Stores secure exam session tokens issued to students.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_se:userid'] = 'The user this session was issued for.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_se:quizid'] = 'The quiz this session is for.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_se:token'] = 'The HMAC security token (hashed).';
+$string['privacy:metadata:quizaccess_sanad_lockdown_se:deviceid'] = 'A fingerprint of the Android device used.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_se:timecreated'] = 'When the session was created.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_se:timeexpires'] = 'When the session token expires.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_vi'] = 'Logs security violations detected during secure exams.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_vi:userid'] = 'The user associated with the violation.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_vi:quizid'] = 'The quiz during which the violation was detected.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_vi:violationtype'] = 'The type of violation recorded.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_vi:deviceid'] = 'The device fingerprint at time of violation.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_vi:details'] = 'Additional context about the violation.';
+$string['privacy:metadata:quizaccess_sanad_lockdown_vi:timecreated'] = 'When the violation occurred.';
 
 $string['exitpassword_newbtn'] = 'Generate new exit password';
 $string['exitpassword_revealonce'] = 'Write this code down now - it will not be shown again.';

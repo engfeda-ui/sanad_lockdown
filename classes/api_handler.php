@@ -88,7 +88,7 @@ class api_handler {
         $clientip = getremoteaddr();
 
         $failedattempts  = $DB->count_records_select(
-            'quizaccess_sanad_violations',
+            'quizaccess_sanad_lockdown_vi',
             "deviceid = :deviceid AND violationtype = 'failed_code_resolution' AND timecreated > :window",
             ['deviceid' => $deviceid, 'window' => $ratelimitwindow]
         );
@@ -99,7 +99,7 @@ class api_handler {
         }
 
         $ipattempts = $DB->count_records_select(
-            'quizaccess_sanad_violations',
+            'quizaccess_sanad_lockdown_vi',
             "ip = :ip AND violationtype = 'failed_code_resolution' AND timecreated > :window",
             ['ip' => $clientip, 'window' => $ratelimitwindow]
         );
@@ -118,7 +118,7 @@ class api_handler {
         }
 
         if (time() > $session->timeexpires) {
-            $DB->delete_records('quizaccess_sanad_sessions', ['id' => $session->id]);
+            $DB->delete_records('quizaccess_sanad_lockdown_se', ['id' => $session->id]);
             http_response_code(410);
             echo json_encode(['error' => 'Access code has expired']);
             return;
@@ -127,7 +127,7 @@ class api_handler {
         // Bind device ID on resolution.
         if (empty($session->deviceid)) {
             $session->deviceid = $deviceid;
-            $DB->set_field('quizaccess_sanad_sessions', 'deviceid', $deviceid, ['id' => $session->id]);
+            $DB->set_field('quizaccess_sanad_lockdown_se', 'deviceid', $deviceid, ['id' => $session->id]);
         } else if ($session->deviceid !== $deviceid) {
             http_response_code(403);
             echo json_encode(['error' => 'Forbidden: Device Mismatch']);
@@ -167,7 +167,7 @@ class api_handler {
         // Standardize hardware ID: uppercase, no spaces or dashes.
         $hardwareid = strtoupper(str_replace([' ', '-'], '', $hardwareid));
 
-        $device = $DB->get_record('quizaccess_sanad_devices', ['hardwareid' => $hardwareid]);
+        $device = $DB->get_record('quizaccess_sanad_lockdown_de', ['hardwareid' => $hardwareid]);
 
         if (!$device) {
             // Auto-register in a pending state.
@@ -179,7 +179,7 @@ class api_handler {
             $device->expirydate   = 0;
             $device->timecreated  = time();
             $device->timemodified = time();
-            $device->id           = $DB->insert_record('quizaccess_sanad_devices', $device);
+            $device->id           = $DB->insert_record('quizaccess_sanad_lockdown_de', $device);
         }
 
         $statusstr = self::resolve_device_status($device);
@@ -219,7 +219,7 @@ class api_handler {
             'SELECT s.*, l.tokenexpiry AS quiz_tokenexpiry,
                     l.exitpassword AS quiz_exitpassword,
                     l.alloweddomains AS quiz_alloweddomains
-               FROM {quizaccess_sanad_sessions} s
+               FROM {quizaccess_sanad_lockdown_se} s
                LEFT JOIN {quizaccess_sanad_lockdown} l ON l.quizid = s.quizid
               WHERE s.token = :token AND s.quizid = :quizid',
             ['token' => $token, 'quizid' => $quizid]
@@ -240,7 +240,7 @@ class api_handler {
         $session = self::maybe_redirect_teacher_session($session, $quizid, $deviceid);
 
         if (time() > $session->timeexpires) {
-            $DB->delete_records('quizaccess_sanad_sessions', ['id' => $session->id]);
+            $DB->delete_records('quizaccess_sanad_lockdown_se', ['id' => $session->id]);
             if ($action === 'verify_exit') {
                 self::exit_with_fallback_check($quizid, $data['password'] ?? '', $deviceid);
             } else {
@@ -253,7 +253,7 @@ class api_handler {
         // Enforce device lock binding.
         if (empty($session->deviceid)) {
             $session->deviceid = $deviceid;
-            $DB->set_field('quizaccess_sanad_sessions', 'deviceid', $deviceid, ['id' => $session->id]);
+            $DB->set_field('quizaccess_sanad_lockdown_se', 'deviceid', $deviceid, ['id' => $session->id]);
         } else if ($session->deviceid !== $deviceid) {
             violation_logger::log(
                 $quizid,
@@ -301,7 +301,7 @@ class api_handler {
 
         $extendby = max(300, (int)($session->quiz_tokenexpiry ?? 300));
         $session->timeexpires = time() + $extendby;
-        $DB->set_field('quizaccess_sanad_sessions', 'timeexpires', $session->timeexpires, ['id' => $session->id]);
+        $DB->set_field('quizaccess_sanad_lockdown_se', 'timeexpires', $session->timeexpires, ['id' => $session->id]);
 
         $alloweddomains = self::parse_allowed_domains($session->quiz_alloweddomains ?? '');
 
@@ -357,7 +357,7 @@ class api_handler {
         // Rate limiting: max 5 failed attempts per quiz and device within 5 minutes.
         $ratelimitwindow = time() - 300;
         $failedattempts  = $DB->count_records_select(
-            'quizaccess_sanad_violations',
+            'quizaccess_sanad_lockdown_vi',
             "quizid = :quizid AND deviceid = :deviceid "
             . "AND violationtype = 'invalid_exit_password_attempt' AND timecreated > :window",
             ['quizid' => $quizid, 'deviceid' => $deviceid, 'window' => $ratelimitwindow]
@@ -431,7 +431,7 @@ class api_handler {
         if ($deviceid !== '') {
             $ratelimitwindow = time() - 300;
             $failedattempts  = $DB->count_records_select(
-                'quizaccess_sanad_violations',
+                'quizaccess_sanad_lockdown_vi',
                 "quizid = :quizid AND deviceid = :deviceid "
                 . "AND violationtype = 'invalid_exit_password_attempt' AND timecreated > :window",
                 ['quizid' => $quizid, 'deviceid' => $deviceid, 'window' => $ratelimitwindow]
@@ -493,7 +493,7 @@ class api_handler {
             'SELECT s.*, l.tokenexpiry AS quiz_tokenexpiry,
                     l.exitpassword AS quiz_exitpassword,
                     l.alloweddomains AS quiz_alloweddomains
-               FROM {quizaccess_sanad_sessions} s
+               FROM {quizaccess_sanad_lockdown_se} s
                LEFT JOIN {quizaccess_sanad_lockdown} l ON l.quizid = s.quizid
               WHERE s.deviceid = :deviceid AND s.quizid = :quizid',
             ['deviceid' => $deviceid, 'quizid' => $quizid]

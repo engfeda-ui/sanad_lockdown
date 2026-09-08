@@ -72,7 +72,7 @@ class token_manager {
         $token = $payloadb64 . '.' . $signature;
 
         // Delete any existing unexpired sessions for this user+quiz.
-        $DB->delete_records('quizaccess_sanad_sessions', [
+        $DB->delete_records('quizaccess_sanad_lockdown_se', [
             'quizid' => $quizid,
             'userid' => $userid,
         ]);
@@ -85,7 +85,7 @@ class token_manager {
         $record->deviceid = $deviceid;
         $record->timecreated = $now;
         $record->timeexpires = $now + $expiry;
-        $DB->insert_record('quizaccess_sanad_sessions', $record);
+        $DB->insert_record('quizaccess_sanad_lockdown_se', $record);
 
         return $token;
     }
@@ -113,7 +113,7 @@ class token_manager {
         if (empty($token)) {
             global $DB;
             $session = $DB->get_record_select(
-                'quizaccess_sanad_sessions',
+                'quizaccess_sanad_lockdown_se',
                 'quizid = :quizid AND userid = :userid AND timeexpires > :now',
                 ['quizid' => $quizid, 'userid' => $userid, 'now' => time()],
                 'token',
@@ -147,7 +147,7 @@ class token_manager {
         }
 
         // Find the session record by token and quizid.
-        $record = $DB->get_record('quizaccess_sanad_sessions', [
+        $record = $DB->get_record('quizaccess_sanad_lockdown_se', [
             'token'  => $token,
             'quizid' => $quizid,
         ]);
@@ -176,7 +176,7 @@ class token_manager {
 
         if (time() > $record->timeexpires) {
             // Token has expired — clean up.
-            $DB->delete_records('quizaccess_sanad_sessions', ['id' => $record->id]);
+            $DB->delete_records('quizaccess_sanad_lockdown_se', ['id' => $record->id]);
             return false;
         }
 
@@ -186,12 +186,12 @@ class token_manager {
         if ($isteachertoken) {
             // If it is a teacher token, we do NOT bind or check the device ID on the teacher's session record.
             // Instead, we ensure the student has their own session record in the database.
-            $studentsession = $DB->get_record('quizaccess_sanad_sessions', [
+            $studentsession = $DB->get_record('quizaccess_sanad_lockdown_se', [
                 'quizid' => $quizid,
                 'userid' => $userid,
             ]);
             if ($studentsession && time() > $studentsession->timeexpires) {
-                $DB->delete_records('quizaccess_sanad_sessions', ['id' => $studentsession->id]);
+                $DB->delete_records('quizaccess_sanad_lockdown_se', ['id' => $studentsession->id]);
                 $studentsession = null;
             }
             if (!$studentsession) {
@@ -203,14 +203,14 @@ class token_manager {
                 // If student session exists but deviceid is not set yet, bind it.
                 if (empty($studentsession->deviceid) && !empty($requestdeviceid)) {
                     $studentsession->deviceid = $requestdeviceid;
-                    $DB->update_record('quizaccess_sanad_sessions', $studentsession);
+                    $DB->update_record('quizaccess_sanad_lockdown_se', $studentsession);
                 }
             }
         } else {
             // If the session record has no device ID bound yet, bind the current request device ID.
             if (empty($record->deviceid) && !empty($requestdeviceid)) {
                 $record->deviceid = $requestdeviceid;
-                $DB->update_record('quizaccess_sanad_sessions', $record);
+                $DB->update_record('quizaccess_sanad_lockdown_se', $record);
             } else if (!empty($record->deviceid) && !empty($requestdeviceid) && $record->deviceid !== $requestdeviceid) {
                 // If the device ID in request does not match the bound device ID, log violation and deny.
                 violation_logger::log(
@@ -258,7 +258,7 @@ class token_manager {
      */
     public static function revoke(int $quizid, int $userid): void {
         global $DB;
-        $DB->delete_records('quizaccess_sanad_sessions', [
+        $DB->delete_records('quizaccess_sanad_lockdown_se', [
             'quizid' => $quizid,
             'userid' => $userid,
         ]);
@@ -292,7 +292,7 @@ class token_manager {
      */
     public static function get_short_code(string $token): string {
         global $DB;
-        $record = $DB->get_record('quizaccess_sanad_sessions', ['token' => $token], 'id');
+        $record = $DB->get_record('quizaccess_sanad_lockdown_se', ['token' => $token], 'id');
         if (!$record) {
             return '';
         }
@@ -328,7 +328,7 @@ class token_manager {
             return null;
         }
 
-        $record = $DB->get_record('quizaccess_sanad_sessions', ['id' => $id]);
+        $record = $DB->get_record('quizaccess_sanad_lockdown_se', ['id' => $id]);
         return $record ?: null;
     }
 

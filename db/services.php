@@ -30,7 +30,7 @@ $functions = [
         'methodname'  => 'execute',
         'description' => 'Generates and returns a secure launch token and deep link for SANAD Kiosk',
         'type'        => 'read',
-        'capabilities'=> 'mod/quiz:attempt',
+        'capabilities' => 'mod/quiz:attempt',
         'services'    => [MOODLE_OFFICIAL_MOBILE_SERVICE],
     ],
 ];

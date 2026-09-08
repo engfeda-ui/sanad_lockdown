@@ -45,29 +45,29 @@ class provider implements
      */
     public static function get_metadata(collection $collection): collection {
         $collection->add_database_table(
-            'quizaccess_sanad_sessions',
+            'quizaccess_sanad_lockdown_se',
             [
-                'userid'      => 'privacy:metadata:quizaccess_sanad_sessions:userid',
-                'quizid'      => 'privacy:metadata:quizaccess_sanad_sessions:quizid',
-                'token'       => 'privacy:metadata:quizaccess_sanad_sessions:token',
-                'deviceid'    => 'privacy:metadata:quizaccess_sanad_sessions:deviceid',
-                'timecreated' => 'privacy:metadata:quizaccess_sanad_sessions:timecreated',
-                'timeexpires' => 'privacy:metadata:quizaccess_sanad_sessions:timeexpires',
+                'userid'      => 'privacy:metadata:quizaccess_sanad_lockdown_se:userid',
+                'quizid'      => 'privacy:metadata:quizaccess_sanad_lockdown_se:quizid',
+                'token'       => 'privacy:metadata:quizaccess_sanad_lockdown_se:token',
+                'deviceid'    => 'privacy:metadata:quizaccess_sanad_lockdown_se:deviceid',
+                'timecreated' => 'privacy:metadata:quizaccess_sanad_lockdown_se:timecreated',
+                'timeexpires' => 'privacy:metadata:quizaccess_sanad_lockdown_se:timeexpires',
             ],
-            'privacy:metadata:quizaccess_sanad_sessions'
+            'privacy:metadata:quizaccess_sanad_lockdown_se'
         );
 
         $collection->add_database_table(
-            'quizaccess_sanad_violations',
+            'quizaccess_sanad_lockdown_vi',
             [
-                'userid'        => 'privacy:metadata:quizaccess_sanad_violations:userid',
-                'quizid'        => 'privacy:metadata:quizaccess_sanad_violations:quizid',
-                'violationtype' => 'privacy:metadata:quizaccess_sanad_violations:violationtype',
-                'deviceid'      => 'privacy:metadata:quizaccess_sanad_violations:deviceid',
-                'details'       => 'privacy:metadata:quizaccess_sanad_violations:details',
-                'timecreated'   => 'privacy:metadata:quizaccess_sanad_violations:timecreated',
+                'userid'        => 'privacy:metadata:quizaccess_sanad_lockdown_vi:userid',
+                'quizid'        => 'privacy:metadata:quizaccess_sanad_lockdown_vi:quizid',
+                'violationtype' => 'privacy:metadata:quizaccess_sanad_lockdown_vi:violationtype',
+                'deviceid'      => 'privacy:metadata:quizaccess_sanad_lockdown_vi:deviceid',
+                'details'       => 'privacy:metadata:quizaccess_sanad_lockdown_vi:details',
+                'timecreated'   => 'privacy:metadata:quizaccess_sanad_lockdown_vi:timecreated',
             ],
-            'privacy:metadata:quizaccess_sanad_violations'
+            'privacy:metadata:quizaccess_sanad_lockdown_vi'
         );
 
         return $collection;
@@ -86,7 +86,7 @@ class provider implements
                   FROM {context} c
                   JOIN {course_modules} cm ON cm.id = c.instanceid AND c.contextlevel = :contextlevel
                   JOIN {modules} m ON m.id = cm.module AND m.name = :modname
-                  JOIN {quizaccess_sanad_sessions} ses ON ses.quizid = cm.instance
+                  JOIN {quizaccess_sanad_lockdown_se} ses ON ses.quizid = cm.instance
                  WHERE ses.userid = :userid";
         $params = [
             'modname'      => 'quiz',
@@ -99,7 +99,7 @@ class provider implements
                   FROM {context} c
                   JOIN {course_modules} cm ON cm.id = c.instanceid AND c.contextlevel = :contextlevel
                   JOIN {modules} m ON m.id = cm.module AND m.name = :modname
-                  JOIN {quizaccess_sanad_violations} vio ON vio.quizid = cm.instance
+                  JOIN {quizaccess_sanad_lockdown_vi} vio ON vio.quizid = cm.instance
                  WHERE vio.userid = :userid";
         $contextlist->add_from_sql($sql, $params);
 
@@ -123,14 +123,14 @@ class provider implements
         $sql = "SELECT ses.userid
                   FROM {course_modules} cm
                   JOIN {modules} m ON m.id = cm.module AND m.name = 'quiz'
-                  JOIN {quizaccess_sanad_sessions} ses ON ses.quizid = cm.instance
+                  JOIN {quizaccess_sanad_lockdown_se} ses ON ses.quizid = cm.instance
                  WHERE cm.id = :instanceid";
         $userlist->add_from_sql('userid', $sql, $params);
 
         $sql = "SELECT vio.userid
                   FROM {course_modules} cm
                   JOIN {modules} m ON m.id = cm.module AND m.name = 'quiz'
-                  JOIN {quizaccess_sanad_violations} vio ON vio.quizid = cm.instance
+                  JOIN {quizaccess_sanad_lockdown_vi} vio ON vio.quizid = cm.instance
                  WHERE cm.id = :instanceid";
         $userlist->add_from_sql('userid', $sql, $params);
     }
@@ -155,7 +155,7 @@ class provider implements
                   FROM {context} c
                   JOIN {course_modules} cm ON cm.id = c.instanceid AND c.contextlevel = :contextlevel
                   JOIN {modules} m ON m.id = cm.module AND m.name = :modname
-                  JOIN {quizaccess_sanad_sessions} ses ON ses.quizid = cm.instance
+                  JOIN {quizaccess_sanad_lockdown_se} ses ON ses.quizid = cm.instance
                  WHERE c.id {$contextsql}
                    AND ses.userid = :userid";
 
@@ -179,7 +179,7 @@ class provider implements
                   FROM {context} c
                   JOIN {course_modules} cm ON cm.id = c.instanceid AND c.contextlevel = :contextlevel
                   JOIN {modules} m ON m.id = cm.module AND m.name = :modname
-                  JOIN {quizaccess_sanad_violations} vio ON vio.quizid = cm.instance
+                  JOIN {quizaccess_sanad_lockdown_vi} vio ON vio.quizid = cm.instance
                  WHERE c.id {$contextsql}
                    AND vio.userid = :userid";
 
@@ -211,8 +211,8 @@ class provider implements
         }
 
         if ($cm = get_coursemodule_from_id('quiz', $context->instanceid)) {
-            $DB->delete_records('quizaccess_sanad_sessions', ['quizid' => $cm->instance]);
-            $DB->delete_records('quizaccess_sanad_violations', ['quizid' => $cm->instance]);
+            $DB->delete_records('quizaccess_sanad_lockdown_se', ['quizid' => $cm->instance]);
+            $DB->delete_records('quizaccess_sanad_lockdown_vi', ['quizid' => $cm->instance]);
         }
     }
 
@@ -248,8 +248,8 @@ class provider implements
         [$quizsql, $quizparams] = $DB->get_in_or_equal($quizids, SQL_PARAMS_NAMED);
         $delparams = ['userid' => $userid] + $quizparams;
 
-        $DB->delete_records_select('quizaccess_sanad_sessions', "userid = :userid AND quizid {$quizsql}", $delparams);
-        $DB->delete_records_select('quizaccess_sanad_violations', "userid = :userid AND quizid {$quizsql}", $delparams);
+        $DB->delete_records_select('quizaccess_sanad_lockdown_se', "userid = :userid AND quizid {$quizsql}", $delparams);
+        $DB->delete_records_select('quizaccess_sanad_lockdown_vi', "userid = :userid AND quizid {$quizsql}", $delparams);
     }
 
     /**
@@ -279,7 +279,7 @@ class provider implements
         [$insql, $inparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
         $params = ['quizid' => $cm->instance] + $inparams;
 
-        $DB->delete_records_select('quizaccess_sanad_sessions', "quizid = :quizid AND userid {$insql}", $params);
-        $DB->delete_records_select('quizaccess_sanad_violations', "quizid = :quizid AND userid {$insql}", $params);
+        $DB->delete_records_select('quizaccess_sanad_lockdown_se', "quizid = :quizid AND userid {$insql}", $params);
+        $DB->delete_records_select('quizaccess_sanad_lockdown_vi', "quizid = :quizid AND userid {$insql}", $params);
     }
 }
