@@ -19,3 +19,7 @@ package-lock.json
 
 # Packaging
 *.zip
+
+# Agent Knowledge & Infrastructure Secrets
+AGENTS.md
+.agents/
