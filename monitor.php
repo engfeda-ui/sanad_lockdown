@@ -87,9 +87,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($action)) {
         $launchurl = token_manager::build_launch_url($quiz->id, $cmid, $newtoken);
 
         // Store launch URL in session so we can show the QR modal after redirect.
-        $_SESSION['sanad_reissue_url']  = $launchurl;
-        $_SESSION['sanad_reissue_uid']  = $uid;
-        $_SESSION['sanad_reissue_quiz'] = $quiz->id;
+        $SESSION->sanad_reissue_url  = $launchurl;
+        $SESSION->sanad_reissue_uid  = $uid;
+        $SESSION->sanad_reissue_quiz = $quiz->id;
 
         $notifymsg  = get_string('session_reissued', 'quizaccess_sanad_lockdown');
         $notifytype = \core\output\notification::NOTIFY_SUCCESS;
@@ -108,8 +108,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($action)) {
         $DB->update_record('quizaccess_sanad_lockdown', $upd);
         $settings->exitpassword = $upd->exitpassword;
 
-        $_SESSION['sanad_newexitpw']      = $plainpw;
-        $_SESSION['sanad_newexitpw_quiz'] = $quiz->id;
+        $SESSION->sanad_newexitpw      = $plainpw;
+        $SESSION->sanad_newexitpw_quiz = $quiz->id;
 
         $notifymsg  = get_string('exitpassword_regenerated', 'quizaccess_sanad_lockdown');
         $notifytype = \core\output\notification::NOTIFY_SUCCESS;
@@ -204,13 +204,14 @@ function sanad_build_student_row(object $user, int $quizid, object $settings): a
     }
 
     // Check re-issued QR in session.
+    global $SESSION;
     $reissuedurl = '';
     if (
-        isset($_SESSION['sanad_reissue_uid']) && $_SESSION['sanad_reissue_uid'] == $user->id
-        && isset($_SESSION['sanad_reissue_quiz']) && $_SESSION['sanad_reissue_quiz'] == $quizid
+        isset($SESSION->sanad_reissue_uid) && $SESSION->sanad_reissue_uid == $user->id
+        && isset($SESSION->sanad_reissue_quiz) && $SESSION->sanad_reissue_quiz == $quizid
     ) {
-        $reissuedurl = $_SESSION['sanad_reissue_url'] ?? '';
-        unset($_SESSION['sanad_reissue_url'], $_SESSION['sanad_reissue_uid'], $_SESSION['sanad_reissue_quiz']);
+        $reissuedurl = $SESSION->sanad_reissue_url ?? '';
+        unset($SESSION->sanad_reissue_url, $SESSION->sanad_reissue_uid, $SESSION->sanad_reissue_quiz);
     }
 
     return [
@@ -308,10 +309,10 @@ echo html_writer::tag(
 if (!empty($settings->exitpassword)) {
     $isbcrypt = (strpos($settings->exitpassword, '$2y$') === 0 && strlen($settings->exitpassword) === 60);
 
-    if (!empty($_SESSION['sanad_newexitpw']) && ($_SESSION['sanad_newexitpw_quiz'] ?? 0) == $quiz->id) {
+    if (!empty($SESSION->sanad_newexitpw) && ($SESSION->sanad_newexitpw_quiz ?? 0) == $quiz->id) {
         // Reveal the freshly generated code exactly once, then discard.
-        $revealpw = $_SESSION['sanad_newexitpw'];
-        unset($_SESSION['sanad_newexitpw'], $_SESSION['sanad_newexitpw_quiz']);
+        $revealpw = $SESSION->sanad_newexitpw;
+        unset($SESSION->sanad_newexitpw, $SESSION->sanad_newexitpw_quiz);
         $pwdhtml = html_writer::tag('strong', s($revealpw), ['class' => 'text-success', 'style' => 'font-size: 1.25em; letter-spacing: 0.5px;'])
             . html_writer::tag('div', get_string('exitpassword_revealonce', 'quizaccess_sanad_lockdown'), ['class' => 'small text-danger mt-1']);
     } else if ($isbcrypt) {

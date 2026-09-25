@@ -5,7 +5,7 @@
 [![PHP Version](https://img.shields.io/badge/PHP-8.2%20%7C%208.3-blue.svg?style=flat-square)](https://php.net)
 [![Database](https://img.shields.io/badge/Database-PostgreSQL%20%7C%20MySQL%20%7C%20MariaDB-purple.svg?style=flat-square)](https://docs.moodle.org)
 [![Android Compatibility](https://img.shields.io/badge/Android-8.0%20to%2014%2B-green.svg?style=flat-square)](https://developer.android.com)
-[![Version](https://img.shields.io/badge/Version-v1.7.1-blue.svg?style=flat-square)](https://github.com/engfeda-ui/sanad_lockdown)
+[![Version](https://img.shields.io/badge/Version-v1.7.2-blue.svg?style=flat-square)](https://github.com/engfeda-ui/sanad_lockdown)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-Moodle%20Plugin%20CI-green.svg)](#)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg?style=flat-square)](#)
 
@@ -106,7 +106,48 @@ It executes the official `moodle-plugin-ci` test suite:
 - **PHPDoc (`phpdoc`)**: Validates documentation comments.
 - **PHPUnit (`phpunit`)**: Executes unit tests in `tests/rule_test.php`.
 
+---
+
+## 🛡️ Zero-Dependency Quality Gates
+
+In accordance with Antigravity AI Engineering Architecture (Pillar 4), this repository includes an autonomous zero-dependency verification harness under `tests/`:
+
+```bash
+# Run all quality gates (Syntax, i18n parity, Moodle contracts, and Smoke tests)
+npm run test:gates
+
+# Run individual gates
+npm run check:syntax     # php -l verification across all PHP source files
+npm run check:i18n       # 100% parity verification between English and Arabic strings
+npm run check:contract   # Moodle metadata, API return types, and privacy provider verification
+npm run smoke            # Plugin integrity, scoped CSS, and security checks
+```
+
+---
+
+## 🤖 Multi-Agent AI Advisory Framework
+
+Run consultations through the local AI advisory runner connected to `agency-agents` and OpenCode:
+
+```bash
+# Consult Moodle plugin architect
+npm run adviser -- -a architect "Audit external service return type contracts for mobile app"
+
+# Consult security auditor
+npm run adviser -- -a security "Verify session token HMAC validation and brute-force defenses"
+```
+
+---
+
 ## 📋 Changelog
+
+### [v1.7.2] - 2026-09-26
+* **Security & Cleanliness**: Eliminated direct `$_SESSION` usage across the plugin in favor of standard Moodle global `$SESSION`.
+* **Security & Standards**: Refined parameter cleaning in `token_manager.php` and external service return types (`get_launch_token.php`) from `PARAM_RAW` to strictly typed `PARAM_NOTAGS`, `PARAM_RAW_TRIMMED`, and `PARAM_URL`.
+* **URL Compliance**: Transitioned URL generation in `build_launch_url()` to standard Moodle `moodle_url` objects.
+* **i18n Parity**: Synchronized English and Arabic string keys (`regeneratepassword`, `alloweddomains`) achieving 100% language parity across all 84 keys.
+* **Quality Harness**: Integrated Zero-Dependency Quality Gates (`tests/run-all.js`, `tests/syntax-check.js`, `tests/i18n-check.js`, `tests/contract-check.js`, `tests/smoke.js`).
+* **Multi-Agent Advisory**: Added `scripts/opencode-adviser.js` connected to `agency-agents` and OpenCode models.
 
 ### [v1.7.1] - 2026-09-08
 * **CI & Standards Compliance:**

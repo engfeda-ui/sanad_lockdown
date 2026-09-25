@@ -12,3 +12,10 @@ __pycache__/
 
 # Composer (if added later)
 vendor/
+
+# Node
+node_modules/
+package-lock.json
+
+# Packaging
+*.zip

@@ -1,0 +1,14 @@
+{
+  "name": "quizaccess_sanad_lockdown",
+  "version": "1.7.2",
+  "description": "Moodle Quiz Access Rule for SANAD Secure Browser",
+  "scripts": {
+    "test:gates": "node tests/run-all.js",
+    "check:syntax": "node tests/syntax-check.js",
+    "check:i18n": "node tests/i18n-check.js",
+    "check:contract": "node tests/contract-check.js",
+    "smoke": "node tests/smoke.js",
+    "adviser": "node scripts/opencode-adviser.js"
+  },
+  "private": true
+}

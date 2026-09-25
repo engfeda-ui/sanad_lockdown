@@ -128,9 +128,9 @@ class get_launch_token extends external_api {
             'enabled'   => new external_value(PARAM_BOOL, 'Whether SANAD lockdown is active on this quiz'),
             'quizid'    => new external_value(PARAM_INT, 'The quiz ID'),
             'cmid'      => new external_value(PARAM_INT, 'The course module ID'),
-            'token'     => new external_value(PARAM_RAW, 'Signed session token (empty if not enabled)'),
-            'deeplink'  => new external_value(PARAM_RAW, 'Direct Deep Link URL to launch SANAD Kiosk'),
-            'launchurl' => new external_value(PARAM_RAW, 'Full HTTP launch URL for SANAD browser'),
+            'token'     => new external_value(PARAM_NOTAGS, 'Signed session token (empty if not enabled)'),
+            'deeplink'  => new external_value(PARAM_RAW_TRIMMED, 'Direct Deep Link URL to launch SANAD Kiosk'),
+            'launchurl' => new external_value(PARAM_URL, 'Full HTTP launch URL for SANAD browser'),
         ]);
     }
 }

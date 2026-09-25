@@ -107,7 +107,7 @@ class token_manager {
         $token = $_SERVER[self::HEADER_TOKEN] ?? '';
         if (empty($token)) {
             // Fallback for page loads/POSTs where custom headers are lost: read from URL query parameters.
-            $token = optional_param('sanadtoken', '', PARAM_RAW);
+            $token = optional_param('sanadtoken', '', PARAM_NOTAGS);
         }
 
         if (empty($token)) {
@@ -277,10 +277,12 @@ class token_manager {
      * @return string Absolute URL.
      */
     public static function build_launch_url(int $quizid, int $cmid, string $token): string {
-        global $CFG;
-        return $CFG->wwwroot . '/mod/quiz/view.php?id=' . $cmid
-            . '&sanadtoken=' . urlencode($token)
-            . '&sanadlaunch=1';
+        $url = new \moodle_url('/mod/quiz/view.php', [
+            'id'          => $cmid,
+            'sanadtoken'  => $token,
+            'sanadlaunch' => 1,
+        ]);
+        return $url->out(false);
     }
 
     /**
