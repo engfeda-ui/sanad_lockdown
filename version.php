@@ -24,9 +24,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2026092601;
+$plugin->version   = 2026092602;
 $plugin->requires  = 2024100700; // Moodle 4.5 minimum.
 $plugin->supported = [405, 500]; // Moodle 4.5 - 5.0.
 $plugin->component = 'quizaccess_sanad_lockdown';
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = 'v1.7.2'; // Security sanitization, i18n parity, session refactor & quality gates.
+$plugin->release   = 'v1.7.3'; // Timing-safe supervisor exit verification & quality gates.

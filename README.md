@@ -5,7 +5,7 @@
 [![PHP Version](https://img.shields.io/badge/PHP-8.2%20%7C%208.3-blue.svg?style=flat-square)](https://php.net)
 [![Database](https://img.shields.io/badge/Database-PostgreSQL%20%7C%20MySQL%20%7C%20MariaDB-purple.svg?style=flat-square)](https://docs.moodle.org)
 [![Android Compatibility](https://img.shields.io/badge/Android-8.0%20to%2014%2B-green.svg?style=flat-square)](https://developer.android.com)
-[![Version](https://img.shields.io/badge/Version-v1.7.2-blue.svg?style=flat-square)](https://github.com/engfeda-ui/sanad_lockdown)
+[![Version](https://img.shields.io/badge/Version-v1.7.3-blue.svg?style=flat-square)](https://github.com/engfeda-ui/sanad_lockdown)
 [![CI/CD](https://img.shields.io/badge/CI%2FCD-Moodle%20Plugin%20CI-green.svg)](#)
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg?style=flat-square)](#)
 
@@ -140,6 +140,9 @@ npm run adviser -- -a security "Verify session token HMAC validation and brute-f
 ---
 
 ## 📋 Changelog
+
+### [v1.7.3] - 2026-09-26
+* **Security & Hardening**: Replaced literal string comparison (`===`) with timing-safe `hash_equals()` in `api_handler.php` across both primary and fallback supervisor exit password verification routines to eliminate potential side-channel timing discrepancy attacks.
 
 ### [v1.7.2] - 2026-09-26
 * **Security & Cleanliness**: Eliminated direct `$_SESSION` usage across the plugin in favor of standard Moodle global `$SESSION`.

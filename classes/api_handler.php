@@ -379,7 +379,7 @@ class api_handler {
             return;
         }
 
-        $verified = password_verify($password, $exitpasswordhash) || ($password === $exitpasswordhash);
+        $verified = password_verify($password, $exitpasswordhash) || hash_equals((string)$exitpasswordhash, (string)$password);
         if ($verified) {
             token_manager::revoke($quizid, $session->userid);
             echo json_encode(['status' => 'verified']);
@@ -453,7 +453,7 @@ class api_handler {
             return;
         }
 
-        $verified = password_verify($password, $exitpasswordhash) || ($password === $exitpasswordhash);
+        $verified = password_verify($password, $exitpasswordhash) || hash_equals((string)$exitpasswordhash, (string)$password);
         if ($verified) {
             echo json_encode(['status' => 'verified']);
         } else {
